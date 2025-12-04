@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Proteção de página -->
+    <script type="module">
+        import { protectPage } from "./js/auth.js";
+        protectPage();
+    </script>
+
+    <!-- Firebase Scripts -->
+    <script type="module" src="js/firebase-config.js"></script>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <div id="navbar"></div>
+    <script>
+        fetch("components/navbar.html")
+            .then(r => r.text())
+            .then(html => document.getElementById("navbar").innerHTML = html);
+    </script>
+
+    <h2 style="text-align:center;margin-top:20px;">Dashboard de Recebimentos</h2>
+
+    <div class="dash-container">
+
+        <!-- LISTA DE LANÇAMENTOS -->
+        <div class="list-area">
+            <h3>Lançamentos</h3>
+            <ul id="launchList" class="list"></ul>
+        </div>
+
+        <!-- FORMULÁRIO -->
+        <div class="form-area">
+            <h3>Editar / Novo Lançamento</h3>
+
+            <div class="form-grid">
+
+                <input id="Customer" data-field placeholder="Customer">
+                <input id="Business" data-field placeholder="Business">
+                <input id="Identification" data-field placeholder="Identification">
+                <input id="Description" data-field placeholder="Description">
+
+                <label>Request</label>
+                <input type="date" id="Request" data-field>
+
+                <label>Delivery</label>
+                <input type="date" id="Delivery" data-field>
+
+                <label>Processed Date</label>
+                <input type="date" id="ProcessedDate" data-field>
+
+                <input type="number" id="Deposit" data-field placeholder="Deposit">
+                <input type="number" id="Expenses" data-field placeholder="Expenses">
+
+                <input id="Profit" placeholder="Profit" readonly>
+
+                <input type="number" id="Withdrawal" data-field placeholder="Withdrawal">
+
+                <label>Status</label>
+                <select id="Status" data-field>
+                    <option value="1">Concluído</option>
+                    <option value="2">Em andamento</option>
+                    <option value="3">Aguardando</option>
+                </select>
+
+                <textarea id="Observation" data-field placeholder="Observation"></textarea>
+
+                <button id="saveBtn" class="save-btn">Salvar</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JS DA DASHBOARD -->
+    <script type="module">
+
+        import { db, auth } from "./js/firebase-config.js";
+        import { ref, onValue, push, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+        
+        let selectedId = null;
+        let formChanged = false;
+
+        const list = document.getElementById("launchList");
+        const fields = document.querySelectorAll("[data-field]");
+
+        // Marcar alterações
+        fields.forEach(f => {
+            f.addEventListener("input", () => {
+                formChanged = true;
+                if (f.id === "Deposit" || f.id === "Expenses") updateProfit();
+            });
+        });
+
+        function updateProfit() {
+            const deposit = parseFloat(document.getElementById("Deposit").value || 0);
+            const expenses = parseFloat(document.getElementById("Expenses").value || 0);
+            document.getElementById("Profit").value = (deposit - expenses).toFixed(2);
+        }
+
+        // CARREGAR LISTA
+        function loadList() {
+            const launchesRef = ref(db, "recebimentos/");
+            onValue(launchesRef, snapshot => {
+                list.innerHTML = "";
+
+                const data = snapshot.val();
+                if (!data) return;
+
+                // Ordenar do mais novo pro mais antigo
+                const entries = Object.entries(data).sort((a,b) => {
+                    const d1 = new Date(a[1].Request || 0);
+                    const d2 = new Date(b[1].Request || 0);
+                    return d2 - d1;
+                });
+
+                entries.forEach(([id, item]) => {
+                    const li = document.createElement("li");
+                    li.textContent = `${item.Customer} - ${item.Business} - R$ ${item.Deposit}`;
+                    li.className = "list-item";
+
+                    li.onclick = () => loadForm(id, item);
+
+                    list.appendChild(li);
+                });
+            });
+        }
+
+        loadList();
+
+        // CARREGAR ITEM NO FORM
+        function loadForm(id, item) {
+            selectedId = id;
+            formChanged = false;
+
+            for (const key in item) {
+                if (document.getElementById(key)) {
+                    document.getElementById(key).value = item[key];
+                }
+            }
+
+            updateProfit();
+        }
+
+        // SALVAR
+        document.getElementById("saveBtn").addEventListener("click", () => {
+            const obj = {};
+
+            fields.forEach(f => obj[f.id] = f.value);
+            obj.Profit = document.getElementById("Profit").value;
+
+            if (selectedId) {
+                update(ref(db, "recebimentos/" + selectedId), obj);
+            } else {
+                push(ref(db, "recebimentos/"), obj);
+            }
+
+            alert("Salvo!");
+            formChanged = false;
+            selectedId = null;
+
+            fields.forEach(f => f.value = "");
+            document.getElementById("Profit").value = "";
+        });
+
+        // AVISO AO SAIR SEM SALVAR
+        window.onbeforeunload = () => {
+            if (formChanged) return "Há alterações não salvas.";
+        };
+
+    </script>
+
+</body>
+</html>

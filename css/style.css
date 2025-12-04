@@ -1,0 +1,39 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: #f8f8f8;
+    font-family: Arial, sans-serif;
+}
+
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-container {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    text-align: center;
+    width: 300px;
+}
+
+.google-btn {
+    margin-top: 20px;
+    padding: 10px 15px;
+    width: 100%;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #4285F4;
+    color: white;
+    font-size: 16px;
+    transition: 0.2s;
+}
+
+.google-btn:hover {
+    background: #3367D6;
+}
