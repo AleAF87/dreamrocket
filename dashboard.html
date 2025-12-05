@@ -8,27 +8,19 @@
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
 
+    <!-- Firebase Scripts -->
+    <script type="module" src="js/firebase-config.js"></script>
+    
     <!-- Proteção de página -->
     <script type="module">
         import { protectPage } from "./js/auth.js";
         protectPage();
     </script>
-
-    <!-- Firebase Scripts -->
-    <script type="module" src="js/firebase-config.js"></script>
-    <script type="module" src="js/navbar.js"></script>
 </head>
 
 <body>
-    <script src="js/auth-guard.js"></script>
-    
     <!-- NAVBAR -->
     <div id="navbar"></div>
-    <script>
-        fetch("components/navbar.html")
-            .then(r => r.text())
-            .then(html => document.getElementById("navbar").innerHTML = html);
-    </script>
 
     <h2 style="text-align:center;margin-top:20px;">Dashboard de Movimentações</h2>
 
@@ -87,13 +79,26 @@
     <script type="module">
 
         import { db, auth } from "./js/firebase-config.js";
-        import { ref, onValue, push, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+        import { ref, onValue, push, update, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
         
         let selectedId = null;
         let formChanged = false;
 
         const list = document.getElementById("launchList");
         const fields = document.querySelectorAll("[data-field]");
+
+        // Carregar a navbar e inicializar
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch("components/navbar.html")
+                .then(r => r.text())
+                .then(html => {
+                    document.getElementById("navbar").innerHTML = html;
+                    // Inicializa eventos da navbar
+                    import("./js/navbar.js").then(module => {
+                        module.default();
+                    });
+                });
+        });
 
         // Marcar alterações
         fields.forEach(f => {
@@ -108,8 +113,6 @@
             const expenses = parseFloat(document.getElementById("Expenses").value || 0);
             document.getElementById("Profit").value = (deposit - expenses).toFixed(2);
         }
-
-        import { ref, onValue, set, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
         
         function generateId() {
             const now = new Date();
@@ -123,7 +126,6 @@
 
             return `${year}${month}${day}${hour}${minute}${second}`;
         }
-
 
         // CARREGAR LISTA
         function loadList() {
