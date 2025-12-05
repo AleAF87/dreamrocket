@@ -11,3 +11,15 @@ document.getElementById("googleLoginBtn").addEventListener("click", () => {
             alert("Falha ao fazer login!");
         });
 });
+
+// Função de Logout
+function logoutUser() {
+    firebase.auth().signOut()
+        .then(() => {
+            console.log("Usuário deslogado.");
+            window.location.href = "index.html"; // volta para login
+        })
+        .catch((error) => {
+            console.error("Erro ao deslogar:", error);
+        });
+}
