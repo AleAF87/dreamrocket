@@ -1,14 +1,51 @@
-<link rel="stylesheet" href="/css/style.css">
-
 <nav class="navbar">
     <div class="nav-left">
-        <span class="nav-title">Dream Rocket</span>
+        <img src="img/logo.png" alt="Logo" class="logo">
     </div>
 
-    <div class="nav-right">
-        <a href="/dashboard.html" class="nav-link">Dashboard</a>
-        <a href="/cadastrar.html" class="nav-link">Cadastrar</a>
+    <div class="nav-center">
+        <a href="dashboard.html">Dashboard</a>
+        <!-- Adicione mais links conforme necessário -->
+    </div>
 
-        <button id="logoutBtn" class="logout-btn">Logout</button>
+    <div class="nav-right" id="userArea">
+        <!-- Estado: Não logado -->
+        <div id="authButtons" style="display: none;">
+            <span class="login-btn" onclick="loginGoogle()">Acessar</span>
+        </div>
+        
+        <!-- Estado: Logado -->
+        <div id="userInfo" style="display: none;">
+            <div class="user-profile">
+                <div class="avatar-container" id="avatarContainer">
+                    <!-- Avatar será inserido aqui dinamicamente -->
+                </div>
+                <div class="user-details">
+                    <span class="user-name" id="userName"></span>
+                    <span class="user-email" id="userEmail"></span>
+                </div>
+                <!-- Botão de logout visível como fallback -->
+                <button id="logoutBtn" class="logout-btn">Sair</button>
+            </div>
+        </div>
     </div>
 </nav>
+
+<!-- Fallback: se o avatar não aparecer, mostra texto "Logout" -->
+<style>
+    /* Estilo de fallback */
+    .avatar-container:empty::after {
+        content: "Logout";
+        display: inline-block;
+        padding: 8px 16px;
+        background-color: #e63946;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    
+    .avatar-container:empty:hover::after {
+        background-color: #c1121f;
+    }
+</style>

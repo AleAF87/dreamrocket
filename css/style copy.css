@@ -1,0 +1,480 @@
+/* ============================================
+   RESET & BASE STYLES
+   ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #0a192f 0%, #1a365d 100%);
+    color: #333;
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+/* ============================================
+   CONTAINERS & LAYOUT
+   ============================================ */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.dash-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 30px;
+    padding: 0 20px;
+}
+
+@media (max-width: 992px) {
+    .dash-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+/* ============================================
+   NAVBAR STYLES
+   ============================================ */
+#navbar {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 3px solid #e63946;
+    box-shadow: 0 4px 12px rgba(10, 25, 47, 0.1);
+    padding: 15px 30px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0a192f;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-brand::before {
+    content: "🚀";
+    font-size: 1.2rem;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-email {
+    background: #f8f9fa;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    color: #0a192f;
+    border: 1px solid #dee2e6;
+}
+
+/* ============================================
+   BUTTON STYLES
+   ============================================ */
+.btn {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Primary Button - Azul Escuro */
+.btn-primary {
+    background: linear-gradient(135deg, #0a192f 0%, #1a365d 100%);
+    color: white;
+    border: 2px solid #0a192f;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+}
+
+/* Danger Button - Vermelho */
+.btn-danger {
+    background: linear-gradient(135deg, #e63946 0%, #ff6b6b 100%);
+    color: white;
+    border: 2px solid #e63946;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+}
+
+/* Success Button - Amarelo/Ouro */
+.btn-success {
+    background: linear-gradient(135deg, #ffd166 0%, #ffed4e 100%);
+    color: #0a192f;
+    border: 2px solid #ffd166;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #ffed4e 0%, #fff176 100%);
+}
+
+/* ============================================
+   LOGIN PAGE STYLES
+   ============================================ */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.login-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 40px;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 20px 40px rgba(10, 25, 47, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+}
+
+.login-logo {
+    margin-bottom: 30px;
+}
+
+.login-logo h1 {
+    color: #0a192f;
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+}
+
+.login-logo p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.google-login-btn {
+    width: 100%;
+    padding: 15px;
+    background: white;
+    border: 2px solid #dee2e6;
+    border-radius: 12px;
+    font-weight: 600;
+    color: #444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+}
+
+.google-login-btn:hover {
+    border-color: #0a192f;
+    background: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(10, 25, 47, 0.1);
+}
+
+.google-icon {
+    width: 24px;
+    height: 24px;
+}
+
+/* ============================================
+   DASHBOARD COMPONENTS
+   ============================================ */
+/* White Cards */
+.list-area, .form-area {
+    background: white;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 8px 24px rgba(10, 25, 47, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.list-area h3, .form-area h3 {
+    color: #0a192f;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #ffd166;
+    font-size: 1.4rem;
+}
+
+/* List Styles */
+.list {
+    list-style: none;
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.list-item {
+    background: #f8f9fa;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border-left: 4px solid #0a192f;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.list-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+    border-left-color: #e63946;
+}
+
+.list-item.selected {
+    background: #0a192f;
+    color: white;
+    border-left-color: #ffd166;
+}
+
+/* Form Styles */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-grid label {
+    grid-column: span 2;
+    color: #0a192f;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .form-grid label {
+        grid-column: span 1;
+    }
+}
+
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+    padding: 12px 15px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus {
+    outline: none;
+    border-color: #0a192f;
+    box-shadow: 0 0 0 3px rgba(10, 25, 47, 0.1);
+}
+
+.form-grid input[readonly] {
+    background: #f8f9fa;
+    border-color: #ced4da;
+    color: #666;
+}
+
+.form-grid textarea {
+    grid-column: span 2;
+    min-height: 100px;
+    resize: vertical;
+}
+
+@media (max-width: 768px) {
+    .form-grid textarea {
+        grid-column: span 1;
+    }
+}
+
+.save-btn {
+    grid-column: span 2;
+    padding: 15px;
+    font-size: 1rem;
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .save-btn {
+        grid-column: span 1;
+    }
+}
+
+/* ============================================
+   TYPOGRAPHY & UTILITIES
+   ============================================ */
+h1, h2, h3, h4 {
+    color: #0a192f;
+    font-weight: 700;
+}
+
+h2 {
+    color: #ffffff;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    position: relative;
+    display: inline-block;
+}
+
+h2::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: #e63946;
+    border-radius: 2px;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+.status-1 { background: #d4edda; color: #155724; } /* Concluído */
+.status-2 { background: #fff3cd; color: #856404; } /* Em andamento */
+.status-3 { background: #cce5ff; color: #004085; } /* Aguardando */
+.status-4 { background: #f8d7da; color: #721c24; } /* Cancelado */
+
+/* ============================================
+   ANIMATIONS & EFFECTS
+   ============================================ */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(10, 25, 47, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(10, 25, 47, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(10, 25, 47, 0); }
+}
+
+/* ============================================
+   ALERTS & MESSAGES
+   ============================================ */
+.alert {
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    font-weight: 500;
+}
+
+.alert-success {
+    background: #d4edda;
+    border: 2px solid #c3e6cb;
+    color: #155724;
+}
+
+.alert-error {
+    background: #f8d7da;
+    border: 2px solid #f5c6cb;
+    color: #721c24;
+}
+
+.alert-info {
+    background: #d1ecf1;
+    border: 2px solid #bee5eb;
+    color: #0c5460;
+}
+
+/* ============================================
+   LOADING STATES
+   ============================================ */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #0a192f;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ============================================
+   FOOTER (if needed)
+   ============================================ */
+.footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
