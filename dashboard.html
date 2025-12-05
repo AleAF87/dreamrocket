@@ -19,7 +19,8 @@
 </head>
 
 <body>
-
+    <script src="js/auth-guard.js"></script>
+    
     <!-- NAVBAR -->
     <div id="navbar"></div>
     <script>
@@ -28,7 +29,7 @@
             .then(html => document.getElementById("navbar").innerHTML = html);
     </script>
 
-    <h2 style="text-align:center;margin-top:20px;">Dashboard de Recebimentos</h2>
+    <h2 style="text-align:center;margin-top:20px;">Dashboard de Movimentações</h2>
 
     <div class="dash-container">
 
@@ -70,6 +71,7 @@
                     <option value="1">Concluído</option>
                     <option value="2">Em andamento</option>
                     <option value="3">Aguardando</option>
+                    <option value="4">Cancelado</option>
                 </select>
 
                 <textarea id="Observation" data-field placeholder="Observation"></textarea>
@@ -106,9 +108,25 @@
             document.getElementById("Profit").value = (deposit - expenses).toFixed(2);
         }
 
+        import { ref, onValue, set, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+        
+        function generateId() {
+            const now = new Date();
+
+            const year   = now.getFullYear();
+            const month  = String(now.getMonth() + 1).padStart(2, "0");
+            const day    = String(now.getDate()).padStart(2, "0");
+            const hour   = String(now.getHours()).padStart(2, "0");
+            const minute = String(now.getMinutes()).padStart(2, "0");
+            const second = String(now.getSeconds()).padStart(2, "0");
+
+            return `${year}${month}${day}${hour}${minute}${second}`;
+        }
+
+
         // CARREGAR LISTA
         function loadList() {
-            const launchesRef = ref(db, "recebimentos/");
+            const launchesRef = ref(db, "servicos/");
             onValue(launchesRef, snapshot => {
                 list.innerHTML = "";
 
@@ -153,14 +171,14 @@
         // SALVAR
         document.getElementById("saveBtn").addEventListener("click", () => {
             const obj = {};
-
             fields.forEach(f => obj[f.id] = f.value);
             obj.Profit = document.getElementById("Profit").value;
 
             if (selectedId) {
-                update(ref(db, "recebimentos/" + selectedId), obj);
+                update(ref(db, "servicos/" + selectedId), obj);
             } else {
-                push(ref(db, "recebimentos/"), obj);
+                const id = generateId();
+                set(ref(db, "servicos/" + id), obj);
             }
 
             alert("Salvo!");
