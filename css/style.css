@@ -676,7 +676,7 @@ h2::after {
 
 .form-grid textarea {
     grid-column: span 2;
-    min-height: 100px;
+    min-height: 250px;
     resize: vertical;
 }
 
