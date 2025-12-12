@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard</title>
+    <title>Dashboard - Dream Rocket</title>
 
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
@@ -16,19 +16,51 @@
         import { protectPage } from "./js/auth.js";
         protectPage();
     </script>
+    
+    <!-- Dashboard JS -->
+    <script type="module" src="js/dashboard.js" defer></script>
 </head>
 
 <body>
     <!-- NAVBAR -->
     <div id="navbar"></div>
 
-    <h2 style="text-align:center;margin-top:20px;">Dashboard de Movimentações</h2>
+    <h2>Dashboard de Movimentações</h2>
 
     <div class="dash-container">
 
         <!-- LISTA DE LANÇAMENTOS -->
         <div class="list-area">
             <h3>Lançamentos</h3>
+            
+            <!-- Filtros -->
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label for="sortFilter">Ordenar por:</label>
+                    <select id="sortFilter" class="filter-select">
+                        <option value="processedDateDesc">Data Processada (Mais Recente)</option>
+                        <option value="processedDateAsc">Data Processada (Mais Antiga)</option>
+                        <option value="requestDesc">Data do Pedido (Mais Recente)</option>
+                        <option value="requestAsc">Data do Pedido (Mais Antiga)</option>
+                        <option value="deliveryDesc">Data de Entrega (Mais Recente)</option>
+                        <option value="deliveryAsc">Data de Entrega (Mais Antiga)</option>
+                        <option value="customerAsc">Cliente (A-Z)</option>
+                        <option value="customerDesc">Cliente (Z-A)</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="statusFilter">Filtrar por Status:</label>
+                    <select id="statusFilter" class="filter-select">
+                        <option value="all">Todos os Status</option>
+                        <option value="1">Concluído</option>
+                        <option value="2">Em andamento</option>
+                        <option value="3">Aguardando</option>
+                        <option value="4">Cancelado</option>
+                    </select>
+                </div>
+            </div>
+            
             <ul id="launchList" class="list"></ul>
         </div>
 
@@ -37,27 +69,27 @@
             <h3>Editar / Novo Lançamento</h3>
 
             <div class="form-grid">
+                <input id="Customer" data-field placeholder="Cliente">
+                <input id="Business" data-field placeholder="Empresa">
+                <input id="Identification" data-field placeholder="Identificação">
+                <input id="Description" data-field placeholder="Descrição">
 
-                <input id="Customer" data-field placeholder="Customer">
-                <input id="Business" data-field placeholder="Business">
-                <input id="Identification" data-field placeholder="Identification">
-                <input id="Description" data-field placeholder="Description">
-
-                <label>Request</label>
+                <label>Data do Pedido</label>
                 <input type="date" id="Request" data-field>
 
-                <label>Delivery</label>
+                <label>Data de Entrega</label>
                 <input type="date" id="Delivery" data-field>
 
-                <label>Processed Date</label>
+                <label>Data Processada</label>
                 <input type="date" id="ProcessedDate" data-field>
 
-                <input type="number" id="Deposit" data-field placeholder="Deposit">
-                <input type="number" id="Expenses" data-field placeholder="Expenses">
+                <input type="number" id="Deposit" data-field placeholder="Depósito" step="0.01">
+                <input type="number" id="Expenses" data-field placeholder="Despesas (R$)" step="0.01">
+                <input type="number" id="PercExpenses" data-field placeholder="Despesas (%)" step="0.01">
 
-                <input id="Profit" placeholder="Profit" readonly>
+                <input id="Profit" placeholder="Lucro" readonly>
 
-                <input type="number" id="Withdrawal" data-field placeholder="Withdrawal">
+                <input type="number" id="Withdrawal" data-field placeholder="Retirada" step="0.01">
 
                 <label>Status</label>
                 <select id="Status" data-field>
@@ -67,137 +99,18 @@
                     <option value="4">Cancelado</option>
                 </select>
 
-                <textarea id="Observation" data-field placeholder="Observation"></textarea>
+                <textarea id="Observation" data-field placeholder="Observações"></textarea>
 
-                <button id="saveBtn" class="save-btn">Salvar</button>
+                <!-- Botões de ação -->
+                <div class="button-group" style="grid-column: span 2;">
+                    <button id="saveBtn" class="save-btn btn-success">Salvar Novo</button>
+                    <button id="updateBtn" class="update-btn btn-primary" style="display: none;">Alterar</button>
+                    <button id="clearBtn" class="clear-btn btn-danger" style="display: none;">Limpar Campos</button>
+                </div>
             </div>
         </div>
 
     </div>
-
-    <!-- JS DA DASHBOARD -->
-    <script type="module">
-
-        import { db, auth } from "./js/firebase-config.js";
-        import { ref, onValue, push, update, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-        
-        let selectedId = null;
-        let formChanged = false;
-
-        const list = document.getElementById("launchList");
-        const fields = document.querySelectorAll("[data-field]");
-
-        // Carregar a navbar e inicializar
-        document.addEventListener("DOMContentLoaded", () => {
-            fetch("components/navbar.html")
-                .then(r => r.text())
-                .then(html => {
-                    document.getElementById("navbar").innerHTML = html;
-                    // Inicializa eventos da navbar
-                    import("./js/navbar.js").then(module => {
-                        module.default();
-                    });
-                });
-        });
-
-        // Marcar alterações
-        fields.forEach(f => {
-            f.addEventListener("input", () => {
-                formChanged = true;
-                if (f.id === "Deposit" || f.id === "Expenses") updateProfit();
-            });
-        });
-
-        function updateProfit() {
-            const deposit = parseFloat(document.getElementById("Deposit").value || 0);
-            const expenses = parseFloat(document.getElementById("Expenses").value || 0);
-            document.getElementById("Profit").value = (deposit - expenses).toFixed(2);
-        }
-        
-        function generateId() {
-            const now = new Date();
-
-            const year   = now.getFullYear();
-            const month  = String(now.getMonth() + 1).padStart(2, "0");
-            const day    = String(now.getDate()).padStart(2, "0");
-            const hour   = String(now.getHours()).padStart(2, "0");
-            const minute = String(now.getMinutes()).padStart(2, "0");
-            const second = String(now.getSeconds()).padStart(2, "0");
-
-            return `${year}${month}${day}${hour}${minute}${second}`;
-        }
-
-        // CARREGAR LISTA
-        function loadList() {
-            const launchesRef = ref(db, "servicos/");
-            onValue(launchesRef, snapshot => {
-                list.innerHTML = "";
-
-                const data = snapshot.val();
-                if (!data) return;
-
-                // Ordenar do mais novo pro mais antigo
-                const entries = Object.entries(data).sort((a,b) => {
-                    const d1 = new Date(a[1].Request || 0);
-                    const d2 = new Date(b[1].Request || 0);
-                    return d2 - d1;
-                });
-
-                entries.forEach(([id, item]) => {
-                    const li = document.createElement("li");
-                    li.textContent = `${item.Customer} - ${item.Business} - R$ ${item.Deposit}`;
-                    li.className = "list-item";
-
-                    li.onclick = () => loadForm(id, item);
-
-                    list.appendChild(li);
-                });
-            });
-        }
-
-        loadList();
-
-        // CARREGAR ITEM NO FORM
-        function loadForm(id, item) {
-            selectedId = id;
-            formChanged = false;
-
-            for (const key in item) {
-                if (document.getElementById(key)) {
-                    document.getElementById(key).value = item[key];
-                }
-            }
-
-            updateProfit();
-        }
-
-        // SALVAR
-        document.getElementById("saveBtn").addEventListener("click", () => {
-            const obj = {};
-            fields.forEach(f => obj[f.id] = f.value);
-            obj.Profit = document.getElementById("Profit").value;
-
-            if (selectedId) {
-                update(ref(db, "servicos/" + selectedId), obj);
-            } else {
-                const id = generateId();
-                set(ref(db, "servicos/" + id), obj);
-            }
-
-            alert("Salvo!");
-            formChanged = false;
-            selectedId = null;
-
-            fields.forEach(f => f.value = "");
-            document.getElementById("Profit").value = "";
-        });
-
-        // AVISO AO SAIR SEM SALVAR
-        window.onbeforeunload = () => {
-            if (formChanged) return "Há alterações não salvas.";
-        };
-
-    </script>
 
 </body>
 </html>

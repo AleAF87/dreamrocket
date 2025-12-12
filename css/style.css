@@ -149,6 +149,51 @@ body {
     padding: 5px;
 }
 
+/* Responsividade para login */
+@media (max-width: 576px) {
+    .login-container {
+        padding: 40px 25px;
+    }
+    
+    .login-title {
+        font-size: 2.2rem;
+    }
+    
+    .login-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .google-btn {
+        padding: 16px 20px;
+        font-size: 1rem;
+    }
+    
+    .login-features {
+        gap: 12px;
+    }
+    
+    .feature-item {
+        font-size: 0.9rem;
+    }
+}
+
+/* Animações para login */
+.login-header,
+.login-button-container,
+.login-footer {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+.login-button-container {
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+
+.login-footer {
+    animation-delay: 0.4s;
+    opacity: 0;
+}
+
 /* ============================================
    NAVBAR STYLES
    ============================================ */
@@ -308,6 +353,32 @@ body {
     box-shadow: 0 4px 8px rgba(230, 57, 70, 0.3);
 }
 
+/* Navbar responsiva */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 10px 15px;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .nav-center {
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .nav-center a {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .user-profile {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}
+
 /* ============================================
    DASHBOARD STYLES
    ============================================ */
@@ -365,7 +436,54 @@ h2::after {
     font-size: 1.4rem;
 }
 
-/* List Styles */
+/* ============================================
+   FILTROS
+   ============================================ */
+.filters-container {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #dee2e6;
+}
+
+.filter-group {
+    margin-bottom: 10px;
+}
+
+.filter-group:last-child {
+    margin-bottom: 0;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #0a192f;
+    font-size: 0.9rem;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 10px 15px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #0a192f;
+    box-shadow: 0 0 0 3px rgba(10, 25, 47, 0.1);
+}
+
+/* ============================================
+   LISTA DE LANÇAMENTOS
+   ============================================ */
 .list {
     list-style: none;
     max-height: 500px;
@@ -387,6 +505,7 @@ h2::after {
     border-radius: 10px;
 }
 
+/* Item da lista */
 .list-item {
     background: #f8f9fa;
     padding: 15px;
@@ -395,6 +514,9 @@ h2::after {
     border-left: 4px solid #0a192f;
     cursor: pointer;
     transition: all 0.3s ease;
+    position: relative;
+    padding-right: 100px !important; /* Espaço para botões */
+    min-height: 90px;
 }
 
 .list-item:hover {
@@ -409,7 +531,99 @@ h2::after {
     border-left-color: #ffd166;
 }
 
-/* Form Styles */
+/* Item pendente de ProcessedDate */
+.list-item.pending-processed {
+    background: #fff9db;
+    border-left-color: #ffd166;
+    animation: pulseWarning 2s infinite;
+}
+
+.list-item.pending-processed:hover {
+    background: #fff3cd;
+}
+
+.pending-text {
+    color: #e63946;
+    font-weight: bold;
+    animation: blink 1.5s infinite;
+}
+
+/* Conteúdo do item */
+.item-content {
+    padding-right: 5px;
+}
+
+.item-main {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    color: #0a192f;
+    font-weight: 500;
+}
+
+.item-details {
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.4;
+}
+
+.item-details small {
+    display: block;
+    margin-bottom: 2px;
+}
+
+/* Botões de ação dos itens */
+.action-buttons {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+/* Botão de reutilizar */
+.reuse-btn {
+    border-color: #0a192f;
+    color: #0a192f;
+}
+
+.reuse-btn:hover {
+    background: #0a192f;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Botão de excluir */
+.delete-btn {
+    border-color: #e63946;
+    color: #e63946;
+}
+
+.delete-btn:hover {
+    background: #e63946;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* ============================================
+   FORMULÁRIO
+   ============================================ */
 .form-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -472,18 +686,39 @@ h2::after {
     }
 }
 
-.save-btn {
+/* Campos de despesas lado a lado */
+#Expenses, #PercExpenses {
+    grid-column: span 1;
+}
+
+/* ============================================
+   BOTÕES DO FORMULÁRIO
+   ============================================ */
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
     grid-column: span 2;
-    padding: 15px;
-    font-size: 1rem;
-    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .button-group {
+        flex-direction: column;
+        grid-column: span 1;
+    }
+}
+
+/* Botão Salvar Novo */
+.save-btn {
     background: linear-gradient(135deg, #ffd166 0%, #ffed4e 100%);
     color: #0a192f;
     border: 2px solid #ffd166;
+    padding: 12px 30px;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+    flex: 1;
 }
 
 .save-btn:hover {
@@ -492,27 +727,91 @@ h2::after {
     box-shadow: 0 4px 8px rgba(255, 209, 102, 0.3);
 }
 
+/* Botão Alterar */
+.update-btn {
+    background: linear-gradient(135deg, #0a192f 0%, #1a365d 100%);
+    color: white;
+    border: 2px solid #0a192f;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.update-btn:hover {
+    background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(10, 25, 47, 0.3);
+}
+
+/* Botão Limpar */
+.clear-btn {
+    background: linear-gradient(135deg, #e63946 0%, #ff6b6b 100%);
+    color: white;
+    border: 2px solid #e63946;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.clear-btn:hover {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(230, 57, 70, 0.3);
+}
+
 @media (max-width: 768px) {
-    .save-btn {
-        grid-column: span 1;
+    .save-btn,
+    .update-btn,
+    .clear-btn {
+        width: 100%;
     }
 }
 
 /* ============================================
-   ANIMATIONS & UTILITIES
+   MENSAGEM VAZIA
+   ============================================ */
+.empty-message {
+    text-align: center;
+    padding: 30px;
+    color: #666;
+    font-style: italic;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px dashed #dee2e6;
+}
+
+/* ============================================
+   ANIMAÇÕES
    ============================================ */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-.fade-in {
-    animation: fadeIn 0.6s ease-out;
+@keyframes pulseWarning {
+    0% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(255, 209, 102, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0); }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
 }
 
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
 }
 
 .loading {
@@ -525,71 +824,62 @@ h2::after {
     animation: spin 1s linear infinite;
 }
 
-/* Responsividade para login */
-@media (max-width: 576px) {
-    .login-container {
-        padding: 40px 25px;
+/* ============================================
+   UTILITÁRIOS
+   ============================================ */
+/* Ajuste para campos de data */
+input[type="date"] {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Placeholders em português */
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+    color: #999;
+    font-style: italic;
+}
+
+/* Responsividade geral */
+@media (max-width: 768px) {
+    .dash-container {
+        padding: 0 15px;
     }
     
-    .login-title {
-        font-size: 2.2rem;
+    .list-area, .form-area {
+        padding: 20px;
     }
     
-    .login-subtitle {
-        font-size: 1.2rem;
+    .list-item {
+        padding-right: 85px !important;
+        min-height: 85px;
     }
     
-    .google-btn {
-        padding: 16px 20px;
+    .action-buttons {
+        right: 12px;
+        gap: 8px;
+    }
+    
+    .action-btn {
+        width: 32px;
+        height: 32px;
         font-size: 1rem;
     }
     
-    .login-features {
-        gap: 12px;
+    .filters-container {
+        padding: 12px;
     }
     
-    .feature-item {
+    .filter-select {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .item-main {
         font-size: 0.9rem;
     }
     
-    /* Navbar responsiva */
-    .navbar {
-        padding: 10px 15px;
-        flex-direction: column;
-        gap: 15px;
+    .item-details {
+        font-size: 0.8rem;
     }
-    
-    .nav-center {
-        gap: 15px;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
-    .nav-center a {
-        padding: 6px 12px;
-        font-size: 0.9rem;
-    }
-    
-    .user-profile {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
-    }
-}
-
-/* Animações para login */
-.login-header,
-.login-button-container,
-.login-footer {
-    animation: fadeIn 0.6s ease-out forwards;
-}
-
-.login-button-container {
-    animation-delay: 0.2s;
-    opacity: 0;
-}
-
-.login-footer {
-    animation-delay: 0.4s;
-    opacity: 0;
 }
