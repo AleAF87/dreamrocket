@@ -294,14 +294,13 @@ function createListItem(item) {
     itemContent.className = "item-content";
     itemContent.innerHTML = `
         <div class="item-main">
-            <strong>${item.Customer || 'Sem cliente'}</strong> - 
-            ${item.Business || 'Sem empresa'} - 
-            R$ ${parseFloat(item.Deposit || 0).toFixed(2)}
+            <strong>${item.Description}
         </div>
         <div class="item-details">
-            <small>Processada: ${processedDate} | Pedido: ${requestDate} | Entrega: ${deliveryDate}</small>
+            <small>${item.Customer || 'Sem cliente'} - ${item.Business || 'Sem empresa'}</small>
             <br>
-            <small>Status: ${getStatusText(item.Status)} | Lucro: R$ ${parseFloat(item.Profit || 0).toFixed(2)}</small>
+            <small>Solicitado: ${requestDate} | Entregue: ${deliveryDate} | Pago: ${processedDate}</small>
+            <small>Status: ${getStatusText(item.Status)} | R$ ${parseFloat(item.Deposit || 0).toFixed(2)}</small>
         </div>
     `;
     
