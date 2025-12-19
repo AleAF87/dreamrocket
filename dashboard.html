@@ -90,7 +90,9 @@
 
                 <input id="Profit" placeholder="Lucro" readonly>
 
-                <input type="number" id="Withdrawal" data-field placeholder="Retirada" step="0.01">
+                <input type="number" id="Discount" data-field placeholder="Desconto" step="0.01">
+
+                <input id="NetProfit" placeholder="Lucro Líquido" readonly>
 
                 <label>Status</label>
                 <select id="Status" data-field>
@@ -119,24 +121,4 @@
     </div>
 
 </body>
-<script>
-    async function migrateWithdrawalToDiscount() {
-        const launchesRef = ref(db, "servicos/");
-        onValue(launchesRef, async (snapshot) => {
-            const data = snapshot.val();
-            if (!data) return;
-            
-            for (const [id, item] of Object.entries(data)) {
-                if (item.Withdrawal !== undefined) {
-                    // Cria novo campo Discount com o valor antigo
-                    await update(ref(db, `servicos/${id}`), {
-                        Discount: item.Withdrawal,
-                        Withdrawal: null // Remove o campo antigo
-                    });
-                    console.log(`Migrado: ${id}`);
-                }
-            }
-        });
-    }
-</script>
 </html>

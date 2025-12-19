@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resumo Financeiro - Dream Rocket</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Firebase Scripts -->
+    <script type="module" src="js/firebase-config.js"></script>
+    
+    <!-- Proteção de página -->
+    <script type="module">
+        import { protectPage } from "./js/auth.js";
+        protectPage();
+    </script>
+    
+    <!-- Financeiro JS -->
+    <script type="module" src="js/financeiro.js" defer></script>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <div id="navbar"></div>
+
+    <h2>Resumo Financeiro</h2>
+
+    <div class="finance-container">
+        <!-- FILTROS DE DATA -->
+        <div class="filters-card">
+            <h3>Filtrar por Período</h3>
+            
+            <div class="date-filters">
+                <!-- Botões rápidos -->
+                <div class="quick-filters">
+                    <button id="currentMonthBtn" class="quick-filter-btn active">
+                        Este Mês
+                    </button>
+                    <button id="lastMonthBtn" class="quick-filter-btn">
+                        Mês Anterior
+                    </button>
+                    <button id="customRangeBtn" class="quick-filter-btn">
+                        Período Personalizado
+                    </button>
+                </div>
+
+                <!-- Filtros personalizados -->
+                <div id="customRangeContainer" class="custom-range-container" style="display: none;">
+                    <div class="date-input-group">
+                        <div class="date-input">
+                            <label for="startDate">Data Inicial:</label>
+                            <input type="date" id="startDate" class="date-picker">
+                        </div>
+                        
+                        <div class="date-input">
+                            <label for="endDate">Data Final:</label>
+                            <input type="date" id="endDate" class="date-picker">
+                        </div>
+                    </div>
+                    
+                    <button id="applyFilterBtn" class="apply-btn">
+                        Aplicar Filtro
+                    </button>
+                </div>
+
+                <!-- Período selecionado -->
+                <div class="selected-period">
+                    <h4>Período Selecionado:</h4>
+                    <p id="periodDisplay">Carregando...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARDS DE RESUMO - ENTRADAS -->
+        <div class="summary-section">
+            <div class="section-header">
+                <h3>📥 Entradas (Recebimentos)</h3>
+                <small>Base: Data de Pagamento (ProcessedDate)</small>
+            </div>
+            
+            <div class="summary-cards">
+                <!-- Card Depósito -->
+                <div class="summary-card deposit-card">
+                    <div class="card-icon">💰</div>
+                    <div class="card-content">
+                        <h4>Total Depósito</h4>
+                        <p class="card-value" id="totalDeposit">R$ 0,00</p>
+                    </div>
+                </div>
+
+                <!-- Card Despesas -->
+                <div class="summary-card expenses-card">
+                    <div class="card-icon">📉</div>
+                    <div class="card-content">
+                        <h4>Total Despesas</h4>
+                        <p class="card-value" id="totalExpenses">R$ 0,00</p>
+                        <p class="card-percentage" id="expensesPercentage">0% do total</p>
+                    </div>
+                </div>
+
+                <!-- Card Lucro Bruto -->
+                <div class="summary-card profit-card">
+                    <div class="card-icon">📊</div>
+                    <div class="card-content">
+                        <h4>Lucro Bruto</h4>
+                        <p class="card-value" id="totalProfit">R$ 0,00</p>
+                        <p class="card-margin" id="profitMargin">Margem: 0%</p>
+                    </div>
+                </div>
+
+                <!-- Card Desconto -->
+                <div class="summary-card discount-card">
+                    <div class="card-icon">🎫</div>
+                    <div class="card-content">
+                        <h4>Total Desconto</h4>
+                        <p class="card-value" id="totalDiscount">R$ 0,00</p>
+                        <p class="card-percentage" id="discountPercentage">0% do lucro</p>
+                    </div>
+                </div>
+
+                <!-- Card Lucro Líquido -->
+                <div class="summary-card netprofit-card">
+                    <div class="card-icon">💎</div>
+                    <div class="card-content">
+                        <h4>Lucro Líquido</h4>
+                        <p class="card-value" id="totalNetProfit">R$ 0,00</p>
+                        <p class="card-margin" id="netProfitMargin">Margem: 0%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARDS DE RESUMO - SAÍDAS (RETIRADAS) -->
+        <div class="summary-section">
+            <div class="section-header">
+                <h3>📤 Saídas (Retiradas)</h3>
+                <small>Base: Data do Saque (WithdrawalDate)</small>
+            </div>
+            
+            <div class="summary-cards">
+                <!-- Card Total Retiradas -->
+                <div class="summary-card withdrawal-card">
+                    <div class="card-icon">💸</div>
+                    <div class="card-content">
+                        <h4>Total Retiradas</h4>
+                        <p class="card-value" id="totalWithdrawals">R$ 0,00</p>
+                        <p class="card-count" id="withdrawalsCount">0 saques</p>
+                    </div>
+                </div>
+
+                <!-- Card Por Categoria -->
+                <div class="summary-card category-card">
+                    <div class="card-icon">🏷️</div>
+                    <div class="card-content">
+                        <h4>Por Categoria</h4>
+                        <p class="card-category" id="categoryPersonal">Pessoal: R$ 0,00</p>
+                        <p class="card-category" id="categoryCompany">Empresa: R$ 0,00</p>
+                        <p class="card-category" id="categoryInvestment">Investimento: R$ 0,00</p>
+                    </div>
+                </div>
+
+                <!-- Card Por Método -->
+                <div class="summary-card method-card">
+                    <div class="card-icon">💳</div>
+                    <div class="card-content">
+                        <h4>Por Método</h4>
+                        <p class="card-method" id="methodPix">PIX: R$ 0,00</p>
+                        <p class="card-method" id="methodTransfer">Transferência: R$ 0,00</p>
+                        <p class="card-method" id="methodCash">Dinheiro: R$ 0,00</p>
+                    </div>
+                </div>
+
+                <!-- Card Saldo Final -->
+                <div class="summary-card finalbalance-card">
+                    <div class="card-icon">⚖️</div>
+                    <div class="card-content">
+                        <h4>Saldo Final</h4>
+                        <p class="card-value" id="finalBalance">R$ 0,00</p>
+                        <p class="card-percentage" id="balancePercentage">0% do lucro</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GRÁFICO OU TABELA DETALHADA (opcional futuramente) -->
+        <div class="detailed-section">
+            <h3>Detalhamento por Status</h3>
+            <div class="status-breakdown">
+                <div class="status-item">
+                    <span class="status-dot status-2"></span>
+                    <span>Em Andamento:</span>
+                    <strong id="status2Count">0</strong>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot status-3"></span>
+                    <span>Aguardando:</span>
+                    <strong id="status3Count">0</strong>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot status-1"></span>
+                    <span>Concluído:</span>
+                    <strong id="status1Count">0</strong>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot status-4"></span>
+                    <span>Cancelado:</span>
+                    <strong id="status4Count">0</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -100,7 +100,12 @@ function setupEventListeners() {
             // Verifica se é campo de cálculo
             if (f.id === "Deposit" || f.id === "Expenses" || f.id === "PercExpenses") {
                 handleExpensesCalculation();
-                updateProfit();
+                updateProfit(); // Isso já chama updateNetProfit()
+            }
+            
+            // Se é campo Discount, atualiza apenas o NetProfit
+            if (f.id === "Discount") {
+                updateNetProfit();
             }
         });
     });
@@ -151,7 +156,12 @@ function handleExpensesCalculation() {
 function updateProfit() {
     const deposit = parseFloat(document.getElementById("Deposit").value) || 0;
     const expenses = parseFloat(document.getElementById("Expenses").value) || 0;
-    document.getElementById("Profit").value = (deposit - expenses).toFixed(2);
+    const profit = deposit - expenses;
+    
+    document.getElementById("Profit").value = profit.toFixed(2);
+    
+    // Agora também atualiza o lucro líquido
+    updateNetProfit();
 }
 
 // ============================================
@@ -178,12 +188,18 @@ function clearForm() {
     // Limpa todos os campos
     elements.fields.forEach(f => f.value = "");
     document.getElementById("Profit").value = "";
+    document.getElementById("NetProfit").value = "";
     
     // Oculta campo Motivo
     const reasonContainer = document.getElementById("reasonContainer");
     if (reasonContainer) {
         reasonContainer.style.display = "none";
     }
+
+    // Resetar estilos do NetProfit
+    const netProfitField = document.getElementById("NetProfit");
+    netProfitField.style.color = "";
+    netProfitField.style.fontWeight = "";
     
     // Volta para modo "Salvar Novo"
     showSaveMode();
@@ -205,7 +221,7 @@ function loadForm(id, item) {
     
     // Atualiza cálculos
     handleExpensesCalculation();
-    updateProfit();
+    updateProfit(); // Já inclui updateNetProfit()
     
     // Muda para modo "Alterar"
     showUpdateMode();
@@ -304,12 +320,38 @@ function renderList() {
         }
     });
 
+    // ============================================
+    // LIMITADOR DE ITENS - AJUSTE AQUI O NÚMERO
+    // ============================================
+    // Para aumentar o número de itens exibidos, mude o valor abaixo:
+    const MAX_ITEMS_TO_SHOW = 10; // ← ALTERE ESTE NÚMERO
+    
+    // Limitar número de itens exibidos
+    const itemsToShow = filteredLaunches.slice(0, MAX_ITEMS_TO_SHOW);
+    
+    // Contador total
+    const totalCount = filteredLaunches.length;
+    const showingCount = itemsToShow.length;
 
-    // Renderizar cada item
-    filteredLaunches.forEach(item => {
+    // Renderizar cada item (apenas os primeiros MAX_ITEMS_TO_SHOW)
+    itemsToShow.forEach(item => {
         const li = createListItem(item);
         elements.list.appendChild(li);
     });
+    
+    // Adicionar mensagem se houver mais itens
+    if (totalCount > showingCount) {
+        const moreItemsMsg = document.createElement("li");
+        moreItemsMsg.className = "more-items-message";
+        moreItemsMsg.innerHTML = `
+            <div style="text-align: center; padding: 15px; color: #666; font-style: italic;">
+                Mostrando ${showingCount} de ${totalCount} lançamentos
+                <br>
+                <small>Use os filtros para encontrar outros lançamentos</small>
+            </div>
+        `;
+        elements.list.appendChild(moreItemsMsg);
+    }
 }
 
 function createListItem(item) {
@@ -338,6 +380,8 @@ function createListItem(item) {
         new Date(item.Delivery).toLocaleDateString('pt-BR') : 
         'Não informada';
     
+    const netProfit = getNetProfit(item);
+    
     // Criar conteúdo do item
     const itemContent = document.createElement("div");
     itemContent.className = "item-content";
@@ -351,10 +395,10 @@ function createListItem(item) {
             <small>Solicitado: ${requestDate} | Entregue: ${deliveryDate} | Pago: ${processedDate}</small>
             ${item.Status === '3' && item.Reason ? `<br><small class="reason-text">Motivo: ${item.Reason}</small>` : ''}
             <br>
-            <small>Status: ${getStatusText(item.Status)} | R$ ${parseFloat(item.Deposit || 0).toFixed(2)}</small>
+            <small>Status: ${getStatusText(item.Status)} | Bruto: R$ ${parseFloat(item.Profit || 0).toFixed(2)} | Líquido: R$ ${netProfit.toFixed(2)}</small>
         </div>
     `;
-
+    
     // Container para botões de ação
     const actionButtons = document.createElement("div");
     actionButtons.className = "action-buttons";
@@ -485,7 +529,14 @@ function collectFormData() {
         obj.Reason = null;
     }
     
-    obj.Profit = parseFloat(document.getElementById("Profit").value) || 0;
+    // Campos calculados
+    const profit = parseFloat(document.getElementById("Profit").value) || 0;
+    const discount = parseFloat(document.getElementById("Discount").value) || 0;
+    const netProfit = profit - discount;
+    
+    obj.Profit = profit;
+    obj.NetProfit = netProfit; // SEMPRE salva o NetProfit calculado
+    
     return obj;
 }
 
@@ -565,4 +616,34 @@ function toggleReasonField() {
         // O campo será removido do Firebase quando salvar
         reasonField.value = "";
     }
+}
+
+function updateNetProfit() {
+    const profit = parseFloat(document.getElementById("Profit").value) || 0;
+    const discount = parseFloat(document.getElementById("Discount").value) || 0;
+    const netProfit = profit - discount;
+    
+    document.getElementById("NetProfit").value = netProfit.toFixed(2);
+    
+    // (Opcional) Destacar se o lucro líquido for negativo
+    const netProfitField = document.getElementById("NetProfit");
+    if (netProfit < 0) {
+        netProfitField.style.color = "#e63946";
+        netProfitField.style.fontWeight = "bold";
+    } else {
+        netProfitField.style.color = "";
+        netProfitField.style.fontWeight = "";
+    }
+}
+
+function getNetProfit(item) {
+    // Se já existe NetProfit no item, usa ele
+    if (item.NetProfit !== undefined && item.NetProfit !== null) {
+        return parseFloat(item.NetProfit) || 0;
+    }
+    
+    // Se não existe, calcula: Profit - Discount
+    const profit = parseFloat(item.Profit || 0);
+    const discount = parseFloat(item.Discount || 0);
+    return profit - discount;
 }
