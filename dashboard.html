@@ -38,6 +38,7 @@
                 <div class="filter-group">
                     <label for="sortFilter">Ordenar por:</label>
                     <select id="sortFilter" class="filter-select">
+                        <option value="default" selected>Padrão</option>
                         <option value="processedDateDesc">Data pagamento (Mais Recente)</option>
                         <option value="processedDateAsc">Data pagamento (Mais Antiga)</option>
                         <option value="requestDesc">Data do pedido (Mais Recente)</option>
@@ -99,6 +100,11 @@
                     <option value="4">Cancelado</option>
                 </select>
 
+                <div id="reasonContainer" style="display: none; grid-column: span 2;">
+                    <label for="Reason">Motivo do Aguardamento:</label>
+                    <textarea id="Reason" data-field placeholder="Descreva o motivo do aguardamento..."></textarea>
+                </div>
+
                 <textarea id="Observation" data-field placeholder="Observações"></textarea>
 
                 <!-- Botões de ação -->
@@ -113,4 +119,24 @@
     </div>
 
 </body>
+<script>
+    async function migrateWithdrawalToDiscount() {
+        const launchesRef = ref(db, "servicos/");
+        onValue(launchesRef, async (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
+            
+            for (const [id, item] of Object.entries(data)) {
+                if (item.Withdrawal !== undefined) {
+                    // Cria novo campo Discount com o valor antigo
+                    await update(ref(db, `servicos/${id}`), {
+                        Discount: item.Withdrawal,
+                        Withdrawal: null // Remove o campo antigo
+                    });
+                    console.log(`Migrado: ${id}`);
+                }
+            }
+        });
+    }
+</script>
 </html>

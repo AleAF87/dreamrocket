@@ -883,3 +883,144 @@ select::placeholder {
         font-size: 0.8rem;
     }
 }
+
+/* ============================================
+   CORES POR STATUS
+   ============================================ */
+.list-item.status-1 { /* Concluído */
+    background-color: #f8f9fa;
+    border-left-color: #0a192f;
+}
+
+.list-item.status-2 { /* Em andamento */
+    background-color: #d7fddb;
+    border-left-color: #28a745;
+}
+
+.list-item.status-3 { /* Aguardando */
+    background-color: #f9f2ca;
+    border-left-color: #ffc107;
+}
+
+.list-item.status-4 { /* Cancelado */
+    background-color: #f5cbce;
+    border-left-color: #dc3545;
+}
+
+/* Hover states para cada status */
+.list-item.status-1:hover {
+    background-color: #e9ecef;
+}
+
+.list-item.status-2:hover {
+    background-color: #c3e9c9;
+}
+
+.list-item.status-3:hover {
+    background-color: #f4e9b8;
+}
+
+.list-item.status-4:hover {
+    background-color: #eeb5b9;
+}
+
+/* Para itens selecionados (quando em edição) */
+.list-item.status-1.selected {
+    background-color: #0a192f;
+    color: white;
+}
+
+.list-item.status-2.selected {
+    background-color: #198754;
+    color: white;
+}
+
+.list-item.status-3.selected {
+    background-color: #ffc107;
+    color: #0a192f;
+}
+
+.list-item.status-4.selected {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Ajuste para itens pendentes combinado com status */
+.list-item.pending-processed.status-1 {
+    background-color: #fff9db;
+}
+
+.list-item.pending-processed.status-2 {
+    background-color: #d7fddb;
+    animation: pulseWarning 2s infinite;
+}
+
+.list-item.pending-processed.status-3 {
+    background-color: #f9f2ca;
+    animation: pulseWarning 2s infinite;
+}
+
+.list-item.pending-processed.status-4 {
+    background-color: #f5cbce;
+}
+
+/* ============================================
+   CAMPO MOTIVO
+   ============================================ */
+#reasonContainer {
+    margin-top: 10px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+#reasonContainer label {
+    display: block;
+    margin-bottom: 5px;
+    color: #0a192f;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+#Reason {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ffc107; /* Borda amarela para combinar com status Aguardando */
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: #f9f2ca; /* Fundo amarelo claro */
+    min-height: 80px;
+    resize: vertical;
+}
+
+#Reason:focus {
+    outline: none;
+    border-color: #ff9800;
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+}
+
+#Reason::placeholder {
+    color: #999;
+    font-style: italic;
+}
+
+/* Animação para aparecer/desaparecer */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Texto do motivo na lista */
+.reason-text {
+    color: #856404;
+    font-style: italic;
+    background: #fff3cd;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 3px;
+}

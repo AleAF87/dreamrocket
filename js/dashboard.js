@@ -5,7 +5,7 @@ import { ref, onValue, set, update, remove } from "https://www.gstatic.com/fireb
 let selectedId = null;
 let formChanged = false;
 let allLaunches = [];
-let currentSort = 'processedDateDesc';
+let currentSort = 'default';
 let currentStatusFilter = 'all';
 
 // Elementos DOM
@@ -85,6 +85,12 @@ function setupEventListeners() {
         currentStatusFilter = elements.statusFilter.value;
         renderList();
     });
+
+    // Evento para campo Status (controle do campo Motivo)
+    const statusField = document.getElementById("Status");
+    if (statusField) {
+        statusField.addEventListener("change", toggleReasonField);
+    }
 
     // Eventos dos campos
     elements.fields.forEach(f => {
@@ -173,6 +179,12 @@ function clearForm() {
     elements.fields.forEach(f => f.value = "");
     document.getElementById("Profit").value = "";
     
+    // Oculta campo Motivo
+    const reasonContainer = document.getElementById("reasonContainer");
+    if (reasonContainer) {
+        reasonContainer.style.display = "none";
+    }
+    
     // Volta para modo "Salvar Novo"
     showSaveMode();
 }
@@ -188,6 +200,9 @@ function loadForm(id, item) {
         }
     }
 
+    // Atualiza visibilidade do campo Motivo baseado no status
+    toggleReasonField();
+    
     // Atualiza cálculos
     handleExpensesCalculation();
     updateProfit();
@@ -239,6 +254,34 @@ function renderList() {
     // Ordenar lançamentos
     filteredLaunches.sort((a, b) => {
         switch (currentSort) {
+            case 'default': // NOVA OPÇÃO - ORDEM PADRÃO
+                // 1º: Status "2" (Em andamento)
+                const aIsStatus2 = String(a.Status) === '2';
+                const bIsStatus2 = String(b.Status) === '2';
+                
+                if (aIsStatus2 && !bIsStatus2) return -1; // a vem primeiro
+                if (!aIsStatus2 && bIsStatus2) return 1;  // b vem primeiro
+                
+                // Ambos status 2? Ordena por Request crescente (mais antigo primeiro)
+                if (aIsStatus2 && bIsStatus2) {
+                    return new Date(a.Request || 0) - new Date(b.Request || 0);
+                }
+                
+                // 2º: ProcessedDate vazio
+                const aNoProcessedDate = !a.ProcessedDate || a.ProcessedDate.trim() === '';
+                const bNoProcessedDate = !b.ProcessedDate || b.ProcessedDate.trim() === '';
+                
+                if (aNoProcessedDate && !bNoProcessedDate) return -1; // a vem primeiro
+                if (!aNoProcessedDate && bNoProcessedDate) return 1;  // b vem primeiro
+                
+                // Ambos sem ProcessedDate? Ordena por Request crescente
+                if (aNoProcessedDate && bNoProcessedDate) {
+                    return new Date(a.Request || 0) - new Date(b.Request || 0);
+                }
+                
+                // 3º: Demais lançamentos por ProcessedDate decrescente (mais recente primeiro)
+                return new Date(b.ProcessedDate || 0) - new Date(a.ProcessedDate || 0);
+                
             case 'processedDateDesc':
                 return new Date(b.ProcessedDate || 0) - new Date(a.ProcessedDate || 0);
             case 'processedDateAsc':
@@ -256,9 +299,11 @@ function renderList() {
             case 'customerDesc':
                 return (b.Customer || '').localeCompare(a.Customer || '');
             default:
+                // Fallback para ordenação padrão
                 return new Date(b.ProcessedDate || 0) - new Date(a.ProcessedDate || 0);
         }
     });
+
 
     // Renderizar cada item
     filteredLaunches.forEach(item => {
@@ -270,6 +315,10 @@ function renderList() {
 function createListItem(item) {
     const li = document.createElement("li");
     li.className = "list-item";
+    
+    // Adicionar classe baseada no status
+    const status = String(item.Status || '1');
+    li.classList.add(`status-${status}`);
     
     // Verificar se está pendente de ProcessedDate
     if (!item.ProcessedDate || item.ProcessedDate.trim() === '') {
@@ -294,16 +343,18 @@ function createListItem(item) {
     itemContent.className = "item-content";
     itemContent.innerHTML = `
         <div class="item-main">
-            <strong>${item.Description}
+            <strong>${item.Description}</strong>
         </div>
         <div class="item-details">
             <small>${item.Customer || 'Sem cliente'} - ${item.Business || 'Sem empresa'}</small>
             <br>
             <small>Solicitado: ${requestDate} | Entregue: ${deliveryDate} | Pago: ${processedDate}</small>
+            ${item.Status === '3' && item.Reason ? `<br><small class="reason-text">Motivo: ${item.Reason}</small>` : ''}
+            <br>
             <small>Status: ${getStatusText(item.Status)} | R$ ${parseFloat(item.Deposit || 0).toFixed(2)}</small>
         </div>
     `;
-    
+
     // Container para botões de ação
     const actionButtons = document.createElement("div");
     actionButtons.className = "action-buttons";
@@ -409,7 +460,14 @@ async function deleteLaunch(id, itemName) {
 
 function collectFormData() {
     const obj = {};
+    const statusField = document.getElementById("Status");
+    const reasonField = document.getElementById("Reason");
+    
+    // Coletar dados de todos os campos normais
     elements.fields.forEach(f => {
+        // Pula o campo Reason - vamos tratá-lo separadamente
+        if (f.id === "Reason") return;
+        
         // Converte números
         if (f.type === 'number') {
             obj[f.id] = f.value ? parseFloat(f.value) : 0;
@@ -417,6 +475,16 @@ function collectFormData() {
             obj[f.id] = f.value || "";
         }
     });
+    
+    // Tratamento ESPECIAL para o campo Reason
+    if (statusField.value === "3") {
+        // Status é "Aguardando" - inclui o campo Reason
+        obj.Reason = reasonField.value || "";
+    } else {
+        // Status NÃO é "Aguardando" - define Reason como null para REMOVER do Firebase
+        obj.Reason = null;
+    }
+    
     obj.Profit = parseFloat(document.getElementById("Profit").value) || 0;
     return obj;
 }
@@ -478,5 +546,23 @@ async function updateLaunch() {
     } catch (error) {
         console.error("Erro ao alterar:", error);
         alert("Erro ao alterar lançamento!");
+    }
+}
+
+function toggleReasonField() {
+    const statusField = document.getElementById("Status");
+    const reasonContainer = document.getElementById("reasonContainer");
+    const reasonField = document.getElementById("Reason");
+    
+    if (statusField.value === "3") { // Status "Aguardando"
+        reasonContainer.style.display = "block";
+        reasonField.required = true; // Torna obrigatório se quiser
+    } else {
+        reasonContainer.style.display = "none";
+        reasonField.required = false;
+        
+        // Se não é status "Aguardando", limpa o campo Motivo
+        // O campo será removido do Firebase quando salvar
+        reasonField.value = "";
     }
 }
