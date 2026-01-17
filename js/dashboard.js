@@ -19,6 +19,20 @@ const elements = {
     statusFilter: null
 };
 
+// Elementos de parcelamento
+const installmentElements = {
+    paymentMethod: null,
+    installmentCount: null,
+    interestRateContainer: null,
+    interestRate: null,
+    installmentsTable: null,
+    installmentsTableBody: null,
+    installmentsTableFooter: null,
+    showInstallmentsBtn: null,
+    firstInstallmentContainer: null,
+    firstInstallmentDate: null
+};
+
 // Inicializar quando o DOM carregar
 document.addEventListener('DOMContentLoaded', initDashboard);
 
@@ -30,8 +44,14 @@ async function initDashboard() {
         // Inicializar elementos DOM
         initializeElements();
         
+        // Inicializar elementos de parcelamento
+        initializeInstallmentElements();
+        
         // Configurar eventos
         setupEventListeners();
+        
+        // Configurar eventos de parcelamento
+        setupInstallmentEventListeners();
         
         // Carregar dados
         loadList();
@@ -73,6 +93,18 @@ function initializeElements() {
     elements.statusFilter = document.getElementById("statusFilter");
 }
 
+// Inicializar elementos de parcelamento
+function initializeInstallmentElements() {
+    installmentElements.paymentMethod = document.getElementById("paymentMethod");
+    installmentElements.installmentCount = document.getElementById("installmentCount");
+    installmentElements.installmentsTable = document.getElementById("installmentsTable");
+    installmentElements.installmentsTableBody = document.getElementById("installmentsTableBody");
+    installmentElements.installmentsTableFooter = document.getElementById("installmentsTableFooter");
+    installmentElements.showInstallmentsBtn = document.getElementById("showInstallmentsBtn");
+    installmentElements.firstInstallmentContainer = document.getElementById("firstInstallmentContainer");
+    installmentElements.firstInstallmentDate = document.getElementById("firstInstallmentDate");
+}
+
 // Configurar eventos
 function setupEventListeners() {
     // Eventos dos filtros
@@ -101,6 +133,11 @@ function setupEventListeners() {
             if (f.id === "Deposit" || f.id === "Expenses" || f.id === "PercExpenses") {
                 handleExpensesCalculation();
                 updateProfit(); // Isso já chama updateNetProfit()
+                
+                // Se mudou o depósito, recalcula parcelas se houver
+                if (f.id === "Deposit") {
+                    updateInstallments();
+                }
             }
             
             // Se é campo Discount, atualiza apenas o NetProfit
@@ -127,6 +164,349 @@ function setupEventListeners() {
             return "Há alterações não salvas. Deseja realmente sair?";
         }
     };
+}
+
+// Configurar eventos de parcelamento
+function setupInstallmentEventListeners() {
+    // Evento para mudança no método de pagamento
+    installmentElements.paymentMethod.addEventListener("change", function() {
+        updateInstallments();
+    });
+
+    // Evento para mudança no número de parcelas
+    installmentElements.installmentCount.addEventListener("change", function() {
+        const count = parseInt(this.value);
+        
+        // Mostra/oculta tabela de parcelas e data da primeira parcela
+        if (count > 1) {
+            installmentElements.showInstallmentsBtn.style.display = "inline-block";
+            installmentElements.firstInstallmentContainer.style.display = "block";
+        } else {
+            installmentElements.showInstallmentsBtn.style.display = "none";
+            installmentElements.installmentsTable.style.display = "none";
+            installmentElements.firstInstallmentContainer.style.display = "none";
+            installmentElements.installmentsTableFooter.style.display = "none";
+        }
+        
+        // Gera parcelas
+        generateInstallments();
+    });
+
+    // Evento para data da primeira parcela
+    installmentElements.firstInstallmentDate.addEventListener("change", function() {
+        generateInstallments();
+    });
+
+    // Botão para mostrar/ocultar tabela de parcelas
+    installmentElements.showInstallmentsBtn.addEventListener("click", function() {
+        const isVisible = installmentElements.installmentsTable.style.display === "table";
+        installmentElements.installmentsTable.style.display = isVisible ? "none" : "table";
+        installmentElements.installmentsTableFooter.style.display = isVisible ? "none" : "table";
+        this.textContent = isVisible ? "Mostrar/Editar Parcelas" : "Ocultar Parcelas";
+    });
+    
+    // Evento para alterações no campo Deposit
+    document.getElementById("Deposit").addEventListener("input", function() {
+        updateInstallments();
+    });
+}
+
+// ============================================
+// FUNÇÕES DE PARCELAMENTO
+// ============================================
+
+function generateInstallments() {
+    const count = parseInt(installmentElements.installmentCount.value);
+    const deposit = parseFloat(document.getElementById("Deposit").value) || 0;
+    const paymentMethod = installmentElements.paymentMethod.value;
+    const firstInstallmentDate = installmentElements.firstInstallmentDate.value;
+    
+    // Limpa a tabela
+    installmentElements.installmentsTableBody.innerHTML = "";
+    
+    if (count <= 1) {
+        installmentElements.installmentsTable.style.display = "none";
+        installmentElements.installmentsTableFooter.style.display = "none";
+        return;
+    }
+    
+    // Calcula valor base por parcela
+    const baseValue = deposit / count;
+    let totalInstallment = 0;
+    let totalInterest = 0;
+    let totalFinal = 0;
+    
+    // Gera cada parcela
+    for (let i = 1; i <= count; i++) {
+        const row = document.createElement("tr");
+        row.dataset.installmentNumber = i;
+        
+        // Calcula data da parcela (adiciona 1 mês para cada parcela subsequente)
+        let installmentDate = "";
+        if (firstInstallmentDate) {
+            const date = new Date(firstInstallmentDate);
+            date.setMonth(date.getMonth() + (i - 1));
+            
+            // CORREÇÃO: Formata data manualmente para evitar problema de fuso horário
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            installmentDate = `${year}-${month}-${day}`;
+        }
+
+        // Calcula juros apenas para cartão com juros
+        let interest = 0;
+        let finalValue = baseValue;
+        
+        if (paymentMethod === "cartao_com") {
+            // Aplica 2% de juros ao mês (padrão)
+            const monthlyRate = 0.02; // 2%
+            finalValue = baseValue * Math.pow(1 + monthlyRate, i - 1);
+            interest = finalValue - baseValue;
+        }
+        
+        // Arredonda valores
+        finalValue = Math.round(finalValue * 100) / 100;
+        interest = Math.round(interest * 100) / 100;
+        
+        // Acumula totais
+        totalInstallment += baseValue;
+        totalInterest += interest;
+        totalFinal += finalValue;
+        
+        row.innerHTML = `
+            <td style="padding: 8px; border: 1px solid #ddd;">${i}/${count}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">
+                <input type="date" class="installment-date-input" 
+                       value="${installmentDate}" 
+                       data-installment="${i}"
+                       style="width: 100%; border: 1px solid #ccc; padding: 4px;">
+            </td>
+            <td style="padding: 8px; border: 1px solid #ddd;">
+                <input type="number" class="installment-value-input" 
+                       value="${baseValue.toFixed(2)}" 
+                       data-installment="${i}"
+                       step="0.01" min="0"
+                       style="width: 100%; border: 1px solid #ccc; padding: 4px;">
+            </td>
+            <td style="padding: 8px; border: 1px solid #ddd;">
+                <span class="installment-interest-display">R$ ${interest.toFixed(2)}</span>
+            </td>
+            <td style="padding: 8px; border: 1px solid #ddd;">
+                <span class="installment-final-display">R$ ${finalValue.toFixed(2)}</span>
+            </td>
+            <td style="padding: 8px; border: 1px solid #ddd;">
+                <select class="installment-status" data-installment="${i}" style="width: 100%; padding: 4px;">
+                    <option value="pending">Pendente</option>
+                    <option value="paid">Pago</option>
+                    <option value="overdue">Atrasado</option>
+                    <option value="canceled">Cancelado</option>
+                </select>
+            </td>
+        `;
+        
+        installmentElements.installmentsTableBody.appendChild(row);
+    }
+    
+    // Atualiza totais
+    updateInstallmentsTotal();
+    
+    // Mostra a tabela
+    installmentElements.installmentsTable.style.display = "table";
+    installmentElements.installmentsTableFooter.style.display = "table";
+    
+    // Adiciona eventos para edição manual
+    setupInstallmentInputEvents();
+}
+
+function updateInstallmentsTotal() {
+    const deposit = parseFloat(document.getElementById("Deposit").value) || 0;
+    const count = parseInt(installmentElements.installmentCount.value);
+    const paymentMethod = installmentElements.paymentMethod.value;
+    
+    let totalInstallment = 0;
+    let totalInterest = 0;
+    let totalFinal = 0;
+    
+    // Calcula totais a partir dos inputs
+    document.querySelectorAll('.installment-value-input').forEach((input, index) => {
+        const value = parseFloat(input.value) || 0;
+        totalInstallment += value;
+        
+        // Calcula juros
+        let interest = 0;
+        let finalValue = value;
+        
+        if (paymentMethod === "cartao_com") {
+            const monthlyRate = 0.02; // 2%
+            finalValue = value * Math.pow(1 + monthlyRate, index);
+            interest = finalValue - value;
+        }
+        
+        totalInterest += interest;
+        totalFinal += finalValue;
+        
+        // Atualiza exibição de juros e valor final
+        const row = input.closest('tr');
+        if (row) {
+            const interestDisplay = row.querySelector('.installment-interest-display');
+            const finalDisplay = row.querySelector('.installment-final-display');
+            
+            if (interestDisplay) interestDisplay.textContent = `R$ ${interest.toFixed(2)}`;
+            if (finalDisplay) finalDisplay.textContent = `R$ ${finalValue.toFixed(2)}`;
+        }
+    });
+    
+    // Atualiza totais na tabela
+    document.getElementById("totalInstallmentValue").textContent = `R$ ${totalInstallment.toFixed(2)}`;
+    document.getElementById("totalInterestValue").textContent = `R$ ${totalInterest.toFixed(2)}`;
+    document.getElementById("totalFinalValue").textContent = `R$ ${totalFinal.toFixed(2)}`;
+    
+    // Calcula diferença em relação ao depósito
+    const totalInformed = totalInstallment;
+    const difference = totalInformed - deposit;
+    const differenceAbs = Math.abs(difference);
+    
+    document.getElementById("totalInformedValue").textContent = `R$ ${totalInformed.toFixed(2)}`;
+    
+    const differenceElement = document.getElementById("totalDifference");
+    if (Math.abs(difference) > 0.01) {
+        if (difference > 0) {
+            differenceElement.innerHTML = `<span style="color: #d32f2f;">↑ R$ ${differenceAbs.toFixed(2)} acima</span>`;
+        } else {
+            differenceElement.innerHTML = `<span style="color: #388e3c;">↓ R$ ${differenceAbs.toFixed(2)} abaixo</span>`;
+        }
+    } else {
+        differenceElement.textContent = "✓ Valores conferem";
+        differenceElement.style.color = "#388e3c";
+    }
+}
+
+function setupInstallmentInputEvents() {
+    // Eventos para edição de datas
+    document.querySelectorAll('.installment-date-input').forEach(input => {
+        input.addEventListener('change', function() {
+            formChanged = true;
+        });
+    });
+    
+    // Eventos para edição de valores (apenas para PIX)
+    document.querySelectorAll('.installment-value-input').forEach(input => {
+        input.addEventListener('input', function() {
+            formChanged = true;
+            updateInstallmentsTotal();
+        });
+    });
+    
+    // Eventos para status das parcelas
+    document.querySelectorAll('.installment-status').forEach(select => {
+        select.addEventListener('change', function() {
+            formChanged = true;
+        });
+    });
+}
+
+function updateInstallments() {
+    // Recalcula parcelas se já existirem
+    if (parseInt(installmentElements.installmentCount.value) > 1) {
+        generateInstallments();
+    }
+}
+
+function getInstallmentsData() {
+    const count = parseInt(installmentElements.installmentCount.value);
+    
+    if (count <= 1) {
+        return null;
+    }
+    
+    const installments = [];
+    const rows = installmentElements.installmentsTableBody.querySelectorAll('tr');
+    
+    rows.forEach(row => {
+        const installmentNumber = parseInt(row.dataset.installmentNumber);
+        const dateInput = row.querySelector('.installment-date-input');
+        const valueInput = row.querySelector('.installment-value-input');
+        const statusSelect = row.querySelector('.installment-status');
+        
+        // Extrai valores das células
+        const cells = row.querySelectorAll('td');
+        const interestText = row.querySelector('.installment-interest-display').textContent;
+        const finalText = row.querySelector('.installment-final-display').textContent;
+        
+        const interestValue = parseFloat(interestText.replace('R$ ', '')) || 0;
+        const finalValue = parseFloat(finalText.replace('R$ ', '')) || 0;
+        
+        installments.push({
+            number: installmentNumber,
+            dueDate: dateInput ? dateInput.value : '',
+            value: valueInput ? parseFloat(valueInput.value) || 0 : 0,
+            interest: interestValue,
+            finalValue: finalValue,
+            status: statusSelect ? statusSelect.value : 'pending'
+        });
+    });
+    
+    return {
+        paymentMethod: installmentElements.paymentMethod.value,
+        installmentCount: count,
+        firstInstallmentDate: installmentElements.firstInstallmentDate.value,
+        installments: installments,
+        totalInstallmentValue: parseFloat(document.getElementById("totalInstallmentValue").textContent.replace('R$ ', '')) || 0,
+        totalInterestValue: parseFloat(document.getElementById("totalInterestValue").textContent.replace('R$ ', '')) || 0,
+        totalFinalValue: parseFloat(document.getElementById("totalFinalValue").textContent.replace('R$ ', '')) || 0
+    };
+}
+
+function loadInstallmentsData(installmentData) {
+    if (!installmentData) {
+        // Configuração padrão
+        installmentElements.paymentMethod.value = "pix";
+        installmentElements.installmentCount.value = "1";
+        installmentElements.showInstallmentsBtn.style.display = "none";
+        installmentElements.installmentsTable.style.display = "none";
+        installmentElements.firstInstallmentContainer.style.display = "none";
+        installmentElements.installmentsTableFooter.style.display = "none";
+        return;
+    }
+    
+    // Carrega configuração
+    installmentElements.paymentMethod.value = installmentData.paymentMethod || "pix";
+    installmentElements.installmentCount.value = String(installmentData.installmentCount || 1);
+    installmentElements.firstInstallmentDate.value = installmentData.firstInstallmentDate || "";
+    
+    // Configura visibilidade
+    if (installmentData.installmentCount > 1) {
+        installmentElements.showInstallmentsBtn.style.display = "inline-block";
+        installmentElements.firstInstallmentContainer.style.display = "block";
+        
+        // Gera parcelas
+        generateInstallments();
+        
+        // Preenche dados das parcelas
+        if (installmentData.installments && installmentData.installments.length > 0) {
+            setTimeout(() => {
+                installmentData.installments.forEach(installment => {
+                    const row = installmentElements.installmentsTableBody.querySelector(
+                        `tr[data-installment-number="${installment.number}"]`
+                    );
+                    
+                    if (row) {
+                        const dateInput = row.querySelector('.installment-date-input');
+                        const valueInput = row.querySelector('.installment-value-input');
+                        const statusSelect = row.querySelector('.installment-status');
+                        
+                        if (dateInput) dateInput.value = installment.dueDate || "";
+                        if (valueInput) valueInput.value = installment.value.toFixed(2);
+                        if (statusSelect) statusSelect.value = installment.status || "pending";
+                    }
+                });
+                
+                // Atualiza totais após carregar valores
+                updateInstallmentsTotal();
+            }, 100);
+        }
+    }
 }
 
 // ============================================
@@ -158,10 +538,30 @@ function updateProfit() {
     const expenses = parseFloat(document.getElementById("Expenses").value) || 0;
     const profit = deposit - expenses;
     
+    // CORREÇÃO: Lucro Bruto = Depósito - Despesas
     document.getElementById("Profit").value = profit.toFixed(2);
     
-    // Agora também atualiza o lucro líquido
+    // Atualiza o lucro líquido
     updateNetProfit();
+}
+
+function updateNetProfit() {
+    const profit = parseFloat(document.getElementById("Profit").value) || 0;
+    const discount = parseFloat(document.getElementById("Discount").value) || 0;
+    const netProfit = profit - discount;
+    
+    // CORREÇÃO: Lucro Líquido = Lucro Bruto - Desconto
+    document.getElementById("NetProfit").value = netProfit.toFixed(2);
+    
+    // Destacar se o lucro líquido for negativo
+    const netProfitField = document.getElementById("NetProfit");
+    if (netProfit < 0) {
+        netProfitField.style.color = "#e63946";
+        netProfitField.style.fontWeight = "bold";
+    } else {
+        netProfitField.style.color = "";
+        netProfitField.style.fontWeight = "";
+    }
 }
 
 // ============================================
@@ -190,6 +590,9 @@ function clearForm() {
     document.getElementById("Profit").value = "";
     document.getElementById("NetProfit").value = "";
     
+    // Limpa dados de parcelamento
+    loadInstallmentsData(null);
+    
     // Oculta campo Motivo
     const reasonContainer = document.getElementById("reasonContainer");
     if (reasonContainer) {
@@ -206,14 +609,45 @@ function clearForm() {
 }
 
 function loadForm(id, item) {
+    // console.log('Carregando formulário para ID:', id);
+    // console.log('Item recebido:', item);
+    
     selectedId = id;
     formChanged = false;
 
     // Preenche todos os campos
     for (const key in item) {
-        if (document.getElementById(key)) {
-            document.getElementById(key).value = item[key] || "";
+        // console.log(`Tentando preencher campo ${key} com valor:`, item[key]);
+        
+        const field = document.getElementById(key);
+        if (field) {
+            // CORREÇÃO: Para datas, ajusta o fuso horário
+            if (key === "ProcessedDate" || key === "Request" || key === "Delivery" || key === "firstInstallmentDate") {
+                if (item[key]) {
+                    // Corrige problema de data (remove 1 dia)
+                    const date = new Date(item[key]);
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    field.value = `${year}-${month}-${day}`;
+                    // console.log(`Campo ${key} preenchido com:`, field.value);
+                } else {
+                    field.value = "";
+                }
+            } else {
+                field.value = item[key] || "";
+                // console.log(`Campo ${key} preenchido com:`, field.value);
+            }
+        } else {
+            // console.log(`Campo ${key} NÃO ENCONTRADO no DOM`);
         }
+    }
+
+    // Carrega dados de parcelamento
+    if (item.installmentData) {
+        loadInstallmentsData(item.installmentData);
+    } else {
+        loadInstallmentsData(null);
     }
 
     // Atualiza visibilidade do campo Motivo baseado no status
@@ -225,6 +659,8 @@ function loadForm(id, item) {
     
     // Muda para modo "Alterar"
     showUpdateMode();
+    
+    // console.log('Formulário carregado com sucesso!');
 }
 
 // ============================================
@@ -367,21 +803,48 @@ function createListItem(item) {
         li.classList.add('pending-processed');
     }
     
-    // Formatar datas para exibição
+    // CORREÇÃO: Formatar datas para exibição com ajuste de fuso
+    const formatDateForDisplay = (dateString) => {
+        if (!dateString) return 'Não informada';
+        
+        try {
+            const date = new Date(dateString);
+            // Ajusta para exibir corretamente
+            const adjustedDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+            return adjustedDate.toLocaleDateString('pt-BR');
+        } catch (e) {
+            return dateString;
+        }
+    };
+    
     const processedDate = item.ProcessedDate ? 
-        new Date(item.ProcessedDate).toLocaleDateString('pt-BR') : 
+        formatDateForDisplay(item.ProcessedDate) : 
         '<span class="pending-text">PENDENTE</span>';
     
-    const requestDate = item.Request ? 
-        new Date(item.Request).toLocaleDateString('pt-BR') : 
-        'Não informada';
+    const requestDate = formatDateForDisplay(item.Request);
+    const deliveryDate = formatDateForDisplay(item.Delivery);
     
-    const deliveryDate = item.Delivery ? 
-        new Date(item.Delivery).toLocaleDateString('pt-BR') : 
-        'Não informada';
-    
+    // CORREÇÃO: Lucro Bruto agora é o Depósito (não mais Profit)
+    const grossProfit = parseFloat(item.Deposit || 0);
     const netProfit = getNetProfit(item);
     
+    // Informações de parcelamento
+    let installmentInfo = "";
+    if (item.installmentData && item.installmentData.installmentCount > 1) {
+        const paidCount = item.installmentData.installments ? 
+            item.installmentData.installments.filter(i => i.status === 'paid').length : 0;
+        
+        // Determina texto do método de pagamento
+        let paymentMethodText = "PIX";
+        if (item.installmentData.paymentMethod === "cartao_sem") {
+            paymentMethodText = "Cartão (s/ juros)";
+        } else if (item.installmentData.paymentMethod === "cartao_com") {
+            paymentMethodText = "Cartão (c/ juros)";
+        }
+        
+        installmentInfo = `<br><small>${item.installmentData.installmentCount}x ${paymentMethodText} - ${paidCount}/${item.installmentData.installmentCount} pagas</small>`;
+    }
+
     // Criar conteúdo do item
     const itemContent = document.createElement("div");
     itemContent.className = "item-content";
@@ -394,8 +857,9 @@ function createListItem(item) {
             <br>
             <small>Solicitado: ${requestDate} | Entregue: ${deliveryDate} | Pago: ${processedDate}</small>
             ${item.Status === '3' && item.Reason ? `<br><small class="reason-text">Motivo: ${item.Reason}</small>` : ''}
+            ${installmentInfo}
             <br>
-            <small>Status: ${getStatusText(item.Status)} | Bruto: R$ ${parseFloat(item.Profit || 0).toFixed(2)} | Líquido: R$ ${netProfit.toFixed(2)}</small>
+            <small>Status: ${getStatusText(item.Status)} | Bruto: R$ ${grossProfit.toFixed(2)} | Líquido: R$ ${netProfit.toFixed(2)}</small>
         </div>
     `;
     
@@ -474,9 +938,15 @@ function reuseDataForNew(item) {
         }
     }
     
-    // Define data atual para ProcessedDate
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById("ProcessedDate").value = today;
+    // Define data atual para ProcessedDate (com ajuste de fuso)
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    document.getElementById("ProcessedDate").value = `${year}-${month}-${day}`;
+    
+    // Limpa dados de parcelamento para novo registro
+    loadInstallmentsData(null);
     
     // Atualiza botões (modo "Salvar Novo")
     showSaveMode();
@@ -516,7 +986,13 @@ function collectFormData() {
         if (f.type === 'number') {
             obj[f.id] = f.value ? parseFloat(f.value) : 0;
         } else {
-            obj[f.id] = f.value || "";
+            // CORREÇÃO: Para datas, salva como string no formato correto
+            if (f.type === 'date' && f.value) {
+                // Salva no formato ISO sem ajuste de fuso (já ajustado na entrada)
+                obj[f.id] = f.value;
+            } else {
+                obj[f.id] = f.value || "";
+            }
         }
     });
     
@@ -529,13 +1005,24 @@ function collectFormData() {
         obj.Reason = null;
     }
     
-    // Campos calculados
-    const profit = parseFloat(document.getElementById("Profit").value) || 0;
+    // CORREÇÃO: Lucro Bruto é o Depósito (não mais Profit)
+    const deposit = parseFloat(document.getElementById("Deposit").value) || 0;
+    const expenses = parseFloat(document.getElementById("Expenses").value) || 0;
+    const profit = deposit - expenses;
     const discount = parseFloat(document.getElementById("Discount").value) || 0;
     const netProfit = profit - discount;
     
-    obj.Profit = profit;
-    obj.NetProfit = netProfit; // SEMPRE salva o NetProfit calculado
+    obj.Profit = profit; // Lucro Bruto = Depósito - Despesas
+    obj.NetProfit = netProfit; // Lucro Líquido = Lucro Bruto - Desconto
+    
+    // Adiciona dados de parcelamento
+    const installmentData = getInstallmentsData();
+    if (installmentData) {
+        obj.installmentData = installmentData;
+    } else {
+        // Remove installmentData se existir anteriormente
+        obj.installmentData = null;
+    }
     
     return obj;
 }
@@ -554,6 +1041,16 @@ function validateForm() {
         alert("Por favor, preencha um valor de Depósito válido!");
         document.getElementById("Deposit").focus();
         return false;
+    }
+    
+    // Validação para múltiplas parcelas
+    if (parseInt(installmentElements.installmentCount.value) > 1) {
+        const firstInstallmentDate = installmentElements.firstInstallmentDate.value;
+        if (!firstInstallmentDate) {
+            alert("Para parcelamento, informe a data da primeira parcela!");
+            installmentElements.firstInstallmentDate.focus();
+            return false;
+        }
     }
     
     return true;
@@ -618,24 +1115,6 @@ function toggleReasonField() {
     }
 }
 
-function updateNetProfit() {
-    const profit = parseFloat(document.getElementById("Profit").value) || 0;
-    const discount = parseFloat(document.getElementById("Discount").value) || 0;
-    const netProfit = profit - discount;
-    
-    document.getElementById("NetProfit").value = netProfit.toFixed(2);
-    
-    // (Opcional) Destacar se o lucro líquido for negativo
-    const netProfitField = document.getElementById("NetProfit");
-    if (netProfit < 0) {
-        netProfitField.style.color = "#e63946";
-        netProfitField.style.fontWeight = "bold";
-    } else {
-        netProfitField.style.color = "";
-        netProfitField.style.fontWeight = "";
-    }
-}
-
 function getNetProfit(item) {
     // Se já existe NetProfit no item, usa ele
     if (item.NetProfit !== undefined && item.NetProfit !== null) {
@@ -643,6 +1122,7 @@ function getNetProfit(item) {
     }
     
     // Se não existe, calcula: Profit - Discount
+    // CORREÇÃO: Profit agora é Lucro Bruto (Deposit - Expenses)
     const profit = parseFloat(item.Profit || 0);
     const discount = parseFloat(item.Discount || 0);
     return profit - discount;

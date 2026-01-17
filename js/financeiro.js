@@ -354,19 +354,24 @@ function updateSummary() {
     };
     
     // ============================================
-    // 1. CÁLCULOS FINANCEIROS (ProcessedDate)
+    // 1. CÁLCULOS FINANCEIROS (ProcessedDate + parcelas)
     // ============================================
     
-    // Filtrar lançamentos pelo ProcessedDate (pagamentos efetivos)
-    const financialLaunches = allLaunches.filter(item => {
+    // A) Pagamentos à vista (ProcessedDate)
+    const upfrontPayments = allLaunches.filter(item => {
+        // Pular lançamentos com parcelamento
+        if (item.installmentData && item.installmentData.installmentCount > 1) {
+            return false;
+        }
+        
         if (!item.ProcessedDate) return false;
         
         const itemDate = new Date(item.ProcessedDate);
         return itemDate >= startDate && itemDate <= endDate;
     });
     
-    // Calcular totais financeiros
-    financialLaunches.forEach(item => {
+    // Calcular pagamentos à vista
+    upfrontPayments.forEach(item => {
         const deposit = parseFloat(item.Deposit || 0);
         const expenses = parseFloat(item.Expenses || 0);
         const discount = parseFloat(item.Discount || 0);
@@ -383,6 +388,17 @@ function updateSummary() {
         
         totals.validItems++;
     });
+    
+    // B) Pagamentos parcelados
+    const installmentPayments = calculateInstallmentPayments();
+    
+    // Somar pagamentos parcelados aos totais
+    totals.deposit += installmentPayments.totalDeposit;
+    totals.expenses += installmentPayments.totalExpenses;
+    totals.profit += installmentPayments.totalProfit;
+    totals.discount += installmentPayments.totalDiscount;
+    totals.netProfit += installmentPayments.totalNetProfit;
+    totals.validItems += installmentPayments.payments.length;
     
     // ============================================
     // 2. CONTAGEM DE STATUS (critérios diferentes)
@@ -434,9 +450,10 @@ function updateSummary() {
         (withdrawalsData.total / totals.netProfit * 100) : 0;
     
     // Log para debug
-    console.log('Resumo financeiro (ProcessedDate):', {
+    console.log('Resumo financeiro:', {
         periodo: `${formatDateDisplay(startDate)} - ${formatDateDisplay(endDate)}`,
-        itensComPagamento: financialLaunches.length,
+        pagamentosAVista: upfrontPayments.length,
+        parcelasPagas: installmentPayments.payments.length,
         deposit: totals.deposit,
         expenses: totals.expenses,
         profit: totals.profit,
@@ -444,6 +461,8 @@ function updateSummary() {
         retiradas: withdrawalsData.total,
         saldoFinal: finalBalance
     });
+    
+    console.log('Detalhes parcelas:', installmentPayments.payments);
     
     console.log('Contagem de status:', {
         emAndamento: totals.statusCounts['2'],
@@ -513,6 +532,8 @@ function updateUI(totals, expensesPerc, profitMargin, discountPerc,
     
     // Aplicar cores baseadas em valores
     applyValueStyles(totals, withdrawalsData, finalBalance);
+
+    showInstallmentDetails(installmentPayments.payments);
 }
 
 // Aplicar estilos baseados em valores
@@ -592,4 +613,98 @@ function resetSummary() {
         el.style.color = "";
         el.style.fontWeight = "";
     });
+}
+
+function calculateInstallmentPayments() {
+    const installmentPayments = {
+        totalDeposit: 0,
+        totalExpenses: 0,
+        totalProfit: 0,
+        totalDiscount: 0,
+        totalNetProfit: 0,
+        payments: []
+    };
+    
+    if (!startDate || !endDate || allLaunches.length === 0) {
+        return installmentPayments;
+    }
+    
+    // Percorrer todos os lançamentos
+    allLaunches.forEach(item => {
+        // Verificar se tem parcelamento
+        if (item.installmentData && item.installmentData.installments) {
+            const deposit = parseFloat(item.Deposit || 0);
+            const expenses = parseFloat(item.Expenses || 0);
+            const discount = parseFloat(item.Discount || 0);
+            const calculatedProfit = deposit - expenses;
+            const calculatedNetProfit = calculatedProfit - discount;
+            
+            // Para cada parcela PAGA no período
+            item.installmentData.installments.forEach(installment => {
+                // Verificar se a parcela está paga e dentro do período
+                if (installment.status === 'paid' && installment.dueDate) {
+                    const installmentDate = new Date(installment.dueDate);
+                    
+                    // Verificar se está no período filtrado
+                    if (installmentDate >= startDate && installmentDate <= endDate) {
+                        // Calcular proporção desta parcela no total
+                        const installmentProportion = installment.finalValue / item.installmentData.totalFinalValue;
+                        
+                        // Adicionar aos totais proporcionais
+                        installmentPayments.totalDeposit += deposit * installmentProportion;
+                        installmentPayments.totalExpenses += expenses * installmentProportion;
+                        installmentPayments.totalProfit += calculatedProfit * installmentProportion;
+                        installmentPayments.totalDiscount += discount * installmentProportion;
+                        installmentPayments.totalNetProfit += calculatedNetProfit * installmentProportion;
+                        
+                        // Registrar o pagamento
+                        installmentPayments.payments.push({
+                            customer: item.Customer,
+                            description: item.Description,
+                            date: installment.dueDate,
+                            installmentNumber: installment.number,
+                            totalInstallments: item.installmentData.installmentCount,
+                            amount: installment.finalValue,
+                            proportion: installmentProportion
+                        });
+                    }
+                }
+            });
+        }
+    });
+    
+    return installmentPayments;
+}
+
+function showInstallmentDetails(payments) {
+    const detailsSection = document.getElementById("installmentDetailsSection");
+    const detailsContent = document.getElementById("installmentDetails");
+    
+    if (payments.length === 0) {
+        detailsSection.style.display = "none";
+        return;
+    }
+    
+    detailsSection.style.display = "block";
+    
+    let html = '<div class="installments-list">';
+    
+    payments.forEach(payment => {
+        const date = new Date(payment.date).toLocaleDateString('pt-BR');
+        html += `
+            <div class="installment-item">
+                <div class="installment-info">
+                    <strong>${payment.customer || 'Cliente'}</strong>
+                    <span>${payment.description || 'Serviço'}</span>
+                </div>
+                <div class="installment-details">
+                    <small>${date} - Parcela ${payment.installmentNumber}/${payment.totalInstallments}</small>
+                    <span class="installment-amount">R$ ${payment.amount.toFixed(2)}</span>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    detailsContent.innerHTML = html;
 }
