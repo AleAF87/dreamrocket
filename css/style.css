@@ -1,6 +1,8 @@
-/* =========================
-   RESET & BASE
-========================= */
+Esse meu CSS acho que está com muitas duplicatas e erros. Conserte pra mim?
+
+/* ============================================
+   RESET & BASE STYLES
+   ============================================ */
 * {
     margin: 0;
     padding: 0;
@@ -16,9 +18,9 @@ body {
     padding-bottom: 40px;
 }
 
-/* =========================
-   LOGIN
-========================= */
+/* ============================================
+   LOGIN PAGE STYLES
+   ============================================ */
 .login-page {
     display: flex;
     justify-content: center;
@@ -28,300 +30,1869 @@ body {
 }
 
 .login-container {
-    background: rgba(255,255,255,0.95);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
     border-radius: 24px;
     padding: 50px 40px;
-    max-width: 480px;
     width: 100%;
+    max-width: 480px;
+    box-shadow: 0 20px 60px rgba(10, 25, 47, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     text-align: center;
-    box-shadow: 0 20px 60px rgba(10,25,47,.3);
 }
 
-/* títulos login */
+/* Header */
+.login-header {
+    margin-bottom: 40px;
+}
+
 .login-title {
+    color: #0a192f;
     font-size: 2.8rem;
     font-weight: 800;
-    background: linear-gradient(135deg,#0a192f,#2c5282);
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #0a192f 0%, #2c5282 100%);
     -webkit-background-clip: text;
-    color: transparent;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-.login-subtitle { color:#1a365d; font-size:1.4rem; }
-.login-description { color:#666; }
+.login-subtitle {
+    color: #1a365d;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
 
-/* botão google */
+.login-description {
+    color: #666;
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-top: 10px;
+}
+
+/* Botão de Login */
+.login-button-container {
+    margin: 40px 0;
+}
+
 .google-btn {
-    width:100%;
-    padding:18px;
-    border-radius:14px;
-    border:2px solid #dee2e6;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:12px;
-    cursor:pointer;
-    transition:.3s;
+    width: 100%;
+    padding: 18px 24px;
+    background: white;
+    border: 2px solid #dee2e6;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #444;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
 }
 
 .google-btn:hover {
-    border-color:#0a192f;
-    transform:translateY(-2px);
+    border-color: #0a192f;
+    background: #f8f9fa;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(10, 25, 47, 0.15);
 }
 
-/* =========================
-   NAVBAR
-========================= */
-.navbar {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:15px 30px;
-    background:rgba(255,255,255,.95);
-    border-bottom:3px solid #e63946;
-    position:sticky;
-    top:0;
-    z-index:1000;
+.google-btn:active {
+    transform: translateY(-1px);
 }
 
-.nav-center { display:flex; gap:30px; }
-
-.nav-center a {
-    text-decoration:none;
-    color:#0a192f;
-    font-weight:600;
-    padding:8px 16px;
-    border-radius:8px;
+.google-icon {
+    width: 24px;
+    height: 24px;
+    color: #4285F4;
 }
 
-.nav-center a:hover { background:#f0f8ff; }
-
-.user-profile { display:flex; align-items:center; gap:12px; }
-
-.logout-btn, .login-btn {
-    padding:8px 20px;
-    border:none;
-    border-radius:8px;
-    font-weight:600;
-    cursor:pointer;
+/* Footer */
+.login-footer {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid #eee;
 }
 
-.logout-btn {
-    background:linear-gradient(135deg,#e63946,#ff6b6b);
-    color:#fff;
+.login-note {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 25px;
+    line-height: 1.5;
 }
 
-.login-btn {
-    background:linear-gradient(135deg,#0a192f,#1a365d);
-    color:#fff;
+.login-features {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 25px;
 }
 
-/* =========================
-   TITULOS
-========================= */
-h2 {
-    color:#fff;
-    text-align:center;
-    margin:30px 0 20px;
-    position:relative;
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #1a365d;
+    font-size: 0.95rem;
+    padding: 8px 0;
 }
 
-h2::after {
-    content:'';
-    position:absolute;
-    bottom:-6px;
-    left:50%;
-    transform:translateX(-50%);
-    width:60px;
-    height:4px;
-    background:#e63946;
+.feature-icon {
+    font-size: 1.2rem;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f8ff;
+    border-radius: 8px;
+    padding: 5px;
 }
 
-/* =========================
-   DASHBOARD LAYOUT (ÚNICO)
-========================= */
-.dash-container {
-    display:grid;
-    grid-template-columns:40% 60%;
-    gap:30px;
-    margin-top:30px;
-    height:calc(100vh - 150px);
-    min-height:600px;
-}
-
-@media (max-width:992px){
-    .dash-container {
-        grid-template-columns:1fr;
-        height:auto;
-        min-height:auto;
+/* Responsividade para login */
+@media (max-width: 576px) {
+    .login-container {
+        padding: 40px 25px;
+    }
+    
+    .login-title {
+        font-size: 2.2rem;
+    }
+    
+    .login-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .google-btn {
+        padding: 16px 20px;
+        font-size: 1rem;
+    }
+    
+    .login-features {
+        gap: 12px;
+    }
+    
+    .feature-item {
+        font-size: 0.9rem;
     }
 }
 
-/* =========================
-   CARDS
-========================= */
+/* ============================================
+   NAVBAR STYLES
+   ============================================ */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 3px solid #e63946;
+    box-shadow: 0 4px 12px rgba(10, 25, 47, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-left .logo {
+    height: 40px;
+}
+
+.nav-center {
+    display: flex;
+    gap: 30px;
+}
+
+.nav-center a {
+    color: #0a192f;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.nav-center a:hover {
+    background: #f0f8ff;
+    color: #1a365d;
+}
+
+/* User area styles */
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.avatar-container {
+    position: relative;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #0a192f;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.user-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.avatar-initial {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0a192f 0%, #1a365d 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+    border: 2px solid #0a192f;
+    transition: all 0.3s ease;
+}
+
+.avatar-initial:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #0a192f;
+    font-size: 0.95rem;
+}
+
+.user-email {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.logout-btn {
+    padding: 8px 20px;
+    background: linear-gradient(135deg, #e63946 0%, #ff6b6b 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(230, 57, 70, 0.3);
+}
+
+.login-btn {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #0a192f 0%, #1a365d 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+    background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(10, 25, 47, 0.3);
+}
+
+/* Navbar responsiva */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 10px 15px;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .nav-center {
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .nav-center a {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .user-profile {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}
+
+/* ============================================
+   TÍTULOS PRINCIPAIS
+   ============================================ */
+h2 {
+    color: #ffffff;
+    font-size: 2rem;
+    margin: 30px 0 20px;
+    text-align: center;
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+h2::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: #e63946;
+    border-radius: 2px;
+}
+
+/* ============================================
+   CONTAINERS PRINCIPAIS
+   ============================================ */
+.dash-container,
+.retirada-container,
+.finance-container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ============================================
+   DASHBOARD LAYOUT
+   ============================================ */
+.dash-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+@media (max-width: 992px) {
+    .dash-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+/* ============================================
+   CARDS BRANCOS
+   ============================================ */
 .list-area,
 .form-area,
 .filters-card,
 .summary-section,
 .detailed-section,
 .form-section {
-    background:#fff;
-    border-radius:16px;
-    padding:25px;
-    box-shadow:0 8px 24px rgba(10,25,47,.1);
+    background: white;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 8px 24px rgba(10, 25, 47, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* =========================
-   LISTA
-========================= */
-.list-area {
-    display:flex;
-    flex-direction:column;
-    height:100%;
+.list-area h3,
+.form-area h3,
+.filters-card h3,
+.summary-section h3,
+.detailed-section h3,
+.form-section h4 {
+    color: #0a192f;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #ffd166;
+    font-size: 1.4rem;
 }
 
-.list {
-    list-style:none;
-    overflow-y:auto;
-    flex:1;
-    margin-top:10px;
+.form-section h4 {
+    font-size: 1.2rem;
+    margin-top: 0;
 }
 
-.list-item {
-    background:#f8f9fa;
-    padding:15px;
-    border-radius:10px;
-    border-left:4px solid #0a192f;
-    margin-bottom:10px;
-    cursor:pointer;
-    transition:.3s;
-}
-
-.list-item:hover {
-    transform:translateX(5px);
-    border-left-color:#e63946;
-}
-
-/* =========================
-   FORM
-========================= */
-.form-area {
-    display:flex;
-    flex-direction:column;
-    height:100%;
-}
-
+/* ============================================
+   FORMULÁRIOS COM LABELS
+   ============================================ */
 .form-grid {
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:15px;
-    flex:1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
 }
 
 .form-grid > div {
-    display:flex;
-    flex-direction:column;
-    gap:6px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-grid label {
+    color: #0a192f;
+    font-weight: 600;
+    font-size: 0.95rem;
 }
 
 .form-grid input,
 .form-grid select,
 .form-grid textarea {
-    padding:10px 12px;
-    border:2px solid #dee2e6;
-    border-radius:8px;
+    padding: 12px 15px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: white;
+    width: 100%;
+}
+
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus {
+    outline: none;
+    border-color: #0a192f;
+    box-shadow: 0 0 0 3px rgba(10, 25, 47, 0.1);
+}
+
+.form-grid input[readonly] {
+    background: #f8f9fa;
+    border-color: #ced4da;
+    color: #666;
+    cursor: not-allowed;
 }
 
 .form-grid textarea {
-    min-height:80px;
-    max-height:120px;
+    min-height: 120px;
+    resize: vertical;
 }
 
-/* campo largura total */
-.full-width {
-    grid-column:span 2;
+/* Campos que ocupam 2 colunas */
+.form-grid > div:has(textarea),
+#reasonContainer,
+.button-group,
+.form-section {
+    grid-column: span 2;
 }
 
-@media (max-width:768px){
+/* Small text abaixo dos campos */
+.form-grid small {
+    color: #666;
+    font-size: 0.8rem;
+    margin-top: 3px;
+}
+
+@media (max-width: 768px) {
     .form-grid {
-        grid-template-columns:1fr;
+        grid-template-columns: 1fr;
     }
-
-    .full-width {
-        grid-column:span 1;
+    
+    .form-grid > div:has(textarea),
+    #reasonContainer,
+    .button-group,
+    .form-section {
+        grid-column: span 1;
     }
 }
 
-/* =========================
-   BOTÕES
-========================= */
-.button-group {
-    display:flex;
-    gap:15px;
-    margin-top:auto;
-    padding-top:20px;
-    border-top:1px solid #eee;
+/* ============================================
+   SEÇÃO DE PARCELAMENTO
+   ============================================ */
+.form-section {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
 }
 
-.button-group button {
-    padding:12px;
-    border:none;
-    border-radius:8px;
-    font-weight:600;
-    cursor:pointer;
+.installment-config {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
 }
 
-.save-btn { background:#ffd166; }
-.update-btn { background:#0a192f; color:#fff; }
-.clear-btn { background:#e63946; color:#fff; }
+.installment-config > div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
 
-/* =========================
-   TABELA PARCELAS (UNIFICADA)
-========================= */
+.installment-config label {
+    color: #0a192f;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.installment-config select,
+.installment-config input {
+    padding: 10px 12px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: white;
+}
+
+#firstInstallmentContainer {
+    margin-top: 15px;
+}
+
+#firstInstallmentContainer small {
+    display: block;
+    margin-top: 5px;
+    color: #666;
+    font-size: 0.85rem;
+}
+
+/* Tabela de parcelas */
+.installments-table-container {
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
 #installmentsTable {
-    width:100%;
-    border-collapse:collapse;
-    table-layout:fixed;
-    font-size:.9rem;
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 #installmentsTable th {
-    background:#0a192f;
-    color:#fff;
-    padding:10px;
+    background: #0a192f;
+    color: white;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
 }
 
 #installmentsTable td {
-    padding:8px;
-    border-bottom:1px solid #dee2e6;
+    padding: 10px 15px;
+    border-bottom: 1px solid #dee2e6;
 }
 
-#installmentsTable tr:nth-child(even){
-    background:#f8f9fa;
+#installmentsTable tr:last-child td {
+    border-bottom: none;
 }
 
-/* =========================
+#installmentsTable tr:hover {
+    background: #f8f9fa;
+}
+
+#installmentsTable tfoot td {
+    background: #f8f9fa;
+    font-weight: 600;
+    padding: 12px 15px;
+}
+
+#installmentsTable tfoot tr:last-child td {
+    background: #fff8e1;
+    color: #856404;
+}
+
+.installment-date-input,
+.installment-value-input,
+.installment-status {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.installment-date-input:focus,
+.installment-value-input:focus {
+    outline: none;
+    border-color: #0a192f;
+}
+
+#showInstallmentsBtn {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #0a192f 0%, #1a365d 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#showInstallmentsBtn:hover {
+    background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .installment-config {
+        grid-template-columns: 1fr;
+    }
+    
+    #installmentsTable {
+        font-size: 0.85rem;
+    }
+    
+    #installmentsTable th,
+    #installmentsTable td {
+        padding: 8px 10px;
+    }
+}
+
+/* ============================================
+   BOTÕES
+   ============================================ */
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.save-btn,
+.update-btn,
+.clear-btn,
+.apply-btn,
+.quick-filter-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+    text-align: center;
+}
+
+.save-btn {
+    background: linear-gradient(135deg, #ffd166 0%, #ffed4e 100%);
+    color: #0a192f;
+}
+
+.save-btn:hover {
+    background: linear-gradient(135deg, #ffed4e 0%, #fff176 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 209, 102, 0.3);
+}
+
+.update-btn {
+    background: linear-gradient(135deg, #0a192f 0%, #1a365d 100%);
+    color: white;
+}
+
+.update-btn:hover {
+    background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(10, 25, 47, 0.3);
+}
+
+.clear-btn {
+    background: linear-gradient(135deg, #e63946 0%, #ff6b6b 100%);
+    color: white;
+}
+
+.clear-btn:hover {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(230, 57, 70, 0.3);
+}
+
+.apply-btn,
+.quick-filter-btn {
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    color: #666;
+}
+
+.apply-btn:hover,
+.quick-filter-btn:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.quick-filter-btn.active {
+    background: linear-gradient(135deg, #0a192f 0%, #1a365d 100%);
+    color: white;
+    border-color: #0a192f;
+}
+
+@media (max-width: 768px) {
+    .button-group {
+        flex-direction: column;
+    }
+}
+
+/* ============================================
+   FILTROS
+   ============================================ */
+.filters-container {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #dee2e6;
+}
+
+.filter-group {
+    margin-bottom: 15px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #0a192f;
+    font-size: 0.9rem;
+}
+
+.filter-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: white;
+    cursor: pointer;
+}
+
+/* ============================================
+   LISTA DE LANÇAMENTOS
+   ============================================ */
+.list {
+    list-style: none;
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+/* Item da lista */
+.list-item {
+    background: #f8f9fa;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border-left: 4px solid #0a192f;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    padding-right: 100px;
+    min-height: 90px;
+}
+
+.list-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+    border-left-color: #e63946;
+}
+
+/* Status colors */
+.list-item.status-1 { 
+    border-left-color: #0a192f;
+    background-color: #f8f9fa;
+}
+.list-item.status-2 { 
+    border-left-color: #28a745;
+    background: #d7fddb;
+}
+.list-item.status-3 { 
+    border-left-color: #ffc107;
+    background: #f9f2ca;
+}
+.list-item.status-4 { 
+    border-left-color: #dc3545;
+    background: #f5cbce;
+}
+
+.list-item.selected {
+    background: #0a192f;
+    color: white;
+    border-left-color: #ffd166;
+}
+
+.list-item.status-2.selected {
+    background: #198754;
+    color: white;
+}
+
+.list-item.status-3.selected {
+    background: #ffc107;
+    color: #0a192f;
+}
+
+.list-item.status-4.selected {
+    background: #dc3545;
+    color: white;
+}
+
+.list-item.pending-processed {
+    background: #fff9db;
+    animation: pulseWarning 2s infinite;
+}
+
+.list-item.pending-processed.status-1 {
+    background-color: #fff9db;
+}
+
+.list-item.pending-processed.status-2 {
+    background-color: #d7fddb;
+    animation: pulseWarning 2s infinite;
+}
+
+.list-item.pending-processed.status-3 {
+    background-color: #f9f2ca;
+    animation: pulseWarning 2s infinite;
+}
+
+.list-item.pending-processed.status-4 {
+    background-color: #f5cbce;
+}
+
+/* Conteúdo do item */
+.item-content {
+    padding-right: 5px;
+}
+
+.item-main {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    color: #0a192f;
+    font-weight: 500;
+}
+
+.item-details {
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.4;
+}
+
+.pending-text {
+    color: #e63946;
+    font-weight: bold;
+    animation: blink 1.5s infinite;
+}
+
+.reason-text {
+    color: #856404;
+    font-style: italic;
+    background: #fff3cd;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 3px;
+}
+
+/* Botões de ação */
+.action-buttons {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.reuse-btn {
+    border-color: #0a192f;
+    color: #0a192f;
+}
+
+.reuse-btn:hover {
+    background: #0a192f;
+    color: white;
+    transform: scale(1.1);
+}
+
+.delete-btn {
+    border-color: #e63946;
+    color: #e63946;
+}
+
+.delete-btn:hover {
+    background: #e63946;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* ============================================
+   RETIRADA STYLES
+   ============================================ */
+.retirada-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+@media (max-width: 992px) {
+    .retirada-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+.total-info {
+    background: #f0f8ff;
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border: 1px solid #cce5ff;
+    text-align: right;
+    font-size: 0.9rem;
+}
+
+.total-info small {
+    color: #0a192f;
+}
+
+.total-info strong {
+    color: #3953e6;
+    font-size: 1.1rem;
+}
+
+.withdrawal-item {
+    border-left-color: #e63946;
+}
+
+.withdrawal-amount {
+    float: right;
+    font-weight: bold;
+    color: #3953e6;
+    font-size: 1.1rem;
+}
+
+.notes-text {
+    color: #666;
+    font-style: italic;
+    background: #f8f9fa;
+    padding: 3px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 3px;
+    font-size: 0.85rem;
+}
+
+/* ============================================
+   FINANCEIRO STYLES
+   ============================================ */
+/* Filtros rápidos */
+.quick-filters {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+/* Filtro personalizado */
+.custom-range-container {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.date-input-group {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.date-input {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* Período selecionado */
+.selected-period {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f0f8ff;
+    border-radius: 10px;
+    border: 1px solid #cce5ff;
+}
+
+.selected-period h4 {
+    color: #0a192f;
+    margin-bottom: 5px;
+    font-size: 1rem;
+}
+
+.selected-period p {
+    color: #666;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* Cards de resumo */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 8px 24px rgba(10, 25, 47, 0.1);
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    transition: all 0.3s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(10, 25, 47, 0.15);
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #f0f8ff;
+}
+
+/* Cores dos cards */
+.deposit-card .card-icon { background: #d4edda; color: #155724; }
+.expenses-card .card-icon { background: #f8d7da; color: #721c24; }
+.profit-card .card-icon { background: #fff3cd; color: #856404; }
+.discount-card .card-icon { background: #d1ecf1; color: #0c5460; }
+.netprofit-card .card-icon { background: #d4edda; color: #155724; }
+.withdrawal-card .card-icon { background: #f8d7da; color: #721c24; }
+.category-card .card-icon { background: #d1ecf1; color: #0c5460; }
+.method-card .card-icon { background: #d4edda; color: #155724; }
+.finalbalance-card .card-icon { background: #fff3cd; color: #856404; }
+
+.card-content {
+    flex: 1;
+}
+
+.card-content h4 {
+    color: #0a192f;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.card-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #0a192f;
+    margin-bottom: 5px;
+}
+
+.card-percentage,
+.card-margin,
+.card-count,
+.card-category,
+.card-method,
+.card-period {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 3px;
+}
+
+.card-period {
+    font-size: 0.8rem;
+    color: #999;
+    font-style: italic;
+    display: none !important;
+}
+
+/* Estilos para cards de retirada */
+.card-category,
+.card-method {
+    padding-left: 5px;
+    border-left: 3px solid;
+}
+
+.card-category:nth-child(2) { border-left-color: #e63946; } /* Pessoal */
+.card-category:nth-child(3) { border-left-color: #0a192f; } /* Empresa */
+.card-category:nth-child(4) { border-left-color: #28a745; } /* Investimento */
+
+.card-method:nth-child(2) { border-left-color: #32a852; } /* PIX */
+.card-method:nth-child(3) { border-left-color: #007bff; } /* Transferência */
+.card-method:nth-child(4) { border-left-color: #6f42c1; } /* Dinheiro */
+
+/* Status breakdown */
+.status-breakdown {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border-left: 4px solid;
+}
+
+.status-item:nth-child(1) { border-left-color: #1a365d; }
+.status-item:nth-child(2) { border-left-color: #28a745; }
+.status-item:nth-child(3) { border-left-color: #ffc107; }
+.status-item:nth-child(4) { border-left-color: #dc3545; }
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.status-dot.status-1 { background: #0a192f; }
+.status-dot.status-2 { background: #28a745; }
+.status-dot.status-3 { background: #ffc107; }
+.status-dot.status-4 { background: #dc3545; }
+
+/* ============================================
+   UTILITÁRIOS
+   ============================================ */
+.empty-message {
+    text-align: center;
+    padding: 30px;
+    color: #666;
+    font-style: italic;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px dashed #dee2e6;
+}
+
+.more-items-message {
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px dashed #dee2e6;
+    margin-top: 10px;
+    cursor: default;
+}
+
+.more-items-message:hover {
+    background: #f8f9fa !important;
+    transform: none !important;
+}
+
+/* Campos específicos */
+#Profit, #NetProfit {
+    background: #f8f9fa;
+    border-color: #ced4da;
+    color: #333;
+    font-weight: 500;
+}
+
+#NetProfit[style*="color: #e63946"] {
+    color: #e63946 !important;
+    font-weight: bold !important;
+    background: #fff5f5;
+    border-color: #f5c6cb;
+}
+
+/* Reason container */
+#reasonContainer {
+    margin-top: 15px;
+}
+
+#Reason {
+    background: #f9f2ca;
+    border-color: #ffc107;
+}
+
+#Reason:focus {
+    outline: none;
+    border-color: #ff9800;
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+}
+
+/* ============================================
    ANIMAÇÕES
-========================= */
+   ============================================ */
 @keyframes fadeIn {
-    from {opacity:0; transform:translateY(15px);}
-    to {opacity:1; transform:none;}
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+}
+
+@keyframes pulseWarning {
+    0% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(255, 209, 102, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0); }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .fade-in {
-    animation:fadeIn .6s ease;
+    animation: fadeIn 0.6s ease-out;
 }
 
-/* =========================
-   UTILITÁRIOS
-========================= */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #0a192f;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* ============================================
+   RESPONSIVIDADE GERAL
+   ============================================ */
+@media (max-width: 768px) {
+    .dash-container,
+    .retirada-container,
+    .finance-container {
+        padding: 0 15px;
+    }
+    
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .status-breakdown {
+        grid-template-columns: 1fr;
+    }
+    
+    .summary-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .card-icon {
+        margin: 0 auto;
+    }
+    
+    .quick-filters {
+        flex-direction: column;
+    }
+    
+    .quick-filter-btn {
+        width: 100%;
+    }
+    
+    .date-input-group {
+        flex-direction: column;
+    }
+    
+    .date-input {
+        min-width: 100%;
+    }
+    
+    .list-item {
+        padding-right: 85px;
+        min-height: 85px;
+    }
+    
+    .action-buttons {
+        right: 12px;
+        gap: 8px;
+    }
+    
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+    
+    .retirada-container .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .retirada-container .form-grid label,
+    .retirada-container .form-grid textarea {
+        grid-column: span 1;
+    }
+    
+    .withdrawal-amount {
+        float: none;
+        display: block;
+        margin-top: 5px;
+    }
+}
+
+/* ============================================
+   CAMPOS ESPECIAIS
+   ============================================ */
+input[type="date"] {
+    font-family: inherit;
+}
+
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+    color: #999;
+    font-style: italic;
+}
+
+/* Destaque para valores negativos */
 .negative {
-    color:#e63946;
-    font-weight:bold;
+    color: #e63946 !important;
+    font-weight: bold !important;
 }
 
-.empty-message {
-    text-align:center;
-    padding:30px;
-    color:#666;
+/* ============================================
+   SEÇÕES
+   ============================================ */
+.section-header {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.section-header h3 {
+    color: #0a192f;
+    margin: 0;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-header small {
+    color: #666;
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-top: 5px;
+    display: block;
+}
+
+/* ============================================
+   ANIMAÇÕES PARA LOGIN
+   ============================================ */
+.login-header,
+.login-button-container,
+.login-footer {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+.login-button-container {
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+
+.login-footer {
+    animation-delay: 0.4s;
+    opacity: 0;
+}
+
+/* ============================================
+   DASHBOARD LAYOUT COM PROPORÇÕES
+   ============================================ */
+.dash-container {
+    display: grid;
+    grid-template-columns: 40% 60%; /* 40% lista, 60% formulário */
+    gap: 30px;
+    margin-top: 30px;
+    height: calc(100vh - 150px); /* Altura máxima para usar tela toda */
+}
+
+@media (max-width: 992px) {
+    .dash-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        gap: 20px;
+    }
+}
+
+/* Ajustar altura da lista para aproveitar espaço */
+.list-area {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.list-area .list {
+    flex: 1;
+    min-height: 400px;
+}
+
+.form-area {
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.form-area::-webkit-scrollbar {
+    width: 6px;
+}
+
+.form-area::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.form-area::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+/* ============================================
+   TABELA DE PARCELAS COM LARGURAS AJUSTADAS
+   ============================================ */
+#installmentsTable {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    table-layout: fixed; /* Importante para controlar larguras fixas */
+}
+
+#installmentsTable th,
+#installmentsTable td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #dee2e6;
+    text-align: left;
+    vertical-align: middle;
+}
+
+/* LARGURAS ESPECÍFICAS DAS COLUNAS */
+#installmentsTable th:nth-child(1), /* Parcela */
+#installmentsTable td:nth-child(1) {
+    width: 60px; /* Bem estreita */
+    text-align: center;
+    font-weight: 600;
+    color: #0a192f;
+}
+
+#installmentsTable th:nth-child(2), /* Data de Vencimento */
+#installmentsTable td:nth-child(2) {
+    width: 140px;
+}
+
+#installmentsTable th:nth-child(3), /* Valor da Parcela */
+#installmentsTable td:nth-child(3) {
+    width: 120px;
+}
+
+#installmentsTable th:nth-child(4), /* Juros */
+#installmentsTable td:nth-child(4) {
+    width: 100px;
+    text-align: right;
+}
+
+#installmentsTable th:nth-child(5), /* Valor com Juros */
+#installmentsTable td:nth-child(5) {
+    width: 120px;
+    text-align: right;
+    font-weight: 600;
+}
+
+#installmentsTable th:nth-child(6), /* Status */
+#installmentsTable td:nth-child(6) {
+    width: 100px;
+}
+
+/* Ajustes para inputs dentro da tabela */
+.installment-date-input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.installment-value-input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    text-align: right;
+}
+
+.installment-status {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    background: white;
+    cursor: pointer;
+}
+
+/* Estilização para valores exibidos */
+.installment-interest-display,
+.installment-final-display {
+    display: block;
+    text-align: right;
+    font-size: 0.85rem;
+    padding: 4px 0;
+}
+
+/* Rodapé da tabela com larguras correspondentes */
+#installmentsTable tfoot td {
+    background: #f8f9fa;
+    font-weight: 600;
+    padding: 12px;
+}
+
+#installmentsTable tfoot td:nth-child(1) { /* Célula vazia */
+    width: 200px; /* Parcela + Data */
+}
+
+#installmentsTable tfoot td:nth-child(2) { /* Total: texto */
+    width: auto;
+    text-align: left;
+}
+
+#installmentsTable tfoot td:nth-child(3), /* Total valor */
+#installmentsTable tfoot td:nth-child(4), /* Total juros */
+#installmentsTable tfoot td:nth-child(5) { /* Total final */
+    width: 120px;
+    text-align: right;
+}
+
+#installmentsTable tfoot tr:last-child td {
+    background: #fff8e1;
+    color: #856404;
+    font-weight: bold;
+}
+
+#installmentsTable tfoot tr:last-child td:nth-child(1) {
+    width: 340px; /* Ajuste para linha de valor total informado */
+}
+
+/* Responsividade para a tabela */
+@media (max-width: 768px) {
+    #installmentsTable {
+        table-layout: auto; /* Volta para auto em mobile */
+        font-size: 0.85rem;
+    }
+    
+    #installmentsTable th,
+    #installmentsTable td {
+        padding: 8px 6px;
+        white-space: nowrap;
+    }
+    
+    /* Em mobile, larguras voltam ao automático */
+    #installmentsTable th:nth-child(1),
+    #installmentsTable td:nth-child(1),
+    #installmentsTable th:nth-child(2),
+    #installmentsTable td:nth-child(2),
+    #installmentsTable th:nth-child(3),
+    #installmentsTable td:nth-child(3),
+    #installmentsTable th:nth-child(4),
+    #installmentsTable td:nth-child(4),
+    #installmentsTable th:nth-child(5),
+    #installmentsTable td:nth-child(5),
+    #installmentsTable th:nth-child(6),
+    #installmentsTable td:nth-child(6) {
+        width: auto;
+    }
+    
+    .installment-date-input,
+    .installment-value-input,
+    .installment-status {
+        font-size: 0.8rem;
+        padding: 4px 6px;
+    }
+}
+
+/* ============================================
+   MELHORIAS VISUAIS
+   ============================================ */
+/* Header da tabela mais compacto */
+#installmentsTable thead {
+    background: #0a192f;
+}
+
+#installmentsTable th {
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 10px;
+}
+
+/* Alternar cores nas linhas para melhor leitura */
+#installmentsTable tbody tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+#installmentsTable tbody tr:hover {
+    background: #e9ecef;
+}
+
+/* Estilo para valores monetários */
+.currency-cell {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+}
+
+/* Ajuste para o botão mostrar/ocultar */
+#showInstallmentsBtn {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #0a192f 0%, #1a365d 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+#showInstallmentsBtn:hover {
+    background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(10, 25, 47, 0.3);
+}
+
+/* Ajuste para seção de parcelamento no formulário */
+.form-section {
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.form-section::-webkit-scrollbar {
+    width: 6px;
+}
+
+.form-section::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.form-section::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+/* ============================================
+   DASHBOARD LAYOUT COM PROPORÇÕES (SEM SCROLL)
+   ============================================ */
+.dash-container {
+    display: grid;
+    grid-template-columns: 40% 60%; /* 40% lista, 60% formulário */
+    gap: 30px;
+    margin-top: 30px;
+    height: calc(100vh - 150px); /* Altura máxima para usar tela toda */
+    min-height: 600px; /* Altura mínima */
+}
+
+@media (max-width: 992px) {
+    .dash-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        gap: 20px;
+        min-height: auto;
+    }
+}
+
+/* Ajustar altura da lista para aproveitar espaço */
+.list-area {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.list-area .list {
+    flex: 1;
+    min-height: 400px;
+    max-height: calc(100vh - 250px); /* Altura máxima baseada na tela */
+    overflow-y: auto;
+}
+
+/* FORM-ÁREA SEM SCROLL */
+.form-area {
+    height: 100%;
+    overflow: visible; /* Mudar de auto para visible */
+    padding-right: 0; /* Remover padding direito */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ajuste do form-grid para não ultrapassar */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px; /* Reduzir gap para caber mais conteúdo */
+    overflow: visible;
+    flex: 1;
+}
+
+/* Ajuste específico para textarea */
+.form-grid textarea {
+    min-height: 80px; /* Reduzir altura mínima */
+    max-height: 120px; /* Adicionar altura máxima */
+    resize: vertical;
+}
+
+/* Ajuste para seção de parcelamento */
+.form-section {
+    max-height: none; /* Remover altura máxima */
+    overflow: visible;
+    padding-right: 0;
+}
+
+/* Tabela de parcelas dentro do form-section */
+.installments-table-container {
+    max-height: 300px; /* Limitar altura da tabela */
+    overflow-y: auto;
+    margin-top: 15px;
+}
+
+.installments-table-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.installments-table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.installments-table-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+/* Botões no final */
+.button-group {
+    margin-top: auto; /* Empurrar para baixo */
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+/* ============================================
+   PREVENÇÃO DE OVERFLOW
+   ============================================ */
+/* Garantir que nada transborde do form-area */
+.form-area > * {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Ajuste para formulário em telas menores */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .form-grid > div:has(textarea),
+    #reasonContainer,
+    .button-group,
+    .form-section {
+        grid-column: span 1;
+    }
+    
+    .form-grid textarea {
+        min-height: 70px;
+        max-height: 100px;
+    }
+    
+    .installments-table-container {
+        max-height: 250px;
+    }
+}
+
+/* Ajuste para evitar que a tabela cause overflow */
+#installmentsTable {
+    width: 100%;
+    table-layout: fixed;
+    word-wrap: break-word;
+}
+
+#installmentsTable td {
+    word-break: break-word;
+    overflow: hidden;
+}
+
+/* Campos de input dentro da tabela */
+.installment-date-input,
+.installment-value-input {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Responsividade extra para telas muito pequenas */
+@media (max-width: 480px) {
+    .form-grid {
+        gap: 10px;
+    }
+    
+    .form-grid input,
+    .form-grid select,
+    .form-grid textarea {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .installments-table-container {
+        font-size: 0.8rem;
+    }
+    
+    #installmentsTable th,
+    #installmentsTable td {
+        padding: 6px 4px;
+    }
 }
