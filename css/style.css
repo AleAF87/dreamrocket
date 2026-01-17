@@ -1,5 +1,3 @@
-Esse meu CSS acho que está com muitas duplicatas e erros. Conserte pra mim?
-
 /* ============================================
    RESET & BASE STYLES
    ============================================ */
@@ -15,7 +13,6 @@ body {
     color: #333;
     min-height: 100vh;
     line-height: 1.6;
-    padding-bottom: 40px;
 }
 
 /* ============================================
@@ -180,6 +177,23 @@ body {
     }
 }
 
+/* Animações para login */
+.login-header,
+.login-button-container,
+.login-footer {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+.login-button-container {
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+
+.login-footer {
+    animation-delay: 0.4s;
+    opacity: 0;
+}
+
 /* ============================================
    NAVBAR STYLES
    ============================================ */
@@ -319,6 +333,26 @@ body {
     box-shadow: 0 4px 8px rgba(10, 25, 47, 0.3);
 }
 
+/* Fallback para avatar */
+.avatar-container:empty::after {
+    content: "Logout";
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #e63946 0%, #ff6b6b 100%);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.avatar-container:empty:hover::after {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(230, 57, 70, 0.3);
+}
+
 /* Navbar responsiva */
 @media (max-width: 768px) {
     .navbar {
@@ -346,8 +380,23 @@ body {
 }
 
 /* ============================================
-   TÍTULOS PRINCIPAIS
+   DASHBOARD STYLES
    ============================================ */
+.dash-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 30px;
+    padding: 0 20px;
+}
+
+@media (max-width: 992px) {
+    .dash-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
 h2 {
     color: #ffffff;
     font-size: 2rem;
@@ -370,43 +419,8 @@ h2::after {
     border-radius: 2px;
 }
 
-/* ============================================
-   CONTAINERS PRINCIPAIS
-   ============================================ */
-.dash-container,
-.retirada-container,
-.finance-container {
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-/* ============================================
-   DASHBOARD LAYOUT
-   ============================================ */
-.dash-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-    margin-top: 30px;
-}
-
-@media (max-width: 992px) {
-    .dash-container {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-}
-
-/* ============================================
-   CARDS BRANCOS
-   ============================================ */
-.list-area,
-.form-area,
-.filters-card,
-.summary-section,
-.detailed-section,
-.form-section {
+/* White Cards */
+.list-area, .form-area {
     background: white;
     border-radius: 16px;
     padding: 25px;
@@ -414,328 +428,12 @@ h2::after {
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.list-area h3,
-.form-area h3,
-.filters-card h3,
-.summary-section h3,
-.detailed-section h3,
-.form-section h4 {
+.list-area h3, .form-area h3 {
     color: #0a192f;
     margin-bottom: 20px;
     padding-bottom: 15px;
     border-bottom: 3px solid #ffd166;
     font-size: 1.4rem;
-}
-
-.form-section h4 {
-    font-size: 1.2rem;
-    margin-top: 0;
-}
-
-/* ============================================
-   FORMULÁRIOS COM LABELS
-   ============================================ */
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-}
-
-.form-grid > div {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.form-grid label {
-    color: #0a192f;
-    font-weight: 600;
-    font-size: 0.95rem;
-}
-
-.form-grid input,
-.form-grid select,
-.form-grid textarea {
-    padding: 12px 15px;
-    border: 2px solid #dee2e6;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-    background: white;
-    width: 100%;
-}
-
-.form-grid input:focus,
-.form-grid select:focus,
-.form-grid textarea:focus {
-    outline: none;
-    border-color: #0a192f;
-    box-shadow: 0 0 0 3px rgba(10, 25, 47, 0.1);
-}
-
-.form-grid input[readonly] {
-    background: #f8f9fa;
-    border-color: #ced4da;
-    color: #666;
-    cursor: not-allowed;
-}
-
-.form-grid textarea {
-    min-height: 120px;
-    resize: vertical;
-}
-
-/* Campos que ocupam 2 colunas */
-.form-grid > div:has(textarea),
-#reasonContainer,
-.button-group,
-.form-section {
-    grid-column: span 2;
-}
-
-/* Small text abaixo dos campos */
-.form-grid small {
-    color: #666;
-    font-size: 0.8rem;
-    margin-top: 3px;
-}
-
-@media (max-width: 768px) {
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .form-grid > div:has(textarea),
-    #reasonContainer,
-    .button-group,
-    .form-section {
-        grid-column: span 1;
-    }
-}
-
-/* ============================================
-   SEÇÃO DE PARCELAMENTO
-   ============================================ */
-.form-section {
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-}
-
-.installment-config {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.installment-config > div {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.installment-config label {
-    color: #0a192f;
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-.installment-config select,
-.installment-config input {
-    padding: 10px 12px;
-    border: 2px solid #dee2e6;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    background: white;
-}
-
-#firstInstallmentContainer {
-    margin-top: 15px;
-}
-
-#firstInstallmentContainer small {
-    display: block;
-    margin-top: 5px;
-    color: #666;
-    font-size: 0.85rem;
-}
-
-/* Tabela de parcelas */
-.installments-table-container {
-    margin-top: 20px;
-    overflow-x: auto;
-}
-
-#installmentsTable {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-#installmentsTable th {
-    background: #0a192f;
-    color: white;
-    padding: 12px 15px;
-    text-align: left;
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-#installmentsTable td {
-    padding: 10px 15px;
-    border-bottom: 1px solid #dee2e6;
-}
-
-#installmentsTable tr:last-child td {
-    border-bottom: none;
-}
-
-#installmentsTable tr:hover {
-    background: #f8f9fa;
-}
-
-#installmentsTable tfoot td {
-    background: #f8f9fa;
-    font-weight: 600;
-    padding: 12px 15px;
-}
-
-#installmentsTable tfoot tr:last-child td {
-    background: #fff8e1;
-    color: #856404;
-}
-
-.installment-date-input,
-.installment-value-input,
-.installment-status {
-    width: 100%;
-    padding: 6px 8px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 0.85rem;
-}
-
-.installment-date-input:focus,
-.installment-value-input:focus {
-    outline: none;
-    border-color: #0a192f;
-}
-
-#showInstallmentsBtn {
-    margin-top: 15px;
-    padding: 10px 20px;
-    background: linear-gradient(135deg, #0a192f 0%, #1a365d 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-#showInstallmentsBtn:hover {
-    background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
-    transform: translateY(-2px);
-}
-
-@media (max-width: 768px) {
-    .installment-config {
-        grid-template-columns: 1fr;
-    }
-    
-    #installmentsTable {
-        font-size: 0.85rem;
-    }
-    
-    #installmentsTable th,
-    #installmentsTable td {
-        padding: 8px 10px;
-    }
-}
-
-/* ============================================
-   BOTÕES
-   ============================================ */
-.button-group {
-    display: flex;
-    gap: 15px;
-    margin-top: 20px;
-}
-
-.save-btn,
-.update-btn,
-.clear-btn,
-.apply-btn,
-.quick-filter-btn {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    flex: 1;
-    text-align: center;
-}
-
-.save-btn {
-    background: linear-gradient(135deg, #ffd166 0%, #ffed4e 100%);
-    color: #0a192f;
-}
-
-.save-btn:hover {
-    background: linear-gradient(135deg, #ffed4e 0%, #fff176 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(255, 209, 102, 0.3);
-}
-
-.update-btn {
-    background: linear-gradient(135deg, #0a192f 0%, #1a365d 100%);
-    color: white;
-}
-
-.update-btn:hover {
-    background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(10, 25, 47, 0.3);
-}
-
-.clear-btn {
-    background: linear-gradient(135deg, #e63946 0%, #ff6b6b 100%);
-    color: white;
-}
-
-.clear-btn:hover {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(230, 57, 70, 0.3);
-}
-
-.apply-btn,
-.quick-filter-btn {
-    background: #f8f9fa;
-    border: 2px solid #dee2e6;
-    color: #666;
-}
-
-.apply-btn:hover,
-.quick-filter-btn:hover {
-    background: #e9ecef;
-    transform: translateY(-2px);
-}
-
-.quick-filter-btn.active {
-    background: linear-gradient(135deg, #0a192f 0%, #1a365d 100%);
-    color: white;
-    border-color: #0a192f;
-}
-
-@media (max-width: 768px) {
-    .button-group {
-        flex-direction: column;
-    }
 }
 
 /* ============================================
@@ -750,12 +448,16 @@ h2::after {
 }
 
 .filter-group {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
+}
+
+.filter-group:last-child {
+    margin-bottom: 0;
 }
 
 .filter-group label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
     font-weight: 600;
     color: #0a192f;
     font-size: 0.9rem;
@@ -763,12 +465,20 @@ h2::after {
 
 .filter-select {
     width: 100%;
-    padding: 10px 12px;
+    padding: 10px 15px;
     border: 2px solid #dee2e6;
     border-radius: 8px;
     font-size: 0.9rem;
     background: white;
+    color: #333;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #0a192f;
+    box-shadow: 0 0 0 3px rgba(10, 25, 47, 0.1);
 }
 
 /* ============================================
@@ -805,7 +515,7 @@ h2::after {
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
-    padding-right: 100px;
+    padding-right: 100px !important; /* Espaço para botões */
     min-height: 90px;
 }
 
@@ -815,66 +525,27 @@ h2::after {
     border-left-color: #e63946;
 }
 
-/* Status colors */
-.list-item.status-1 { 
-    border-left-color: #0a192f;
-    background-color: #f8f9fa;
-}
-.list-item.status-2 { 
-    border-left-color: #28a745;
-    background: #d7fddb;
-}
-.list-item.status-3 { 
-    border-left-color: #ffc107;
-    background: #f9f2ca;
-}
-.list-item.status-4 { 
-    border-left-color: #dc3545;
-    background: #f5cbce;
-}
-
 .list-item.selected {
     background: #0a192f;
     color: white;
     border-left-color: #ffd166;
 }
 
-.list-item.status-2.selected {
-    background: #198754;
-    color: white;
-}
-
-.list-item.status-3.selected {
-    background: #ffc107;
-    color: #0a192f;
-}
-
-.list-item.status-4.selected {
-    background: #dc3545;
-    color: white;
-}
-
+/* Item pendente de ProcessedDate */
 .list-item.pending-processed {
     background: #fff9db;
+    border-left-color: #ffd166;
     animation: pulseWarning 2s infinite;
 }
 
-.list-item.pending-processed.status-1 {
-    background-color: #fff9db;
+.list-item.pending-processed:hover {
+    background: #fff3cd;
 }
 
-.list-item.pending-processed.status-2 {
-    background-color: #d7fddb;
-    animation: pulseWarning 2s infinite;
-}
-
-.list-item.pending-processed.status-3 {
-    background-color: #f9f2ca;
-    animation: pulseWarning 2s infinite;
-}
-
-.list-item.pending-processed.status-4 {
-    background-color: #f5cbce;
+.pending-text {
+    color: #e63946;
+    font-weight: bold;
+    animation: blink 1.5s infinite;
 }
 
 /* Conteúdo do item */
@@ -895,23 +566,12 @@ h2::after {
     line-height: 1.4;
 }
 
-.pending-text {
-    color: #e63946;
-    font-weight: bold;
-    animation: blink 1.5s infinite;
+.item-details small {
+    display: block;
+    margin-bottom: 2px;
 }
 
-.reason-text {
-    color: #856404;
-    font-style: italic;
-    background: #fff3cd;
-    padding: 2px 6px;
-    border-radius: 4px;
-    display: inline-block;
-    margin-top: 3px;
-}
-
-/* Botões de ação */
+/* Botões de ação dos itens */
 .action-buttons {
     position: absolute;
     right: 15px;
@@ -937,6 +597,7 @@ h2::after {
     background: white;
 }
 
+/* Botão de reutilizar */
 .reuse-btn {
     border-color: #0a192f;
     color: #0a192f;
@@ -948,6 +609,7 @@ h2::after {
     transform: scale(1.1);
 }
 
+/* Botão de excluir */
 .delete-btn {
     border-color: #e63946;
     color: #e63946;
@@ -960,72 +622,495 @@ h2::after {
 }
 
 /* ============================================
-   RETIRADA STYLES
+   FORMULÁRIO
    ============================================ */
-.retirada-container {
+.form-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-    margin-top: 30px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
 }
 
-@media (max-width: 992px) {
-    .retirada-container {
+@media (max-width: 768px) {
+    .form-grid {
         grid-template-columns: 1fr;
-        gap: 20px;
     }
 }
 
-.total-info {
-    background: #f0f8ff;
-    border-radius: 8px;
-    padding: 10px 15px;
-    margin-bottom: 15px;
-    border: 1px solid #cce5ff;
-    text-align: right;
-    font-size: 0.9rem;
-}
-
-.total-info small {
+.form-grid label {
+    grid-column: span 2;
     color: #0a192f;
+    font-weight: 600;
+    margin-top: 10px;
 }
 
-.total-info strong {
-    color: #3953e6;
-    font-size: 1.1rem;
+@media (max-width: 768px) {
+    .form-grid label {
+        grid-column: span 1;
+    }
 }
 
-.withdrawal-item {
-    border-left-color: #e63946;
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+    padding: 12px 15px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: white;
 }
 
-.withdrawal-amount {
-    float: right;
-    font-weight: bold;
-    color: #3953e6;
-    font-size: 1.1rem;
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus {
+    outline: none;
+    border-color: #0a192f;
+    box-shadow: 0 0 0 3px rgba(10, 25, 47, 0.1);
 }
 
-.notes-text {
+.form-grid input[readonly] {
+    background: #f8f9fa;
+    border-color: #ced4da;
+    color: #666;
+}
+
+.form-grid textarea {
+    grid-column: span 2;
+    min-height: 250px;
+    resize: vertical;
+}
+
+@media (max-width: 768px) {
+    .form-grid textarea {
+        grid-column: span 1;
+    }
+}
+
+/* Campos de despesas lado a lado */
+#Expenses, #PercExpenses {
+    grid-column: span 1;
+}
+
+/* ============================================
+   BOTÕES DO FORMULÁRIO
+   ============================================ */
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    grid-column: span 2;
+}
+
+@media (max-width: 768px) {
+    .button-group {
+        flex-direction: column;
+        grid-column: span 1;
+    }
+}
+
+/* Botão Salvar Novo */
+.save-btn {
+    background: linear-gradient(135deg, #ffd166 0%, #ffed4e 100%);
+    color: #0a192f;
+    border: 2px solid #ffd166;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.save-btn:hover {
+    background: linear-gradient(135deg, #ffed4e 0%, #fff176 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 209, 102, 0.3);
+}
+
+/* Botão Alterar */
+.update-btn {
+    background: linear-gradient(135deg, #0a192f 0%, #1a365d 100%);
+    color: white;
+    border: 2px solid #0a192f;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.update-btn:hover {
+    background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(10, 25, 47, 0.3);
+}
+
+/* Botão Limpar */
+.clear-btn {
+    background: linear-gradient(135deg, #e63946 0%, #ff6b6b 100%);
+    color: white;
+    border: 2px solid #e63946;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.clear-btn:hover {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(230, 57, 70, 0.3);
+}
+
+@media (max-width: 768px) {
+    .save-btn,
+    .update-btn,
+    .clear-btn {
+        width: 100%;
+    }
+}
+
+/* ============================================
+   MENSAGEM VAZIA
+   ============================================ */
+.empty-message {
+    text-align: center;
+    padding: 30px;
     color: #666;
     font-style: italic;
     background: #f8f9fa;
-    padding: 3px 6px;
+    border-radius: 10px;
+    border: 2px dashed #dee2e6;
+}
+
+/* ============================================
+   ANIMAÇÕES
+   ============================================ */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseWarning {
+    0% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(255, 209, 102, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0); }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #0a192f;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* ============================================
+   UTILITÁRIOS
+   ============================================ */
+/* Ajuste para campos de data */
+input[type="date"] {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Placeholders em português */
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+    color: #999;
+    font-style: italic;
+}
+
+/* Responsividade geral */
+@media (max-width: 768px) {
+    .dash-container {
+        padding: 0 15px;
+    }
+    
+    .list-area, .form-area {
+        padding: 20px;
+    }
+    
+    .list-item {
+        padding-right: 85px !important;
+        min-height: 85px;
+    }
+    
+    .action-buttons {
+        right: 12px;
+        gap: 8px;
+    }
+    
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+    
+    .filters-container {
+        padding: 12px;
+    }
+    
+    .filter-select {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .item-main {
+        font-size: 0.9rem;
+    }
+    
+    .item-details {
+        font-size: 0.8rem;
+    }
+}
+
+/* ============================================
+   CORES POR STATUS
+   ============================================ */
+.list-item.status-1 { /* Concluído */
+    background-color: #f8f9fa;
+    border-left-color: #0a192f;
+}
+
+.list-item.status-2 { /* Em andamento */
+    background-color: #d7fddb;
+    border-left-color: #28a745;
+}
+
+.list-item.status-3 { /* Aguardando */
+    background-color: #f9f2ca;
+    border-left-color: #ffc107;
+}
+
+.list-item.status-4 { /* Cancelado */
+    background-color: #f5cbce;
+    border-left-color: #dc3545;
+}
+
+/* Hover states para cada status */
+.list-item.status-1:hover {
+    background-color: #e9ecef;
+}
+
+.list-item.status-2:hover {
+    background-color: #c3e9c9;
+}
+
+.list-item.status-3:hover {
+    background-color: #f4e9b8;
+}
+
+.list-item.status-4:hover {
+    background-color: #eeb5b9;
+}
+
+/* Para itens selecionados (quando em edição) */
+.list-item.status-1.selected {
+    background-color: #0a192f;
+    color: white;
+}
+
+.list-item.status-2.selected {
+    background-color: #198754;
+    color: white;
+}
+
+.list-item.status-3.selected {
+    background-color: #ffc107;
+    color: #0a192f;
+}
+
+.list-item.status-4.selected {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Ajuste para itens pendentes combinado com status */
+.list-item.pending-processed.status-1 {
+    background-color: #fff9db;
+}
+
+.list-item.pending-processed.status-2 {
+    background-color: #d7fddb;
+    animation: pulseWarning 2s infinite;
+}
+
+.list-item.pending-processed.status-3 {
+    background-color: #f9f2ca;
+    animation: pulseWarning 2s infinite;
+}
+
+.list-item.pending-processed.status-4 {
+    background-color: #f5cbce;
+}
+
+/* ============================================
+   CAMPO MOTIVO
+   ============================================ */
+#reasonContainer {
+    margin-top: 10px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+#reasonContainer label {
+    display: block;
+    margin-bottom: 5px;
+    color: #0a192f;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+#Reason {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ffc107; /* Borda amarela para combinar com status Aguardando */
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: #f9f2ca; /* Fundo amarelo claro */
+    min-height: 80px;
+    resize: vertical;
+}
+
+#Reason:focus {
+    outline: none;
+    border-color: #ff9800;
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+}
+
+#Reason::placeholder {
+    color: #999;
+    font-style: italic;
+}
+
+/* Animação para aparecer/desaparecer */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Texto do motivo na lista */
+.reason-text {
+    color: #856404;
+    font-style: italic;
+    background: #fff3cd;
+    padding: 2px 6px;
     border-radius: 4px;
     display: inline-block;
     margin-top: 3px;
-    font-size: 0.85rem;
+}
+
+/* ============================================
+   CAMPOS DE LUCRO
+   ============================================ */
+#Profit, #NetProfit {
+    background: #f8f9fa;
+    border-color: #ced4da;
+    color: #333;
+    font-weight: 500;
+}
+
+#NetProfit.negative {
+    color: #e63946 !important;
+    font-weight: bold !important;
+    background: #fff5f5;
+    border-color: #f5c6cb;
+}
+
+/* Labels para os campos de lucro */
+.form-grid label[for="Profit"],
+.form-grid label[for="NetProfit"] {
+    margin-top: 15px;
+    color: #0a192f;
+    font-weight: 600;
+}
+
+/* Ajuste no grid para os novos campos */
+/* Opcional: se quiser organizar melhor, ajuste o form-grid */
+.form-grid {
+    /* Mantém 2 colunas, ajusta conforme necessário */
 }
 
 /* ============================================
    FINANCEIRO STYLES
    ============================================ */
-/* Filtros rápidos */
+.finance-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 40px;
+}
+
+/* Filtros */
+.filters-card {
+    background: white;
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 24px rgba(10, 25, 47, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.filters-card h3 {
+    color: #0a192f;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #ffd166;
+    font-size: 1.4rem;
+}
+
+/* Botões rápidos */
 .quick-filters {
     display: flex;
     gap: 15px;
     margin-bottom: 25px;
     flex-wrap: wrap;
+}
+
+.quick-filter-btn {
+    padding: 12px 24px;
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    border-radius: 10px;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quick-filter-btn:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.quick-filter-btn.active {
+    background: linear-gradient(135deg, #0a192f 0%, #1a365d 100%);
+    color: white;
+    border-color: #0a192f;
 }
 
 /* Filtro personalizado */
@@ -1045,6 +1130,45 @@ h2::after {
 .date-input {
     flex: 1;
     min-width: 200px;
+}
+
+.date-input label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #0a192f;
+}
+
+.date-picker {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.date-picker:focus {
+    outline: none;
+    border-color: #0a192f;
+    box-shadow: 0 0 0 3px rgba(10, 25, 47, 0.1);
+}
+
+.apply-btn {
+    padding: 12px 30px;
+    background: linear-gradient(135deg, #0a192f 0%, #1a365d 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.apply-btn:hover {
+    background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(10, 25, 47, 0.3);
 }
 
 /* Período selecionado */
@@ -1081,6 +1205,7 @@ h2::after {
     border-radius: 16px;
     padding: 25px;
     box-shadow: 0 8px 24px rgba(10, 25, 47, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: flex-start;
     gap: 20px;
@@ -1103,16 +1228,31 @@ h2::after {
     background: #f0f8ff;
 }
 
-/* Cores dos cards */
-.deposit-card .card-icon { background: #d4edda; color: #155724; }
-.expenses-card .card-icon { background: #f8d7da; color: #721c24; }
-.profit-card .card-icon { background: #fff3cd; color: #856404; }
-.discount-card .card-icon { background: #d1ecf1; color: #0c5460; }
-.netprofit-card .card-icon { background: #d4edda; color: #155724; }
-.withdrawal-card .card-icon { background: #f8d7da; color: #721c24; }
-.category-card .card-icon { background: #d1ecf1; color: #0c5460; }
-.method-card .card-icon { background: #d4edda; color: #155724; }
-.finalbalance-card .card-icon { background: #fff3cd; color: #856404; }
+/* Cores específicas para cada card */
+.deposit-card .card-icon {
+    background: #d4edda;
+    color: #155724;
+}
+
+.expenses-card .card-icon {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.profit-card .card-icon {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.discount-card .card-icon {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.netprofit-card .card-icon {
+    background: #d4edda;
+    color: #155724;
+}
 
 .card-content {
     flex: 1;
@@ -1133,9 +1273,6 @@ h2::after {
 
 .card-percentage,
 .card-margin,
-.card-count,
-.card-category,
-.card-method,
 .card-period {
     font-size: 0.9rem;
     color: #666;
@@ -1146,25 +1283,25 @@ h2::after {
     font-size: 0.8rem;
     color: #999;
     font-style: italic;
-    display: none !important;
 }
 
-/* Estilos para cards de retirada */
-.card-category,
-.card-method {
-    padding-left: 5px;
-    border-left: 3px solid;
+/* Seção detalhada */
+.detailed-section {
+    background: white;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 8px 24px rgba(10, 25, 47, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.card-category:nth-child(2) { border-left-color: #e63946; } /* Pessoal */
-.card-category:nth-child(3) { border-left-color: #0a192f; } /* Empresa */
-.card-category:nth-child(4) { border-left-color: #28a745; } /* Investimento */
+.detailed-section h3 {
+    color: #0a192f;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #ffd166;
+    font-size: 1.4rem;
+}
 
-.card-method:nth-child(2) { border-left-color: #32a852; } /* PIX */
-.card-method:nth-child(3) { border-left-color: #007bff; } /* Transferência */
-.card-method:nth-child(4) { border-left-color: #6f42c1; } /* Dinheiro */
-
-/* Status breakdown */
 .status-breakdown {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -1192,123 +1329,52 @@ h2::after {
     border-radius: 50%;
 }
 
-.status-dot.status-1 { background: #0a192f; }
-.status-dot.status-2 { background: #28a745; }
-.status-dot.status-3 { background: #ffc107; }
-.status-dot.status-4 { background: #dc3545; }
+.status-dot.status-1 { background: #f8f9fa; }
+.status-dot.status-2 { background: #d7fddb; }
+.status-dot.status-3 { background: #f9f2ca; }
+.status-dot.status-4 { background: #f5cbce; }
 
-/* ============================================
-   UTILITÁRIOS
-   ============================================ */
-.empty-message {
-    text-align: center;
-    padding: 30px;
+.status-item span:not(.status-dot) {
+    flex: 1;
     color: #666;
-    font-style: italic;
-    background: #f8f9fa;
-    border-radius: 10px;
-    border: 2px dashed #dee2e6;
 }
 
-.more-items-message {
-    background: #f8f9fa;
-    border-radius: 10px;
-    border: 2px dashed #dee2e6;
-    margin-top: 10px;
-    cursor: default;
+.status-item strong {
+    color: #0a192f;
+    font-size: 1.2rem;
 }
 
-.more-items-message:hover {
-    background: #f8f9fa !important;
-    transform: none !important;
-}
-
-/* Campos específicos */
-#Profit, #NetProfit {
-    background: #f8f9fa;
-    border-color: #ced4da;
-    color: #333;
-    font-weight: 500;
-}
-
-#NetProfit[style*="color: #e63946"] {
-    color: #e63946 !important;
-    font-weight: bold !important;
-    background: #fff5f5;
-    border-color: #f5c6cb;
-}
-
-/* Reason container */
-#reasonContainer {
-    margin-top: 15px;
-}
-
-#Reason {
-    background: #f9f2ca;
-    border-color: #ffc107;
-}
-
-#Reason:focus {
-    outline: none;
-    border-color: #ff9800;
-    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
-}
-
-/* ============================================
-   ANIMAÇÕES
-   ============================================ */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeOut {
-    from { opacity: 1; transform: translateY(0); }
-    to { opacity: 0; transform: translateY(-10px); }
-}
-
-@keyframes pulseWarning {
-    0% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0.4); }
-    70% { box-shadow: 0 0 0 6px rgba(255, 209, 102, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0); }
-}
-
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.fade-in {
-    animation: fadeIn 0.6s ease-out;
-}
-
-.loading {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid #0a192f;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-/* ============================================
-   RESPONSIVIDADE GERAL
-   ============================================ */
+/* Responsividade */
 @media (max-width: 768px) {
-    .dash-container,
-    .retirada-container,
     .finance-container {
-        padding: 0 15px;
+        padding: 0 10px !important;
+    }
+    
+    /* Filtros em coluna */
+    .filters-card {
+        padding: 15px !important;
+    }
+
+    .quick-filters {
+        flex-direction: column;
+    }
+    
+    .quick-filter-btn {
+        width: 100% !important;
+        text-align: center;
+    }
+    
+    .date-input-group {
+        flex-direction: column;
+    }
+    
+    .date-input {
+        min-width: 100% !important;
     }
     
     .summary-cards {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
     }
     
     .status-breakdown {
@@ -1318,42 +1384,141 @@ h2::after {
     .summary-card {
         flex-direction: column;
         text-align: center;
+        padding: 15px !important;
     }
     
     .card-icon {
         margin: 0 auto;
     }
-    
-    .quick-filters {
-        flex-direction: column;
+
+    .summary-section {
+        padding: 15px !important;
+        margin-bottom: 20px !important;
     }
     
-    .quick-filter-btn {
-        width: 100%;
+    .section-header h3 {
+        font-size: 1.1rem !important;
     }
     
-    .date-input-group {
-        flex-direction: column;
+    /* Status breakdown em coluna */
+    .status-breakdown {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
     }
     
-    .date-input {
-        min-width: 100%;
+    .status-item {
+        padding: 12px !important;
     }
-    
-    .list-item {
-        padding-right: 85px;
-        min-height: 85px;
+}
+
+/* ============================================
+   MENSAGEM DE MAIS ITENS
+   ============================================ */
+.more-items-message {
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px dashed #dee2e6;
+    margin-top: 10px;
+    cursor: default !important;
+}
+
+.more-items-message:hover {
+    background: #f8f9fa !important;
+    transform: none !important;
+    border-left-color: #dee2e6 !important;
+}
+
+/* ============================================
+   OCULTAR PERÍODOS NOS CARDS
+   ============================================ */
+.card-period {
+    display: none !important;
+}
+
+/* ============================================
+   RETIRADA STYLES
+   ============================================ */
+.retirada-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 30px;
+    padding: 0 20px;
+}
+
+@media (max-width: 992px) {
+    .retirada-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
     }
-    
-    .action-buttons {
-        right: 12px;
-        gap: 8px;
-    }
-    
-    .action-btn {
-        width: 32px;
-        height: 32px;
-        font-size: 1rem;
+}
+
+/* Info do total do mês */
+.total-info {
+    background: #f0f8ff;
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border: 1px solid #cce5ff;
+    text-align: right;
+    font-size: 0.9rem;
+}
+
+.total-info small {
+    color: #0a192f;
+}
+
+.total-info strong {
+    color: #3953e6;
+    font-size: 1.1rem;
+}
+
+/* Item específico para saques */
+.withdrawal-item {
+    border-left-color: #e63946;
+}
+
+.withdrawal-amount {
+    float: right;
+    font-weight: bold;
+    color: #3953e6;
+    font-size: 1.1rem;
+}
+
+.notes-text {
+    color: #666;
+    font-style: italic;
+    background: #f8f9fa;
+    padding: 3px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 3px;
+    font-size: 0.85rem;
+}
+
+/* Ajustes no formulário de saques */
+.retirada-container .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.retirada-container .form-grid label {
+    grid-column: span 2;
+    color: #0a192f;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.retirada-container .form-grid textarea {
+    grid-column: span 2;
+    min-height: 80px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .retirada-container {
+        padding: 0 15px;
     }
     
     .retirada-container .form-grid {
@@ -1373,28 +1538,17 @@ h2::after {
 }
 
 /* ============================================
-   CAMPOS ESPECIAIS
+   SEÇÕES DE RESUMO
    ============================================ */
-input[type="date"] {
-    font-family: inherit;
+.summary-section {
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(10, 25, 47, 0.08);
+    border: 1px solid #dee2e6;
 }
 
-input::placeholder,
-textarea::placeholder,
-select::placeholder {
-    color: #999;
-    font-style: italic;
-}
-
-/* Destaque para valores negativos */
-.negative {
-    color: #e63946 !important;
-    font-weight: bold !important;
-}
-
-/* ============================================
-   SEÇÕES
-   ============================================ */
 .section-header {
     margin-bottom: 25px;
     padding-bottom: 15px;
@@ -1418,481 +1572,294 @@ select::placeholder {
     display: block;
 }
 
-/* ============================================
-   ANIMAÇÕES PARA LOGIN
-   ============================================ */
-.login-header,
-.login-button-container,
-.login-footer {
-    animation: fadeIn 0.6s ease-out forwards;
+/* Novos cards para retiradas */
+.withdrawal-card .card-icon {
+    background: #f8d7da;
+    color: #721c24;
 }
 
-.login-button-container {
-    animation-delay: 0.2s;
-    opacity: 0;
+.category-card .card-icon {
+    background: #d1ecf1;
+    color: #0c5460;
 }
 
-.login-footer {
-    animation-delay: 0.4s;
-    opacity: 0;
+.method-card .card-icon {
+    background: #d4edda;
+    color: #155724;
 }
 
-/* ============================================
-   DASHBOARD LAYOUT COM PROPORÇÕES
-   ============================================ */
-.dash-container {
-    display: grid;
-    grid-template-columns: 40% 60%; /* 40% lista, 60% formulário */
-    gap: 30px;
-    margin-top: 30px;
-    height: calc(100vh - 150px); /* Altura máxima para usar tela toda */
-}
-
-@media (max-width: 992px) {
-    .dash-container {
-        grid-template-columns: 1fr;
-        height: auto;
-        gap: 20px;
-    }
-}
-
-/* Ajustar altura da lista para aproveitar espaço */
-.list-area {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.list-area .list {
-    flex: 1;
-    min-height: 400px;
-}
-
-.form-area {
-    height: 100%;
-    overflow-y: auto;
-    padding-right: 10px;
-}
-
-.form-area::-webkit-scrollbar {
-    width: 6px;
-}
-
-.form-area::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-.form-area::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 10px;
-}
-
-/* ============================================
-   TABELA DE PARCELAS COM LARGURAS AJUSTADAS
-   ============================================ */
-#installmentsTable {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    table-layout: fixed; /* Importante para controlar larguras fixas */
-}
-
-#installmentsTable th,
-#installmentsTable td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #dee2e6;
-    text-align: left;
-    vertical-align: middle;
-}
-
-/* LARGURAS ESPECÍFICAS DAS COLUNAS */
-#installmentsTable th:nth-child(1), /* Parcela */
-#installmentsTable td:nth-child(1) {
-    width: 60px; /* Bem estreita */
-    text-align: center;
-    font-weight: 600;
-    color: #0a192f;
-}
-
-#installmentsTable th:nth-child(2), /* Data de Vencimento */
-#installmentsTable td:nth-child(2) {
-    width: 140px;
-}
-
-#installmentsTable th:nth-child(3), /* Valor da Parcela */
-#installmentsTable td:nth-child(3) {
-    width: 120px;
-}
-
-#installmentsTable th:nth-child(4), /* Juros */
-#installmentsTable td:nth-child(4) {
-    width: 100px;
-    text-align: right;
-}
-
-#installmentsTable th:nth-child(5), /* Valor com Juros */
-#installmentsTable td:nth-child(5) {
-    width: 120px;
-    text-align: right;
-    font-weight: 600;
-}
-
-#installmentsTable th:nth-child(6), /* Status */
-#installmentsTable td:nth-child(6) {
-    width: 100px;
-}
-
-/* Ajustes para inputs dentro da tabela */
-.installment-date-input {
-    width: 100%;
-    padding: 6px 8px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 0.85rem;
-}
-
-.installment-value-input {
-    width: 100%;
-    padding: 6px 8px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    text-align: right;
-}
-
-.installment-status {
-    width: 100%;
-    padding: 6px 8px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    background: white;
-    cursor: pointer;
-}
-
-/* Estilização para valores exibidos */
-.installment-interest-display,
-.installment-final-display {
-    display: block;
-    text-align: right;
-    font-size: 0.85rem;
-    padding: 4px 0;
-}
-
-/* Rodapé da tabela com larguras correspondentes */
-#installmentsTable tfoot td {
-    background: #f8f9fa;
-    font-weight: 600;
-    padding: 12px;
-}
-
-#installmentsTable tfoot td:nth-child(1) { /* Célula vazia */
-    width: 200px; /* Parcela + Data */
-}
-
-#installmentsTable tfoot td:nth-child(2) { /* Total: texto */
-    width: auto;
-    text-align: left;
-}
-
-#installmentsTable tfoot td:nth-child(3), /* Total valor */
-#installmentsTable tfoot td:nth-child(4), /* Total juros */
-#installmentsTable tfoot td:nth-child(5) { /* Total final */
-    width: 120px;
-    text-align: right;
-}
-
-#installmentsTable tfoot tr:last-child td {
-    background: #fff8e1;
+.finalbalance-card .card-icon {
+    background: #fff3cd;
     color: #856404;
-    font-weight: bold;
 }
 
-#installmentsTable tfoot tr:last-child td:nth-child(1) {
-    width: 340px; /* Ajuste para linha de valor total informado */
-}
-
-/* Responsividade para a tabela */
-@media (max-width: 768px) {
-    #installmentsTable {
-        table-layout: auto; /* Volta para auto em mobile */
-        font-size: 0.85rem;
-    }
-    
-    #installmentsTable th,
-    #installmentsTable td {
-        padding: 8px 6px;
-        white-space: nowrap;
-    }
-    
-    /* Em mobile, larguras voltam ao automático */
-    #installmentsTable th:nth-child(1),
-    #installmentsTable td:nth-child(1),
-    #installmentsTable th:nth-child(2),
-    #installmentsTable td:nth-child(2),
-    #installmentsTable th:nth-child(3),
-    #installmentsTable td:nth-child(3),
-    #installmentsTable th:nth-child(4),
-    #installmentsTable td:nth-child(4),
-    #installmentsTable th:nth-child(5),
-    #installmentsTable td:nth-child(5),
-    #installmentsTable th:nth-child(6),
-    #installmentsTable td:nth-child(6) {
-        width: auto;
-    }
-    
-    .installment-date-input,
-    .installment-value-input,
-    .installment-status {
-        font-size: 0.8rem;
-        padding: 4px 6px;
-    }
-}
-
-/* ============================================
-   MELHORIAS VISUAIS
-   ============================================ */
-/* Header da tabela mais compacto */
-#installmentsTable thead {
-    background: #0a192f;
-}
-
-#installmentsTable th {
-    color: white;
-    font-weight: 600;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 12px 10px;
-}
-
-/* Alternar cores nas linhas para melhor leitura */
-#installmentsTable tbody tr:nth-child(even) {
-    background: #f8f9fa;
-}
-
-#installmentsTable tbody tr:hover {
-    background: #e9ecef;
-}
-
-/* Estilo para valores monetários */
-.currency-cell {
-    font-family: 'Courier New', monospace;
-    letter-spacing: 0.5px;
-}
-
-/* Ajuste para o botão mostrar/ocultar */
-#showInstallmentsBtn {
-    margin-top: 15px;
-    padding: 10px 20px;
-    background: linear-gradient(135deg, #0a192f 0%, #1a365d 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
+/* Estilos específicos para cards de retiradas */
+.card-count,
+.card-category,
+.card-method {
     font-size: 0.9rem;
-    width: 100%;
+    color: #666;
+    margin-bottom: 3px;
 }
 
-#showInstallmentsBtn:hover {
-    background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(10, 25, 47, 0.3);
+.card-category,
+.card-method {
+    padding-left: 5px;
+    border-left: 3px solid;
 }
 
-/* Ajuste para seção de parcelamento no formulário */
-.form-section {
-    max-height: 500px;
-    overflow-y: auto;
-    padding-right: 10px;
-}
+.card-category:nth-child(2) { border-left-color: #e63946; } /* Pessoal */
+.card-category:nth-child(3) { border-left-color: #0a192f; } /* Empresa */
+.card-category:nth-child(4) { border-left-color: #28a745; } /* Investimento */
 
-.form-section::-webkit-scrollbar {
-    width: 6px;
-}
+.card-method:nth-child(2) { border-left-color: #32a852; } /* PIX */
+.card-method:nth-child(3) { border-left-color: #007bff; } /* Transferência */
+.card-method:nth-child(4) { border-left-color: #6f42c1; } /* Dinheiro */
 
-.form-section::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-.form-section::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 10px;
+/* Responsividade */
+@media (max-width: 768px) {
+    .summary-section {
+        padding: 20px 15px;
+    }
+    
+    .section-header h3 {
+        font-size: 1.2rem;
+    }
+    
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ============================================
-   DASHBOARD LAYOUT COM PROPORÇÕES (SEM SCROLL)
+   RESPONSIVIDADE GERAL PARA MOBILE
    ============================================ */
-.dash-container {
-    display: grid;
-    grid-template-columns: 40% 60%; /* 40% lista, 60% formulário */
-    gap: 30px;
-    margin-top: 30px;
-    height: calc(100vh - 150px); /* Altura máxima para usar tela toda */
-    min-height: 600px; /* Altura mínima */
-}
 
-@media (max-width: 992px) {
+/* Ajustes gerais para telas pequenas */
+@media (max-width: 768px) {
+    /* Ajusta padding lateral em todos os containers */
+    .dash-container,
+    .finance-container,
+    .retirada-container {
+        padding: 0 10px !important;
+        margin-top: 15px;
+    }
+    
+    /* Ajusta tamanho da fonte do título */
+    h2 {
+        font-size: 1.5rem !important;
+        margin: 20px 0 15px !important;
+        padding: 0 10px;
+    }
+    
+    /* Ajusta navbar para mobile */
+    .navbar {
+        padding: 10px 15px !important;
+        flex-direction: row !important; /* Mantém em linha */
+        flex-wrap: wrap;
+    }
+    
+    .nav-center {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        margin-top: 10px;
+        gap: 10px !important;
+    }
+    
+    .nav-center a {
+        font-size: 0.85rem !important;
+        padding: 5px 10px !important;
+    }
+    
+    /* Ajusta user profile */
+    .user-profile {
+        flex-direction: row !important;
+        gap: 8px !important;
+    }
+    
+    .user-details {
+        display: none; /* Esconde detalhes em mobile para economizar espaço */
+    }
+    
+    /* Cards principais */
+    .list-area, .form-area {
+        padding: 15px !important;
+        border-radius: 12px !important;
+    }
+    
+    /* Grid do dashboard */
     .dash-container {
-        grid-template-columns: 1fr;
-        height: auto;
-        gap: 20px;
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+    }
+    
+    /* Form grid ajustado */
+    .form-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+    
+    .form-grid label,
+    .form-grid textarea,
+    .button-group {
+        grid-column: span 1 !important;
+    }
+    
+    /* List items ajustados */
+    .list-item {
+        padding: 12px !important;
+        padding-right: 70px !important;
         min-height: auto;
     }
-}
-
-/* Ajustar altura da lista para aproveitar espaço */
-.list-area {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.list-area .list {
-    flex: 1;
-    min-height: 400px;
-    max-height: calc(100vh - 250px); /* Altura máxima baseada na tela */
-    overflow-y: auto;
-}
-
-/* FORM-ÁREA SEM SCROLL */
-.form-area {
-    height: 100%;
-    overflow: visible; /* Mudar de auto para visible */
-    padding-right: 0; /* Remover padding direito */
-    display: flex;
-    flex-direction: column;
-}
-
-/* Ajuste do form-grid para não ultrapassar */
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px; /* Reduzir gap para caber mais conteúdo */
-    overflow: visible;
-    flex: 1;
-}
-
-/* Ajuste específico para textarea */
-.form-grid textarea {
-    min-height: 80px; /* Reduzir altura mínima */
-    max-height: 120px; /* Adicionar altura máxima */
-    resize: vertical;
-}
-
-/* Ajuste para seção de parcelamento */
-.form-section {
-    max-height: none; /* Remover altura máxima */
-    overflow: visible;
-    padding-right: 0;
-}
-
-/* Tabela de parcelas dentro do form-section */
-.installments-table-container {
-    max-height: 300px; /* Limitar altura da tabela */
-    overflow-y: auto;
-    margin-top: 15px;
-}
-
-.installments-table-container::-webkit-scrollbar {
-    width: 6px;
-}
-
-.installments-table-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-.installments-table-container::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 10px;
-}
-
-/* Botões no final */
-.button-group {
-    margin-top: auto; /* Empurrar para baixo */
-    padding-top: 20px;
-    border-top: 1px solid #eee;
-}
-
-/* ============================================
-   PREVENÇÃO DE OVERFLOW
-   ============================================ */
-/* Garantir que nada transborde do form-area */
-.form-area > * {
-    max-width: 100%;
-    overflow: hidden;
-}
-
-/* Ajuste para formulário em telas menores */
-@media (max-width: 768px) {
-    .form-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
+    
+    .action-buttons {
+        right: 10px !important;
+        gap: 5px !important;
     }
     
-    .form-grid > div:has(textarea),
-    #reasonContainer,
-    .button-group,
-    .form-section {
-        grid-column: span 1;
+    .action-btn {
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 0.9rem !important;
     }
     
-    .form-grid textarea {
-        min-height: 70px;
-        max-height: 100px;
+    /* Textos menores */
+    .item-main {
+        font-size: 0.9rem !important;
     }
     
-    .installments-table-container {
-        max-height: 250px;
+    .item-details {
+        font-size: 0.75rem !important;
     }
 }
 
-/* Ajuste para evitar que a tabela cause overflow */
-#installmentsTable {
-    width: 100%;
-    table-layout: fixed;
-    word-wrap: break-word;
-}
-
-#installmentsTable td {
-    word-break: break-word;
-    overflow: hidden;
-}
-
-/* Campos de input dentro da tabela */
-.installment-date-input,
-.installment-value-input {
-    max-width: 100%;
-    box-sizing: border-box;
-}
-
-/* Responsividade extra para telas muito pequenas */
+/* Ajustes para telas muito pequenas (celulares menores) */
 @media (max-width: 480px) {
-    .form-grid {
-        gap: 10px;
+    /* Ajusta containers */
+    .dash-container,
+    .finance-container,
+    .retirada-container {
+        padding: 0 8px !important;
     }
     
+    /* Títulos menores */
+    h2 {
+        font-size: 1.3rem !important;
+        margin: 15px 0 10px !important;
+    }
+    
+    /* Navbar compacta */
+    .navbar {
+        padding: 8px 10px !important;
+    }
+    
+    .nav-left .logo {
+        height: 30px !important;
+    }
+    
+    .nav-center {
+        gap: 5px !important;
+    }
+    
+    .nav-center a {
+        font-size: 0.8rem !important;
+        padding: 4px 8px !important;
+    }
+    
+    /* Botões de login/logout menores */
+    .login-btn, .logout-btn {
+        padding: 6px 12px !important;
+        font-size: 0.8rem !important;
+    }
+    
+    /* Avatar menor */
+    .user-avatar,
+    .avatar-initial {
+        width: 30px !important;
+        height: 30px !important;
+    }
+    
+    /* Cards mais compactos */
+    .list-area h3, .form-area h3 {
+        font-size: 1.1rem !important;
+        margin-bottom: 15px !important;
+        padding-bottom: 10px !important;
+    }
+    
+    /* Inputs ajustados */
     .form-grid input,
     .form-grid select,
     .form-grid textarea {
-        padding: 10px 12px;
-        font-size: 0.9rem;
+        padding: 10px 12px !important;
+        font-size: 0.9rem !important;
     }
     
-    .installments-table-container {
-        font-size: 0.8rem;
+    /* Botões de ação */
+    .save-btn,
+    .update-btn,
+    .clear-btn {
+        padding: 10px 20px !important;
+        font-size: 0.9rem !important;
     }
     
-    #installmentsTable th,
-    #installmentsTable td {
-        padding: 6px 4px;
+    /* List items ultra compactos */
+    .list-item {
+        padding: 10px !important;
+        padding-right: 60px !important;
+    }
+    
+    .action-buttons {
+        flex-direction: row !important; /* Botões lado a lado em mobile muito pequeno */
+        gap: 3px !important;
+    }
+
+    /* Cards ainda mais compactos */
+    .summary-card {
+        flex-direction: column !important;
+        text-align: center;
+        gap: 10px !important;
+    }
+    
+    .card-icon {
+        margin: 0 auto;
+    }
+    
+    .card-value {
+        font-size: 1.4rem !important;
+    }
+}
+
+/* ============================================
+   RESPONSIVIDADE ESPECÍFICA PARA RETIRADA
+   ============================================ */
+@media (max-width: 768px) {
+    .retirada-container {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+        padding: 0 10px !important;
+    }
+    
+    .total-info {
+        padding: 8px 12px !important;
+        font-size: 0.85rem !important;
+    }
+    
+    .withdrawal-amount {
+        float: none !important;
+        display: block;
+        margin-top: 5px;
+        font-size: 1rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .retirada-container .form-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .retirada-container .form-grid label,
+    .retirada-container .form-grid textarea {
+        grid-column: span 1 !important;
     }
 }
