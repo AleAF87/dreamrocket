@@ -7,6 +7,8 @@ let formChanged = false;
 let allLaunches = [];
 let currentSort = 'default';
 let currentStatusFilter = 'all';
+let selectedWorkEntryIndex = null;
+let workHistory = [];
 
 // Elementos DOM
 const elements = {
@@ -91,6 +93,19 @@ function initializeElements() {
     elements.clearBtn = document.getElementById("clearBtn");
     elements.sortFilter = document.getElementById("sortFilter");
     elements.statusFilter = document.getElementById("statusFilter");
+    elements.workDate = document.getElementById("workDate");
+    elements.workHours = document.getElementById("workHours");
+    elements.workDescription = document.getElementById("workDescription");
+    elements.addWorkEntryBtn = document.getElementById("addWorkEntryBtn");
+    elements.workHistoryList = document.getElementById("workHistoryList");
+    elements.workHistoryModal = document.getElementById("workHistoryModal");
+    elements.closeModal = document.querySelector(".close-modal");
+    elements.modalWorkDate = document.getElementById("modalWorkDate");
+    elements.modalWorkHours = document.getElementById("modalWorkHours");
+    elements.modalWorkDescription = document.getElementById("modalWorkDescription");
+    elements.updateWorkEntryBtn = document.getElementById("updateWorkEntryBtn");
+    elements.deleteWorkEntryBtn = document.getElementById("deleteWorkEntryBtn");
+
 }
 
 // Inicializar elementos de parcelamento
@@ -164,6 +179,9 @@ function setupEventListeners() {
             return "Há alterações não salvas. Deseja realmente sair?";
         }
     };
+
+    // Configurar eventos do histórico
+    setupWorkHistoryEventListeners();
 }
 
 // Configurar eventos de parcelamento
@@ -208,6 +226,33 @@ function setupInstallmentEventListeners() {
     // Evento para alterações no campo Deposit
     document.getElementById("Deposit").addEventListener("input", function() {
         updateInstallments();
+    });
+}
+
+// Configurar eventos do histórico de trabalho
+function setupWorkHistoryEventListeners() {
+    // Botão para adicionar novo lançamento
+    elements.addWorkEntryBtn.addEventListener("click", addWorkEntry);
+    
+    // Fechar modal
+    elements.closeModal.addEventListener("click", closeWorkHistoryModal);
+    
+    // Botões do modal
+    elements.updateWorkEntryBtn.addEventListener("click", updateWorkEntry);
+    elements.deleteWorkEntryBtn.addEventListener("click", deleteWorkEntry);
+    
+    // Fechar modal clicando fora
+    window.addEventListener("click", function(event) {
+        if (event.target === elements.workHistoryModal) {
+            closeWorkHistoryModal();
+        }
+    });
+    
+    // Validar entrada ao pressionar Enter no campo de descrição
+    elements.workDescription.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+            addWorkEntry();
+        }
     });
 }
 
@@ -592,6 +637,9 @@ function clearForm() {
     
     // Limpa dados de parcelamento
     loadInstallmentsData(null);
+
+    // Limpa histórico de trabalho
+    loadWorkHistory([]);
     
     // Oculta campo Motivo
     const reasonContainer = document.getElementById("reasonContainer");
@@ -648,6 +696,13 @@ function loadForm(id, item) {
         loadInstallmentsData(item.installmentData);
     } else {
         loadInstallmentsData(null);
+    }
+
+    // Carrega histórico de trabalho
+    if (item.workHistory && Array.isArray(item.workHistory)) {
+        loadWorkHistory(item.workHistory);
+    } else {
+        loadWorkHistory([]);
     }
 
     // Atualiza visibilidade do campo Motivo baseado no status
@@ -859,7 +914,9 @@ function createListItem(item) {
             ${item.Status === '3' && item.Reason ? `<br><small class="reason-text">Motivo: ${item.Reason}</small>` : ''}
             ${installmentInfo}
             <br>
-            <small>Status: ${getStatusText(item.Status)} | Bruto: R$ ${grossProfit.toFixed(2)} | Líquido: R$ ${netProfit.toFixed(2)}</small>
+            <small>Status: ${getStatusText(item.Status)}${item.workHistory && item.workHistory.length > 0 ? 
+                '<span style="color: #4CAF50; margin: 0 5px;" title="Possui histórico de serviços">📋</span>' : 
+                '<span style="margin: 0 5px;">|</span>'} Bruto: R$ ${grossProfit.toFixed(2)} | Líquido: R$ ${netProfit.toFixed(2)}</small>
         </div>
     `;
     
@@ -1023,6 +1080,14 @@ function collectFormData() {
         // Remove installmentData se existir anteriormente
         obj.installmentData = null;
     }
+
+    // Adiciona histórico de trabalho ao objeto
+    if (workHistory.length > 0) {
+        obj.workHistory = workHistory;
+    } else {
+        // Remove workHistory se existir anteriormente
+        obj.workHistory = null;
+    }
     
     return obj;
 }
@@ -1126,4 +1191,179 @@ function getNetProfit(item) {
     const profit = parseFloat(item.Profit || 0);
     const discount = parseFloat(item.Discount || 0);
     return profit - discount;
+}
+
+// ============================================
+// FUNÇÕES DE HISTÓRICO DE TRABALHO
+// ============================================
+
+function addWorkEntry() {
+    const date = elements.workDate.value;
+    const hours = parseFloat(elements.workHours.value);
+    const description = elements.workDescription.value.trim();
+    
+    // Validação
+    if (!date) {
+        alert("Informe a data do serviço!");
+        elements.workDate.focus();
+        return;
+    }
+    
+    if (!hours || hours <= 0) {
+        alert("Informe um tempo válido em horas!");
+        elements.workHours.focus();
+        return;
+    }
+    
+    if (!description) {
+        alert("Descreva o serviço realizado!");
+        elements.workDescription.focus();
+        return;
+    }
+    
+    // Adiciona ao histórico
+    workHistory.push({
+        date: date,
+        hours: hours,
+        description: description
+    });
+    
+    // Atualiza a interface
+    renderWorkHistory();
+    
+    // Limpa os campos
+    elements.workDate.value = "";
+    elements.workHours.value = "";
+    elements.workDescription.value = "";
+    
+    // Marca o formulário como alterado
+    formChanged = true;
+    
+    // Foca no próximo campo
+    elements.workDate.focus();
+}
+
+function renderWorkHistory() {
+    elements.workHistoryList.innerHTML = "";
+    
+    if (workHistory.length === 0) {
+        const emptyMsg = document.createElement("div");
+        emptyMsg.className = "history-item";
+        emptyMsg.textContent = "Nenhum registro de serviço adicionado.";
+        emptyMsg.style.color = "#999";
+        elements.workHistoryList.appendChild(emptyMsg);
+        return;
+    }
+    
+    // Ordena por data (mais recente primeiro)
+    workHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    // Renderiza cada item
+    workHistory.forEach((entry, index) => {
+        const itemDiv = document.createElement("div");
+        itemDiv.className = "history-item";
+        
+        // Formata a data
+        const dateObj = new Date(entry.date);
+        const formattedDate = dateObj.toLocaleDateString('pt-BR');
+        
+        itemDiv.innerHTML = `
+            <div class="history-item-info">
+                <span class="history-item-date">${formattedDate}</span>
+                <span class="history-item-hours">${entry.hours}h</span>
+                <span class="history-item-desc">${entry.description}</span>
+            </div>
+            <button class="view-history-btn" data-index="${index}" title="Ver detalhes">
+                👁
+            </button>
+        `;
+        
+        elements.workHistoryList.appendChild(itemDiv);
+    });
+    
+    // Adiciona eventos aos botões de visualização
+    document.querySelectorAll('.view-history-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const index = parseInt(this.dataset.index);
+            openWorkHistoryModal(index);
+        });
+    });
+}
+
+function openWorkHistoryModal(index) {
+    const entry = workHistory[index];
+    
+    if (!entry) return;
+    
+    // Preenche o modal com os dados
+    elements.modalWorkDate.value = entry.date;
+    elements.modalWorkHours.value = entry.hours;
+    elements.modalWorkDescription.value = entry.description;
+    
+    // Salva o índice do item sendo editado
+    selectedWorkEntryIndex = index;
+    
+    // Mostra o modal
+    elements.workHistoryModal.style.display = "block";
+}
+
+function closeWorkHistoryModal() {
+    elements.workHistoryModal.style.display = "none";
+    selectedWorkEntryIndex = null;
+}
+
+function updateWorkEntry() {
+    if (selectedWorkEntryIndex === null) return;
+    
+    const date = elements.modalWorkDate.value;
+    const hours = parseFloat(elements.modalWorkHours.value);
+    const description = elements.modalWorkDescription.value.trim();
+    
+    // Validação
+    if (!date || !hours || hours <= 0 || !description) {
+        alert("Preencha todos os campos corretamente!");
+        return;
+    }
+    
+    // Atualiza o histórico
+    workHistory[selectedWorkEntryIndex] = {
+        date: date,
+        hours: hours,
+        description: description
+    };
+    
+    // Atualiza a interface
+    renderWorkHistory();
+    
+    // Marca como alterado
+    formChanged = true;
+    
+    // Fecha o modal
+    closeWorkHistoryModal();
+}
+
+function deleteWorkEntry() {
+    if (selectedWorkEntryIndex === null) return;
+    
+    if (!confirm("Tem certeza que deseja excluir este registro de serviço?")) {
+        return;
+    }
+    
+    // Remove do histórico
+    workHistory.splice(selectedWorkEntryIndex, 1);
+    
+    // Atualiza a interface
+    renderWorkHistory();
+    
+    // Marca como alterado
+    formChanged = true;
+    
+    // Fecha o modal
+    closeWorkHistoryModal();
+}
+
+// Função para carregar histórico existente
+function loadWorkHistory(historyData) {
+    workHistory = historyData || [];
+    renderWorkHistory();
 }

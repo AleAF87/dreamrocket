@@ -246,6 +246,73 @@
                     <textarea id="Observation" data-field placeholder="Observações adicionais..."></textarea>
                 </div>
 
+                <!-- SEÇÃO DE LANÇAMENTO DE TEMPO E HISTÓRICO -->
+                <div class="form-section" style="grid-column: span 2; border: 1px solid #ddd; padding: 10px; border-radius: 5px; margin: 5px 0;">
+                    <h4 style="margin-top: 0; color: #333;">Histórico de Serviço</h4>
+                    
+                    <!-- Formulário para adicionar novo lançamento de tempo -->
+                    <div class="time-entry-form" style="display: grid; grid-template-columns: 1fr 1fr 2fr auto; gap: 10px; margin-bottom: 15px; align-items: end;">
+                        <div>
+                            <label for="workDate">Data:</label>
+                            <input type="date" id="workDate" style="width: 100%;">
+                        </div>
+                        
+                        <div>
+                            <label for="workHours">Tempo (horas):</label>
+                            <input type="number" id="workHours" step="0.5" min="0" placeholder="Ex: 3.5" style="width: 100%;">
+                        </div>
+                        
+                        <div>
+                            <label for="workDescription">Serviço:</label>
+                            <input type="text" id="workDescription" placeholder="Ex: Corte e fitamento das chapas" style="width: 100%;">
+                        </div>
+                        
+                        <div>
+                            <button type="button" id="addWorkEntryBtn" class="btn-secondary" style="padding: 8px 12px; white-space: nowrap;">
+                                + Adicionar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Lista de histórico -->
+                    <div class="work-history-container">
+                        <h5 style="margin-top: 0; color: #666;">Histórico Registrado:</h5>
+                        <div id="workHistoryList" class="history-list">
+                            <!-- Histórico será gerado dinamicamente aqui -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal para visualizar/editar histórico -->
+                <div id="workHistoryModal" class="modal" style="display: none;">
+                    <div class="modal-content" style="max-width: 500px;">
+                        <div class="modal-header">
+                            <h3 style="margin: 0;">Detalhes do Serviço</h3>
+                            <span class="close-modal">&times;</span>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-form">
+                                <div>
+                                    <label for="modalWorkDate">Data:</label>
+                                    <input type="date" id="modalWorkDate">
+                                </div>
+                                <div>
+                                    <label for="modalWorkHours">Tempo (horas):</label>
+                                    <input type="number" id="modalWorkHours" step="0.5" min="0">
+                                </div>
+                                <div>
+                                    <label for="modalWorkDescription">Serviço:</label>
+                                    <textarea id="modalWorkDescription" rows="3"></textarea>
+                                </div>
+                                <div class="modal-actions">
+                                    <button id="updateWorkEntryBtn" class="btn-primary">Salvar Alterações</button>
+                                    <button id="deleteWorkEntryBtn" class="btn-danger">Excluir</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Botões de ação -->
                 <div class="button-group" style="grid-column: span 2;">
                     <button id="saveBtn" class="save-btn btn-success">Salvar Novo</button>
