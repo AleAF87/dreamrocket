@@ -672,19 +672,21 @@ function loadForm(id, item) {
             // CORREÇÃO: Para datas, ajusta o fuso horário
             if (key === "ProcessedDate" || key === "Request" || key === "Delivery" || key === "firstInstallmentDate") {
                 if (item[key]) {
-                    // Corrige problema de data (remove 1 dia)
-                    const date = new Date(item[key]);
-                    const year = date.getFullYear();
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const day = String(date.getDate()).padStart(2, '0');
-                    field.value = `${year}-${month}-${day}`;
-                    // console.log(`Campo ${key} preenchido com:`, field.value);
+                    // Se a data já está no formato YYYY-MM-DD, usa diretamente
+                    if (typeof item[key] === 'string' && item[key].match(/^\d{4}-\d{2}-\d{2}$/)) {
+                        field.value = item[key];
+                    } else {
+                        // Converte de timestamp ou outro formato
+                        const date = new Date(item[key]);
+                        // Usa UTC para evitar problemas de fuso
+                        const year = date.getUTCFullYear();
+                        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+                        const day = String(date.getUTCDate()).padStart(2, '0');
+                        field.value = `${year}-${month}-${day}`;
+                    }
                 } else {
                     field.value = "";
                 }
-            } else {
-                field.value = item[key] || "";
-                // console.log(`Campo ${key} preenchido com:`, field.value);
             }
         } else {
             // console.log(`Campo ${key} NÃO ENCONTRADO no DOM`);
@@ -863,15 +865,24 @@ function createListItem(item) {
         if (!dateString) return 'Não informada';
         
         try {
-            const date = new Date(dateString);
-            // Ajusta para exibir corretamente
-            const adjustedDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
-            return adjustedDate.toLocaleDateString('pt-BR');
+            // Divide a data string "YYYY-MM-DD"
+            const [year, month, day] = dateString.split('-').map(Number);
+            
+            // Cria data sem problemas de fuso horário
+            const date = new Date(year, month - 1, day);
+            
+            // Formata manualmente para evitar problemas de fuso
+            const formattedDay = String(date.getDate()).padStart(2, '0');
+            const formattedMonth = String(date.getMonth() + 1).padStart(2, '0');
+            const formattedYear = date.getFullYear();
+            
+            return `${formattedDay}/${formattedMonth}/${formattedYear}`;
         } catch (e) {
+            console.error('Erro ao formatar data:', dateString, e);
             return dateString;
         }
     };
-    
+
     const processedDate = item.ProcessedDate ? 
         formatDateForDisplay(item.ProcessedDate) : 
         '<span class="pending-text">PENDENTE</span>';
@@ -1209,6 +1220,9 @@ function addWorkEntry() {
         return;
     }
     
+    // DEBUG: Verifique o valor da data
+    console.log('Data do input:', date); // Adicione esta linha para debug
+    
     if (!hours || hours <= 0) {
         alert("Informe um tempo válido em horas!");
         elements.workHours.focus();
@@ -1263,9 +1277,8 @@ function renderWorkHistory() {
         const itemDiv = document.createElement("div");
         itemDiv.className = "history-item";
         
-        // Formata a data
-        const dateObj = new Date(entry.date);
-        const formattedDate = dateObj.toLocaleDateString('pt-BR');
+        // CORREÇÃO: Formata a data CORRETAMENTE
+        const formattedDate = formatHistoryDate(entry.date);
         
         itemDiv.innerHTML = `
             <div class="history-item-info">
@@ -1290,13 +1303,38 @@ function renderWorkHistory() {
     });
 }
 
+// Função para formatar data do histórico CORRETAMENTE
+function formatHistoryDate(dateString) {
+    if (!dateString) return 'Data não informada';
+    
+    try {
+        // A data está no formato "YYYY-MM-DD" do input date
+        const [year, month, day] = dateString.split('-').map(Number);
+        
+        // Verifica se os valores são válidos
+        if (!year || !month || !day) return dateString;
+        
+        // Formata manualmente para DD/MM/YYYY
+        const formattedDay = String(day).padStart(2, '0');
+        const formattedMonth = String(month).padStart(2, '0');
+        
+        return `${formattedDay}/${formattedMonth}/${year}`;
+    } catch (error) {
+        console.error('Erro ao formatar data do histórico:', dateString, error);
+        return dateString;
+    }
+}
+
 function openWorkHistoryModal(index) {
     const entry = workHistory[index];
     
     if (!entry) return;
     
+    // DEBUG: Verifique os dados
+    console.log('Dados do histórico:', entry); // Adicione esta linha
+    
     // Preenche o modal com os dados
-    elements.modalWorkDate.value = entry.date;
+    elements.modalWorkDate.value = entry.date; // Já está no formato YYYY-MM-DD
     elements.modalWorkHours.value = entry.hours;
     elements.modalWorkDescription.value = entry.description;
     
