@@ -25,8 +25,6 @@ const elements = {
 const installmentElements = {
     paymentMethod: null,
     installmentCount: null,
-    interestRateContainer: null,
-    interestRate: null,
     installmentsTable: null,
     installmentsTableBody: null,
     installmentsTableFooter: null,
@@ -54,6 +52,9 @@ async function initDashboard() {
         
         // Configurar eventos de parcelamento
         setupInstallmentEventListeners();
+        
+        // Configurar eventos do histórico
+        setupWorkHistoryEventListeners();
         
         // Carregar dados
         loadList();
@@ -147,7 +148,7 @@ function setupEventListeners() {
             // Verifica se é campo de cálculo
             if (f.id === "Deposit" || f.id === "Expenses" || f.id === "PercExpenses") {
                 handleExpensesCalculation();
-                updateProfit(); // Isso já chama updateNetProfit()
+                updateProfit();
                 
                 // Se mudou o depósito, recalcula parcelas se houver
                 if (f.id === "Deposit") {
@@ -179,9 +180,6 @@ function setupEventListeners() {
             return "Há alterações não salvas. Deseja realmente sair?";
         }
     };
-
-    // Configurar eventos do histórico
-    setupWorkHistoryEventListeners();
 }
 
 // Configurar eventos de parcelamento
@@ -286,13 +284,13 @@ function generateInstallments() {
         const row = document.createElement("tr");
         row.dataset.installmentNumber = i;
         
-        // Calcula data da parcela (adiciona 1 mês para cada parcela subsequente)
+        // Calcula data da parcela
         let installmentDate = "";
         if (firstInstallmentDate) {
             const date = new Date(firstInstallmentDate);
             date.setMonth(date.getMonth() + (i - 1));
             
-            // CORREÇÃO: Formata data manualmente para evitar problema de fuso horário
+            // Formata data manualmente para evitar problema de fuso horário
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
@@ -304,7 +302,6 @@ function generateInstallments() {
         let finalValue = baseValue;
         
         if (paymentMethod === "cartao_com") {
-            // Aplica 2% de juros ao mês (padrão)
             const monthlyRate = 0.02; // 2%
             finalValue = baseValue * Math.pow(1 + monthlyRate, i - 1);
             interest = finalValue - baseValue;
@@ -320,28 +317,26 @@ function generateInstallments() {
         totalFinal += finalValue;
         
         row.innerHTML = `
-            <td style="padding: 8px; border: 1px solid #ddd;">${i}/${count}</td>
-            <td style="padding: 8px; border: 1px solid #ddd;">
+            <td>${i}/${count}</td>
+            <td>
                 <input type="date" class="installment-date-input" 
                        value="${installmentDate}" 
-                       data-installment="${i}"
-                       style="width: 100%; border: 1px solid #ccc; padding: 4px;">
+                       data-installment="${i}">
             </td>
-            <td style="padding: 8px; border: 1px solid #ddd;">
+            <td>
                 <input type="number" class="installment-value-input" 
                        value="${baseValue.toFixed(2)}" 
                        data-installment="${i}"
-                       step="0.01" min="0"
-                       style="width: 100%; border: 1px solid #ccc; padding: 4px;">
+                       step="0.01" min="0">
             </td>
-            <td style="padding: 8px; border: 1px solid #ddd;">
+            <td>
                 <span class="installment-interest-display">R$ ${interest.toFixed(2)}</span>
             </td>
-            <td style="padding: 8px; border: 1px solid #ddd;">
+            <td>
                 <span class="installment-final-display">R$ ${finalValue.toFixed(2)}</span>
             </td>
-            <td style="padding: 8px; border: 1px solid #ddd;">
-                <select class="installment-status" data-installment="${i}" style="width: 100%; padding: 4px;">
+            <td>
+                <select class="installment-status" data-installment="${i}">
                     <option value="pending">Pendente</option>
                     <option value="paid">Pago</option>
                     <option value="overdue">Atrasado</option>
@@ -366,7 +361,6 @@ function generateInstallments() {
 
 function updateInstallmentsTotal() {
     const deposit = parseFloat(document.getElementById("Deposit").value) || 0;
-    const count = parseInt(installmentElements.installmentCount.value);
     const paymentMethod = installmentElements.paymentMethod.value;
     
     let totalInstallment = 0;
@@ -410,16 +404,17 @@ function updateInstallmentsTotal() {
     // Calcula diferença em relação ao depósito
     const totalInformed = totalInstallment;
     const difference = totalInformed - deposit;
-    const differenceAbs = Math.abs(difference);
     
     document.getElementById("totalInformedValue").textContent = `R$ ${totalInformed.toFixed(2)}`;
     
     const differenceElement = document.getElementById("totalDifference");
     if (Math.abs(difference) > 0.01) {
         if (difference > 0) {
-            differenceElement.innerHTML = `<span style="color: #d32f2f;">↑ R$ ${differenceAbs.toFixed(2)} acima</span>`;
+            differenceElement.innerHTML = `↑ R$ ${Math.abs(difference).toFixed(2)} acima`;
+            differenceElement.style.color = "#d32f2f";
         } else {
-            differenceElement.innerHTML = `<span style="color: #388e3c;">↓ R$ ${differenceAbs.toFixed(2)} abaixo</span>`;
+            differenceElement.innerHTML = `↓ R$ ${Math.abs(difference).toFixed(2)} abaixo`;
+            differenceElement.style.color = "#388e3c";
         }
     } else {
         differenceElement.textContent = "✓ Valores conferem";
@@ -435,7 +430,7 @@ function setupInstallmentInputEvents() {
         });
     });
     
-    // Eventos para edição de valores (apenas para PIX)
+    // Eventos para edição de valores
     document.querySelectorAll('.installment-value-input').forEach(input => {
         input.addEventListener('input', function() {
             formChanged = true;
@@ -474,8 +469,6 @@ function getInstallmentsData() {
         const valueInput = row.querySelector('.installment-value-input');
         const statusSelect = row.querySelector('.installment-status');
         
-        // Extrai valores das células
-        const cells = row.querySelectorAll('td');
         const interestText = row.querySelector('.installment-interest-display').textContent;
         const finalText = row.querySelector('.installment-final-display').textContent;
         
@@ -574,7 +567,7 @@ function handleExpensesCalculation() {
     if (document.activeElement === percExpensesInput && percExpensesInput.value) {
         const percentage = parseFloat(percExpensesInput.value);
         const expenses = deposit * (percentage / 100);
-        expensesInput.value = Math.ceil(expenses * 100) / 100; // Arredonda para cima com 2 decimais
+        expensesInput.value = Math.ceil(expenses * 100) / 100;
     }
 }
 
@@ -583,7 +576,6 @@ function updateProfit() {
     const expenses = parseFloat(document.getElementById("Expenses").value) || 0;
     const profit = deposit - expenses;
     
-    // CORREÇÃO: Lucro Bruto = Depósito - Despesas
     document.getElementById("Profit").value = profit.toFixed(2);
     
     // Atualiza o lucro líquido
@@ -595,7 +587,6 @@ function updateNetProfit() {
     const discount = parseFloat(document.getElementById("Discount").value) || 0;
     const netProfit = profit - discount;
     
-    // CORREÇÃO: Lucro Líquido = Lucro Bruto - Desconto
     document.getElementById("NetProfit").value = netProfit.toFixed(2);
     
     // Destacar se o lucro líquido for negativo
@@ -657,39 +648,33 @@ function clearForm() {
 }
 
 function loadForm(id, item) {
-    // console.log('Carregando formulário para ID:', id);
-    // console.log('Item recebido:', item);
-    
     selectedId = id;
     formChanged = false;
 
     // Preenche todos os campos
     for (const key in item) {
-        // console.log(`Tentando preencher campo ${key} com valor:`, item[key]);
-        
         const field = document.getElementById(key);
         if (field) {
-            // CORREÇÃO: Para datas, ajusta o fuso horário
+            // Para datas, ajusta o fuso horário
             if (key === "ProcessedDate" || key === "Request" || key === "Delivery" || key === "firstInstallmentDate") {
                 if (item[key]) {
-                    // Se a data já está no formato YYYY-MM-DD, usa diretamente
+                    // Se já está no formato YYYY-MM-DD, usa diretamente
                     if (typeof item[key] === 'string' && item[key].match(/^\d{4}-\d{2}-\d{2}$/)) {
                         field.value = item[key];
                     } else {
-                        // Converte de timestamp ou outro formato
+                        // Converte de timestamp
                         const date = new Date(item[key]);
-                        // Usa UTC para evitar problemas de fuso
-                        const year = date.getUTCFullYear();
-                        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-                        const day = String(date.getUTCDate()).padStart(2, '0');
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
                         field.value = `${year}-${month}-${day}`;
                     }
                 } else {
                     field.value = "";
                 }
+            } else {
+                field.value = item[key] || "";
             }
-        } else {
-            // console.log(`Campo ${key} NÃO ENCONTRADO no DOM`);
         }
     }
 
@@ -712,12 +697,10 @@ function loadForm(id, item) {
     
     // Atualiza cálculos
     handleExpensesCalculation();
-    updateProfit(); // Já inclui updateNetProfit()
+    updateProfit();
     
     // Muda para modo "Alterar"
     showUpdateMode();
-    
-    // console.log('Formulário carregado com sucesso!');
 }
 
 // ============================================
@@ -738,6 +721,8 @@ function loadList() {
         }
         
         renderList();
+    }, {
+        onlyOnce: true // Carrega apenas uma vez para melhor performance
     });
 }
 
@@ -813,20 +798,15 @@ function renderList() {
         }
     });
 
-    // ============================================
-    // LIMITADOR DE ITENS - AJUSTE AQUI O NÚMERO
-    // ============================================
-    // Para aumentar o número de itens exibidos, mude o valor abaixo:
-    const MAX_ITEMS_TO_SHOW = 10; // ← ALTERE ESTE NÚMERO
-    
-    // Limitar número de itens exibidos
+    // Limitar número de itens exibidos para melhor performance
+    const MAX_ITEMS_TO_SHOW = 10;
     const itemsToShow = filteredLaunches.slice(0, MAX_ITEMS_TO_SHOW);
     
     // Contador total
     const totalCount = filteredLaunches.length;
     const showingCount = itemsToShow.length;
 
-    // Renderizar cada item (apenas os primeiros MAX_ITEMS_TO_SHOW)
+    // Renderizar cada item
     itemsToShow.forEach(item => {
         const li = createListItem(item);
         elements.list.appendChild(li);
@@ -837,11 +817,8 @@ function renderList() {
         const moreItemsMsg = document.createElement("li");
         moreItemsMsg.className = "more-items-message";
         moreItemsMsg.innerHTML = `
-            <div style="text-align: center; padding: 15px; color: #666; font-style: italic;">
-                Mostrando ${showingCount} de ${totalCount} lançamentos
-                <br>
-                <small>Use os filtros para encontrar outros lançamentos</small>
-            </div>
+            <div>Mostrando ${showingCount} de ${totalCount} lançamentos<br>
+            <small>Use os filtros para encontrar outros lançamentos</small></div>
         `;
         elements.list.appendChild(moreItemsMsg);
     }
@@ -860,7 +837,7 @@ function createListItem(item) {
         li.classList.add('pending-processed');
     }
     
-    // CORREÇÃO: Formatar datas para exibição com ajuste de fuso
+    // Formatar datas para exibição
     const formatDateForDisplay = (dateString) => {
         if (!dateString) return 'Não informada';
         
@@ -868,21 +845,16 @@ function createListItem(item) {
             // Divide a data string "YYYY-MM-DD"
             const [year, month, day] = dateString.split('-').map(Number);
             
-            // Cria data sem problemas de fuso horário
-            const date = new Date(year, month - 1, day);
+            // Formata manualmente para DD/MM/YYYY
+            const formattedDay = String(day).padStart(2, '0');
+            const formattedMonth = String(month).padStart(2, '0');
             
-            // Formata manualmente para evitar problemas de fuso
-            const formattedDay = String(date.getDate()).padStart(2, '0');
-            const formattedMonth = String(date.getMonth() + 1).padStart(2, '0');
-            const formattedYear = date.getFullYear();
-            
-            return `${formattedDay}/${formattedMonth}/${formattedYear}`;
+            return `${formattedDay}/${formattedMonth}/${year}`;
         } catch (e) {
-            console.error('Erro ao formatar data:', dateString, e);
             return dateString;
         }
     };
-
+    
     const processedDate = item.ProcessedDate ? 
         formatDateForDisplay(item.ProcessedDate) : 
         '<span class="pending-text">PENDENTE</span>';
@@ -890,7 +862,7 @@ function createListItem(item) {
     const requestDate = formatDateForDisplay(item.Request);
     const deliveryDate = formatDateForDisplay(item.Delivery);
     
-    // CORREÇÃO: Lucro Bruto agora é o Depósito (não mais Profit)
+    // Lucro Bruto
     const grossProfit = parseFloat(item.Deposit || 0);
     const netProfit = getNetProfit(item);
     
@@ -926,8 +898,8 @@ function createListItem(item) {
             ${installmentInfo}
             <br>
             <small>Status: ${getStatusText(item.Status)}${item.workHistory && item.workHistory.length > 0 ? 
-                '<span style="color: #4CAF50; margin: 0 5px;" title="Possui histórico de serviços">📋</span>' : 
-                '<span style="margin: 0 5px;">|</span>'} Bruto: R$ ${grossProfit.toFixed(2)} | Líquido: R$ ${netProfit.toFixed(2)}</small>
+                '<span class="history-icon" title="Possui histórico de serviços">📋</span>' : 
+                '<span class="separator">|</span>'} Bruto: R$ ${grossProfit.toFixed(2)} | Líquido: R$ ${netProfit.toFixed(2)}</small>
         </div>
     `;
     
@@ -1006,7 +978,7 @@ function reuseDataForNew(item) {
         }
     }
     
-    // Define data atual para ProcessedDate (com ajuste de fuso)
+    // Define data atual para ProcessedDate
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -1054,9 +1026,8 @@ function collectFormData() {
         if (f.type === 'number') {
             obj[f.id] = f.value ? parseFloat(f.value) : 0;
         } else {
-            // CORREÇÃO: Para datas, salva como string no formato correto
+            // Para datas, salva como string no formato correto
             if (f.type === 'date' && f.value) {
-                // Salva no formato ISO sem ajuste de fuso (já ajustado na entrada)
                 obj[f.id] = f.value;
             } else {
                 obj[f.id] = f.value || "";
@@ -1073,15 +1044,15 @@ function collectFormData() {
         obj.Reason = null;
     }
     
-    // CORREÇÃO: Lucro Bruto é o Depósito (não mais Profit)
+    // Lucro Bruto é o Depósito
     const deposit = parseFloat(document.getElementById("Deposit").value) || 0;
     const expenses = parseFloat(document.getElementById("Expenses").value) || 0;
     const profit = deposit - expenses;
     const discount = parseFloat(document.getElementById("Discount").value) || 0;
     const netProfit = profit - discount;
     
-    obj.Profit = profit; // Lucro Bruto = Depósito - Despesas
-    obj.NetProfit = netProfit; // Lucro Líquido = Lucro Bruto - Desconto
+    obj.Profit = profit;
+    obj.NetProfit = netProfit;
     
     // Adiciona dados de parcelamento
     const installmentData = getInstallmentsData();
@@ -1180,13 +1151,12 @@ function toggleReasonField() {
     
     if (statusField.value === "3") { // Status "Aguardando"
         reasonContainer.style.display = "block";
-        reasonField.required = true; // Torna obrigatório se quiser
+        reasonField.required = true;
     } else {
         reasonContainer.style.display = "none";
         reasonField.required = false;
         
         // Se não é status "Aguardando", limpa o campo Motivo
-        // O campo será removido do Firebase quando salvar
         reasonField.value = "";
     }
 }
@@ -1198,7 +1168,6 @@ function getNetProfit(item) {
     }
     
     // Se não existe, calcula: Profit - Discount
-    // CORREÇÃO: Profit agora é Lucro Bruto (Deposit - Expenses)
     const profit = parseFloat(item.Profit || 0);
     const discount = parseFloat(item.Discount || 0);
     return profit - discount;
@@ -1220,9 +1189,6 @@ function addWorkEntry() {
         return;
     }
     
-    // DEBUG: Verifique o valor da data
-    console.log('Data do input:', date); // Adicione esta linha para debug
-    
     if (!hours || hours <= 0) {
         alert("Informe um tempo válido em horas!");
         elements.workHours.focus();
@@ -1235,9 +1201,12 @@ function addWorkEntry() {
         return;
     }
     
+    // CORREÇÃO: Formata a data para garantir formato correto
+    const formattedDate = formatDateForStorage(date);
+    
     // Adiciona ao histórico
     workHistory.push({
-        date: date,
+        date: formattedDate,
         hours: hours,
         description: description
     });
@@ -1262,9 +1231,8 @@ function renderWorkHistory() {
     
     if (workHistory.length === 0) {
         const emptyMsg = document.createElement("div");
-        emptyMsg.className = "history-item";
+        emptyMsg.className = "history-item empty";
         emptyMsg.textContent = "Nenhum registro de serviço adicionado.";
-        emptyMsg.style.color = "#999";
         elements.workHistoryList.appendChild(emptyMsg);
         return;
     }
@@ -1278,7 +1246,7 @@ function renderWorkHistory() {
         itemDiv.className = "history-item";
         
         // CORREÇÃO: Formata a data CORRETAMENTE
-        const formattedDate = formatHistoryDate(entry.date);
+        const formattedDate = formatDateForDisplay(entry.date);
         
         itemDiv.innerHTML = `
             <div class="history-item-info">
@@ -1303,12 +1271,11 @@ function renderWorkHistory() {
     });
 }
 
-// Função para formatar data do histórico CORRETAMENTE
-function formatHistoryDate(dateString) {
+function formatDateForDisplay(dateString) {
     if (!dateString) return 'Data não informada';
     
     try {
-        // A data está no formato "YYYY-MM-DD" do input date
+        // A data está no formato "YYYY-MM-DD"
         const [year, month, day] = dateString.split('-').map(Number);
         
         // Verifica se os valores são válidos
@@ -1325,16 +1292,28 @@ function formatHistoryDate(dateString) {
     }
 }
 
+function formatDateForStorage(dateString) {
+    // Garante que a data está no formato YYYY-MM-DD
+    if (!dateString) return '';
+    
+    try {
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    } catch (error) {
+        return dateString;
+    }
+}
+
 function openWorkHistoryModal(index) {
     const entry = workHistory[index];
     
     if (!entry) return;
     
-    // DEBUG: Verifique os dados
-    console.log('Dados do histórico:', entry); // Adicione esta linha
-    
     // Preenche o modal com os dados
-    elements.modalWorkDate.value = entry.date; // Já está no formato YYYY-MM-DD
+    elements.modalWorkDate.value = entry.date;
     elements.modalWorkHours.value = entry.hours;
     elements.modalWorkDescription.value = entry.description;
     
@@ -1363,9 +1342,12 @@ function updateWorkEntry() {
         return;
     }
     
+    // CORREÇÃO: Formata a data para garantir formato correto
+    const formattedDate = formatDateForStorage(date);
+    
     // Atualiza o histórico
     workHistory[selectedWorkEntryIndex] = {
-        date: date,
+        date: formattedDate,
         hours: hours,
         description: description
     };
