@@ -61,6 +61,9 @@ async function initDashboard() {
         
         // Mostrar modo inicial
         showSaveMode();
+
+        // Inicializa total de horas
+        updateTotalHoursDisplay();
         
         console.log('Dashboard inicializado com sucesso!');
     } catch (error) {
@@ -898,8 +901,10 @@ function createListItem(item) {
             ${installmentInfo}
             <br>
             <small>Status: ${getStatusText(item.Status)}${item.workHistory && item.workHistory.length > 0 ? 
-                '<span class="history-icon" title="Possui histórico de serviços">📋</span>' : 
-                '<span class="separator">|</span>'} Bruto: R$ ${grossProfit.toFixed(2)} | Líquido: R$ ${netProfit.toFixed(2)}</small>
+                `<span class="history-icon" title="Possui histórico de serviços">📋</span>` : 
+                '<span class="separator">|</span>'} Bruto: R$ ${grossProfit.toFixed(2)} | Líquido: R$ ${netProfit.toFixed(2)} | 
+                <span class="work-hours" style="color: #2196F3; font-weight: bold;">⏱️ ${calculateTotalHoursFromItem(item.workHistory)}</span>
+            </small>
         </div>
     `;
     
@@ -942,6 +947,22 @@ function createListItem(item) {
 // ============================================
 // FUNÇÕES AUXILIARES
 // ============================================
+
+// Função auxiliar para calcular horas do item
+function calculateTotalHoursFromItem(workHistory) {
+    if (!workHistory || workHistory.length === 0) return "0h";
+    
+    let total = 0;
+    workHistory.forEach(entry => {
+        total += parseFloat(entry.hours) || 0;
+    });
+    
+    const hours = Math.floor(total);
+    const minutes = Math.round((total - hours) * 60);
+    
+    if (minutes === 0) return `${hours}h`;
+    return `${hours}h ${minutes}min`;
+}
 
 function generateId() {
     const now = new Date();
@@ -1234,41 +1255,80 @@ function renderWorkHistory() {
         emptyMsg.className = "history-item empty";
         emptyMsg.textContent = "Nenhum registro de serviço adicionado.";
         elements.workHistoryList.appendChild(emptyMsg);
-        return;
+    } else {
+        // Ordena por data (mais recente primeiro)
+        workHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        // Renderiza cada item
+        workHistory.forEach((entry, index) => {
+            const itemDiv = document.createElement("div");
+            itemDiv.className = "history-item";
+            
+            // Formata a data CORRETAMENTE
+            const formattedDate = formatDateForDisplay(entry.date);
+            
+            // Calcula horas e minutos
+            const hours = Math.floor(entry.hours);
+            const minutes = Math.round((entry.hours - hours) * 60);
+            
+            itemDiv.innerHTML = `
+                <div class="history-item-info">
+                    <span class="history-item-date">${formattedDate}</span>
+                    <span class="history-item-hours">${hours}h ${minutes}min</span>
+                    <span class="history-item-desc">${entry.description}</span>
+                </div>
+                <button class="view-history-btn" data-index="${index}" title="Ver detalhes">
+                    👁
+                </button>
+            `;
+            
+            elements.workHistoryList.appendChild(itemDiv);
+        });
     }
     
-    // Ordena por data (mais recente primeiro)
-    workHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    // Renderiza cada item
-    workHistory.forEach((entry, index) => {
-        const itemDiv = document.createElement("div");
-        itemDiv.className = "history-item";
-        
-        // CORREÇÃO: Formata a data CORRETAMENTE
-        const formattedDate = formatDateForDisplay(entry.date);
-        
-        itemDiv.innerHTML = `
-            <div class="history-item-info">
-                <span class="history-item-date">${formattedDate}</span>
-                <span class="history-item-hours">${entry.hours}h</span>
-                <span class="history-item-desc">${entry.description}</span>
-            </div>
-            <button class="view-history-btn" data-index="${index}" title="Ver detalhes">
-                👁
-            </button>
-        `;
-        
-        elements.workHistoryList.appendChild(itemDiv);
-    });
+    // Atualiza o total de horas no cabeçalho
+    updateTotalHoursDisplay();
     
     // Adiciona eventos aos botões de visualização
     document.querySelectorAll('.view-history-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
             const index = parseInt(this.dataset.index);
             openWorkHistoryModal(index);
         });
     });
+}
+
+function calculateTotalHours(history) {
+    if (!history || history.length === 0) return 0;
+    
+    let total = 0;
+    history.forEach(entry => {
+        total += parseFloat(entry.hours) || 0;
+    });
+    return total;
+}
+
+function updateTotalHoursDisplay() {
+    const total = calculateTotalHours(workHistory);
+    
+    // Verifica se já existe o elemento de total, se não, cria
+    let totalElement = document.getElementById('totalWorkHours');
+    if (!totalElement) {
+        const historySection = document.querySelector('.work-history-section h4');
+        if (historySection) {
+            totalElement = document.createElement('span');
+            totalElement.id = 'totalWorkHours';
+            totalElement.style.cssText = 'margin-left: 15px; color: #2196F3; padding: 3px 10px; border-radius: 20px; font-size: 0.9rem;';
+            historySection.appendChild(totalElement);
+        }
+    }
+    
+    if (totalElement) {
+        const hours = Math.floor(total);
+        const minutes = Math.round((total - hours) * 60);
+        totalElement.textContent = `Total: ${hours}h ${minutes}min`;
+    }
 }
 
 function formatDateForDisplay(dateString) {
@@ -1312,8 +1372,22 @@ function openWorkHistoryModal(index) {
     
     if (!entry) return;
     
+    // CORREÇÃO: Formata a data para o formato correto (YYYY-MM-DD) se necessário
+    let formattedDate = entry.date;
+    if (entry.date && !entry.date.includes('-')) {
+        try {
+            const date = new Date(entry.date);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            formattedDate = `${year}-${month}-${day}`;
+        } catch (e) {
+            formattedDate = entry.date;
+        }
+    }
+    
     // Preenche o modal com os dados
-    elements.modalWorkDate.value = entry.date;
+    elements.modalWorkDate.value = formattedDate;
     elements.modalWorkHours.value = entry.hours;
     elements.modalWorkDescription.value = entry.description;
     

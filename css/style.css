@@ -1030,3 +1030,37 @@ h2::after {
         width: 100%;
     }
 }
+
+/* ============================================
+   TOTAL DE HORAS NO CARD
+   ============================================ */
+.work-hours {
+    /* background: #838f9c; */
+    color: rgb(0, 0, 0);
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin-left: 5px;
+    display: inline-block;
+}
+
+.history-icon {
+    margin-left: 5px;
+    font-size: 0.8rem;
+}
+
+.separator {
+    margin: 0 3px;
+    color: #666;
+}
+
+/* Total no cabeçalho */
+#totalWorkHours {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.8; }
+    100% { opacity: 1; }
+}
