@@ -156,22 +156,27 @@ body {
 }
 
 /* ============================================
-   DASHBOARD STYLES
+   DASHBOARD CONTAINER - LARGURAS FIXAS
    ============================================ */
 .dash-container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
-    margin: 30px 20px 0;
-    max-width: 1800px;
-    margin-left: auto;
-    margin-right: auto;
+    grid-template-columns: 40% 60%; /* para lista, formulário */
+    gap: 10px;
+    margin-top: 10px;
+    padding: 0 20px;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 992px) {
     .dash-container {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* Volta para 1 coluna em tablets/mobile */
         gap: 20px;
+    }
+}
+
+/* Para telas muito grandes, pode manter as proporções */
+@media (min-width: 1600px) {
+    .dash-container {
+        grid-template-columns: 40% 60%; /* Ajusta se quiser proporções diferentes em telas grandes */
     }
 }
 
