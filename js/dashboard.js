@@ -658,19 +658,15 @@ function loadForm(id, item) {
     for (const key in item) {
         const field = document.getElementById(key);
         if (field) {
-            // Para datas, ajusta o fuso horário
+            // CORREÇÃO: Para datas, mantém a string original sem converter
             if (key === "ProcessedDate" || key === "Request" || key === "Delivery" || key === "firstInstallmentDate") {
                 if (item[key]) {
                     // Se já está no formato YYYY-MM-DD, usa diretamente
                     if (typeof item[key] === 'string' && item[key].match(/^\d{4}-\d{2}-\d{2}$/)) {
                         field.value = item[key];
                     } else {
-                        // Converte de timestamp
-                        const date = new Date(item[key]);
-                        const year = date.getFullYear();
-                        const month = String(date.getMonth() + 1).padStart(2, '0');
-                        const day = String(date.getDate()).padStart(2, '0');
-                        field.value = `${year}-${month}-${day}`;
+                        // Se for outro formato, usa a string original
+                        field.value = item[key];
                     }
                 } else {
                     field.value = "";
@@ -1222,8 +1218,9 @@ function addWorkEntry() {
         return;
     }
     
-    // CORREÇÃO: Formata a data para garantir formato correto
-    const formattedDate = formatDateForStorage(date);
+    // CORREÇÃO: Mantém a data exatamente como veio do input (YYYY-MM-DD)
+    // Sem criar objeto Date para evitar problemas de fuso
+    const formattedDate = date; // Já está no formato YYYY-MM-DD
     
     // Adiciona ao histórico
     workHistory.push({
@@ -1256,15 +1253,20 @@ function renderWorkHistory() {
         emptyMsg.textContent = "Nenhum registro de serviço adicionado.";
         elements.workHistoryList.appendChild(emptyMsg);
     } else {
-        // Ordena por data (mais recente primeiro)
-        workHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+        // CORREÇÃO: Ordena por data (mais recente primeiro) de forma segura
+        workHistory.sort((a, b) => {
+            // Compara strings YYYY-MM-DD diretamente
+            if (a.date > b.date) return -1;
+            if (a.date < b.date) return 1;
+            return 0;
+        });
         
         // Renderiza cada item
         workHistory.forEach((entry, index) => {
             const itemDiv = document.createElement("div");
             itemDiv.className = "history-item";
             
-            // Formata a data CORRETAMENTE
+            // CORREÇÃO: Formata a data CORRETAMENTE sem usar new Date()
             const formattedDate = formatDateForDisplay(entry.date);
             
             // Calcula horas e minutos
@@ -1335,17 +1337,20 @@ function formatDateForDisplay(dateString) {
     if (!dateString) return 'Data não informada';
     
     try {
+        // CORREÇÃO: Não usa new Date(), manipula a string diretamente
         // A data está no formato "YYYY-MM-DD"
-        const [year, month, day] = dateString.split('-').map(Number);
+        const parts = dateString.split('-');
+        if (parts.length !== 3) return dateString;
+        
+        const year = parts[0];
+        const month = parts[1];
+        const day = parts[2];
         
         // Verifica se os valores são válidos
         if (!year || !month || !day) return dateString;
         
         // Formata manualmente para DD/MM/YYYY
-        const formattedDay = String(day).padStart(2, '0');
-        const formattedMonth = String(month).padStart(2, '0');
-        
-        return `${formattedDay}/${formattedMonth}/${year}`;
+        return `${day}/${month}/${year}`;
     } catch (error) {
         console.error('Erro ao formatar data do histórico:', dateString, error);
         return dateString;
@@ -1353,18 +1358,9 @@ function formatDateForDisplay(dateString) {
 }
 
 function formatDateForStorage(dateString) {
-    // Garante que a data está no formato YYYY-MM-DD
-    if (!dateString) return '';
-    
-    try {
-        const date = new Date(dateString);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    } catch (error) {
-        return dateString;
-    }
+    // CORREÇÃO: Mantém a data exatamente como veio do input (YYYY-MM-DD)
+    // Sem criar objeto Date para evitar problemas de fuso
+    return dateString; // Já está no formato YYYY-MM-DD
 }
 
 function openWorkHistoryModal(index) {
@@ -1372,19 +1368,9 @@ function openWorkHistoryModal(index) {
     
     if (!entry) return;
     
-    // CORREÇÃO: Formata a data para o formato correto (YYYY-MM-DD) se necessário
-    let formattedDate = entry.date;
-    if (entry.date && !entry.date.includes('-')) {
-        try {
-            const date = new Date(entry.date);
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            formattedDate = `${year}-${month}-${day}`;
-        } catch (e) {
-            formattedDate = entry.date;
-        }
-    }
+    // CORREÇÃO: Usa a data diretamente, sem conversão
+    // A data já está no formato YYYY-MM-DD
+    const formattedDate = entry.date;
     
     // Preenche o modal com os dados
     elements.modalWorkDate.value = formattedDate;
@@ -1416,8 +1402,8 @@ function updateWorkEntry() {
         return;
     }
     
-    // CORREÇÃO: Formata a data para garantir formato correto
-    const formattedDate = formatDateForStorage(date);
+    // CORREÇÃO: Mantém a data exatamente como veio do input
+    const formattedDate = date; // Já está no formato YYYY-MM-DD
     
     // Atualiza o histórico
     workHistory[selectedWorkEntryIndex] = {
