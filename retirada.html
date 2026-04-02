@@ -5,39 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Controle de Saques - Dream Rocket</title>
 
-    <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
-
-    <!-- Firebase Scripts -->
-    <script type="module" src="js/firebase-config.js"></script>
-    
-    <!-- Proteção de página -->
-    <script type="module">
-        import { protectPage } from "./js/auth.js";
-        protectPage();
+    <script>
+        if (!window.location.pathname.includes("app.html")) {
+            sessionStorage.setItem("dreamrocket:last-spa-page", "retirada.html");
+            window.location.replace("app.html");
+        }
     </script>
-    
-    <!-- Retiradas JS -->
-    <script type="module" src="js/retirada.js" defer></script>
 </head>
-
 <body>
-    <!-- NAVBAR -->
-    <div id="navbar"></div>
-
     <h2>Controle de Saques</h2>
 
     <div class="retirada-container">
-        <!-- LISTA DE SAQUES -->
         <div class="list-area">
-            <h3>Últimos Saques</h3>
+            <h3>Ultimos Saques</h3>
             <div class="total-info">
-                <small>Total do Mês: <strong id="monthTotal">R$ 0,00</strong></small>
+                <small>Total do Mes: <strong id="monthTotal">R$ 0,00</strong></small>
             </div>
             <ul id="withdrawalList" class="list"></ul>
         </div>
 
-        <!-- FORMULÁRIO -->
         <div class="form-area">
             <h3>Novo Saque / Editar</h3>
 
@@ -45,7 +32,7 @@
                 <label>Data do Saque</label>
                 <input type="date" id="WithdrawalDate" data-field required>
 
-                <input id="Description" data-field placeholder="Descrição do saque" required>
+                <input id="Description" data-field placeholder="Descricao do saque" required>
 
                 <input type="number" id="Amount" data-field placeholder="Valor (R$)" step="0.01" min="0.01" required>
 
@@ -57,18 +44,17 @@
                     <option value="outros">Outros</option>
                 </select>
 
-                <label>Método de Saque</label>
+                <label>Metodo de Saque</label>
                 <select id="Method" data-field>
                     <option value="pix">PIX</option>
                     <option value="ted">TED/DOC</option>
                     <option value="dinheiro">Dinheiro</option>
-                    <option value="cartao">Cartão</option>
+                    <option value="cartao">Cartao</option>
                     <option value="outro">Outro</option>
                 </select>
 
-                <textarea id="Notes" data-field placeholder="Observações (opcional)"></textarea>
+                <textarea id="Notes" data-field placeholder="Observacoes (opcional)"></textarea>
 
-                <!-- Botões de ação -->
                 <div class="button-group" style="grid-column: span 2;">
                     <button id="saveBtn" class="save-btn btn-success">Salvar Novo</button>
                     <button id="updateBtn" class="update-btn btn-primary" style="display: none;">Alterar</button>
@@ -77,6 +63,5 @@
             </div>
         </div>
     </div>
-
 </body>
 </html>

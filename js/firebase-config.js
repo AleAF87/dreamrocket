@@ -1,9 +1,7 @@
-// IMPORTS DO FIREBASE
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
-// CONFIG DO FIREBASE
 export const firebaseConfig = {
     apiKey: "AIzaSyAnch8gMY5On_A9Jt4VciOy9VemgEwzIx8",
     authDomain: "dream-rocket.firebaseapp.com",
@@ -14,12 +12,10 @@ export const firebaseConfig = {
     measurementId: "G-7HV1L3JKWW"
 };
 
-// INICIALIZA O APP
-const app = initializeApp(firebaseConfig);
-
-// AUTH + PROVIDER
+export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: "select_account" });
 
-// REALTIME DATABASE
-export const db = getDatabase(app, "https://dream-rocket-default-rtdb.firebaseio.com/");
+export const database = getDatabase(app, "https://dream-rocket-default-rtdb.firebaseio.com/");
+export const db = database;

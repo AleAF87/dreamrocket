@@ -1,10 +1,11 @@
-import { db } from "./firebase-config.js";
+import { database } from "./firebase-config.js";
 import { ref, onValue, set, update, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Variáveis globais
 let selectedId = null;
 let formChanged = false;
 let allWithdrawals = [];
+let stopWithdrawalsListener = null;
 
 // Elementos DOM
 const elements = {
@@ -16,10 +17,15 @@ const elements = {
     monthTotal: null
 };
 
-// Inicializar quando o DOM carregar
-document.addEventListener('DOMContentLoaded', initRetirada);
+let retiradaInitialized = false;
 
-async function initRetirada() {
+export async function initRetirada() {
+    if (retiradaInitialized && elements.list?.isConnected) {
+        return;
+    }
+
+    retiradaInitialized = true;
+
     try {
         // Carregar navbar
         await loadNavbar();
@@ -41,18 +47,34 @@ async function initRetirada() {
         
         console.log('Controle de saques inicializado com sucesso!');
     } catch (error) {
+        retiradaInitialized = false;
         console.error('Erro ao inicializar controle de saques:', error);
     }
 }
 
+if (!window.location.pathname.includes('app.html')) {
+    document.addEventListener('DOMContentLoaded', () => {
+        initRetirada();
+    });
+}
+
 // Carregar navbar
 async function loadNavbar() {
+    const navbarElement = document.getElementById("navbar");
+    if (!navbarElement) {
+        return;
+    }
+
+    if (navbarElement.innerHTML.trim() !== "") {
+        return;
+    }
+
     try {
         const response = await fetch("components/navbar.html");
         if (!response.ok) throw new Error('Falha ao carregar navbar');
         
         const html = await response.text();
-        document.getElementById("navbar").innerHTML = html;
+        navbarElement.innerHTML = html;
         
         // Inicializar navbar.js
         const navbarModule = await import("./navbar.js");
@@ -160,8 +182,12 @@ function loadForm(id, item) {
 // ============================================
 
 function loadList() {
-    const withdrawalsRef = ref(db, "retiradas/");
-    onValue(withdrawalsRef, snapshot => {
+    const withdrawalsRef = ref(database, "retiradas/");
+    if (typeof stopWithdrawalsListener === "function") {
+        stopWithdrawalsListener();
+    }
+
+    stopWithdrawalsListener = onValue(withdrawalsRef, snapshot => {
         allWithdrawals = [];
         const data = snapshot.val();
         
@@ -363,7 +389,7 @@ async function deleteWithdrawal(id, itemName) {
     }
     
     try {
-        await remove(ref(db, "retiradas/" + id));
+        await remove(ref(database, "retiradas/" + id));
         alert("Saque excluído com sucesso!");
         loadList();
     } catch (error) {
@@ -465,7 +491,7 @@ async function saveNewWithdrawal() {
     
     try {
         const id = generateId();
-        await set(ref(db, "retiradas/" + id), obj);
+        await set(ref(database, "retiradas/" + id), obj);
         alert("Saque registrado com sucesso!");
         clearForm();
         loadList();
@@ -485,7 +511,7 @@ async function updateWithdrawal() {
     const obj = collectFormData();
     
     try {
-        await update(ref(db, "retiradas/" + selectedId), obj);
+        await update(ref(database, "retiradas/" + selectedId), obj);
         alert("Saque alterado com sucesso!");
         clearForm();
         loadList();

@@ -5,92 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Resumo Financeiro - Dream Rocket</title>
 
-    <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
-
-    <!-- Firebase Scripts -->
-    <script type="module" src="js/firebase-config.js"></script>
-    
-    <!-- Proteção de página -->
-    <script type="module">
-        import { protectPage } from "./js/auth.js";
-        protectPage();
+    <script>
+        if (!window.location.pathname.includes("app.html")) {
+            sessionStorage.setItem("dreamrocket:last-spa-page", "financeiro.html");
+            window.location.replace("app.html");
+        }
     </script>
-    
-    <!-- Financeiro JS -->
-    <script type="module" src="js/financeiro.js" defer></script>
 </head>
-
 <body>
-    <!-- NAVBAR -->
-    <div id="navbar"></div>
-
     <h2>Resumo Financeiro</h2>
 
     <div class="finance-container">
-        <!-- FILTROS DE DATA -->
         <div class="filters-card">
-            <h3>Filtrar por Período</h3>
-            
+            <h3>Filtrar por Periodo</h3>
+
             <div class="date-filters">
-                <!-- Botões rápidos -->
                 <div class="quick-filters">
                     <button id="currentMonthBtn" class="quick-filter-btn active">
-                        Este Mês
+                        Este Mes
                     </button>
                     <button id="lastMonthBtn" class="quick-filter-btn">
-                        Mês Anterior
+                        Mes Anterior
                     </button>
                     <button id="customRangeBtn" class="quick-filter-btn">
-                        Período Personalizado
+                        Periodo Personalizado
                     </button>
                 </div>
 
-                <!-- Filtros personalizados -->
                 <div id="customRangeContainer" class="custom-range-container" style="display: none;">
                     <div class="date-input-group">
                         <div class="date-input">
                             <label for="startDate">Data Inicial:</label>
                             <input type="date" id="startDate" class="date-picker">
                         </div>
-                        
+
                         <div class="date-input">
                             <label for="endDate">Data Final:</label>
                             <input type="date" id="endDate" class="date-picker">
                         </div>
                     </div>
-                    
+
                     <button id="applyFilterBtn" class="apply-btn">
                         Aplicar Filtro
                     </button>
                 </div>
 
-                <!-- Período selecionado -->
                 <div class="selected-period">
-                    <h4>Período Selecionado:</h4>
+                    <h4>Periodo Selecionado:</h4>
                     <p id="periodDisplay">Carregando...</p>
                 </div>
             </div>
         </div>
 
-        <!-- CARDS DE RESUMO - ENTRADAS -->
         <div class="summary-section">
             <div class="section-header">
                 <h3>📥 Entradas (Recebimentos)</h3>
                 <small>Base: Data de Pagamento (ProcessedDate)</small>
             </div>
-            
+
             <div class="summary-cards">
-                <!-- Card Depósito -->
                 <div class="summary-card deposit-card">
                     <div class="card-icon">💰</div>
                     <div class="card-content">
-                        <h4>Total Depósito</h4>
+                        <h4>Total Deposito</h4>
                         <p class="card-value" id="totalDeposit">R$ 0,00</p>
                     </div>
                 </div>
 
-                <!-- Card Despesas -->
                 <div class="summary-card expenses-card">
                     <div class="card-icon">📉</div>
                     <div class="card-content">
@@ -100,7 +82,6 @@
                     </div>
                 </div>
 
-                <!-- Card Lucro Bruto -->
                 <div class="summary-card profit-card">
                     <div class="card-icon">📊</div>
                     <div class="card-content">
@@ -110,7 +91,6 @@
                     </div>
                 </div>
 
-                <!-- Card Desconto -->
                 <div class="summary-card discount-card">
                     <div class="card-icon">🎫</div>
                     <div class="card-content">
@@ -120,11 +100,10 @@
                     </div>
                 </div>
 
-                <!-- Card Lucro Líquido -->
                 <div class="summary-card netprofit-card">
                     <div class="card-icon">💎</div>
                     <div class="card-content">
-                        <h4>Lucro Líquido</h4>
+                        <h4>Lucro Liquido</h4>
                         <p class="card-value" id="totalNetProfit">R$ 0,00</p>
                         <p class="card-margin" id="netProfitMargin">Margem: 0%</p>
                     </div>
@@ -132,15 +111,13 @@
             </div>
         </div>
 
-        <!-- CARDS DE RESUMO - SAÍDAS (RETIRADAS) -->
         <div class="summary-section">
             <div class="section-header">
-                <h3>📤 Saídas (Retiradas)</h3>
+                <h3>📤 Saidas (Retiradas)</h3>
                 <small>Base: Data do Saque (WithdrawalDate)</small>
             </div>
-            
+
             <div class="summary-cards">
-                <!-- Card Total Retiradas -->
                 <div class="summary-card withdrawal-card">
                     <div class="card-icon">💸</div>
                     <div class="card-content">
@@ -150,7 +127,6 @@
                     </div>
                 </div>
 
-                <!-- Card Por Categoria -->
                 <div class="summary-card category-card">
                     <div class="card-icon">🏷️</div>
                     <div class="card-content">
@@ -161,18 +137,16 @@
                     </div>
                 </div>
 
-                <!-- Card Por Método -->
                 <div class="summary-card method-card">
                     <div class="card-icon">💳</div>
                     <div class="card-content">
-                        <h4>Por Método</h4>
+                        <h4>Por Metodo</h4>
                         <p class="card-method" id="methodPix">PIX: R$ 0,00</p>
-                        <p class="card-method" id="methodTransfer">Transferência: R$ 0,00</p>
+                        <p class="card-method" id="methodTransfer">Transferencia: R$ 0,00</p>
                         <p class="card-method" id="methodCash">Dinheiro: R$ 0,00</p>
                     </div>
                 </div>
 
-                <!-- Card Saldo Final -->
                 <div class="summary-card finalbalance-card">
                     <div class="card-icon">⚖️</div>
                     <div class="card-content">
@@ -184,8 +158,7 @@
             </div>
         </div>
 
-        <!-- GRÁFICO OU TABELA DETALHADA (opcional futuramente) -->
-        <div class="detailed-section" id="installmentDetailsSection"> <!--style="display: none;"-->
+        <div class="detailed-section" id="installmentDetailsSection">
             <h3>Detalhamento por Status</h3>
             <div class="status-breakdown">
                 <div class="status-item">
@@ -200,7 +173,7 @@
                 </div>
                 <div class="status-item">
                     <span class="status-dot status-1"></span>
-                    <span>Concluído:</span>
+                    <span>Concluido:</span>
                     <strong id="status1Count">0</strong>
                 </div>
                 <div class="status-item">
@@ -209,12 +182,9 @@
                     <strong id="status4Count">0</strong>
                 </div>
             </div>
-            <h3>Pagamentos Parcelados do Período</h3>
-            <div id="installmentDetails">
-                <!-- Detalhes serão preenchidos aqui -->
-            </div>
+            <h3>Pagamentos Parcelados do Periodo</h3>
+            <div id="installmentDetails"></div>
         </div>
     </div>
-
 </body>
 </html>

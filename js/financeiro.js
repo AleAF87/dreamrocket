@@ -1,4 +1,4 @@
-import { db } from "./firebase-config.js";
+import { database } from "./firebase-config.js";
 import { ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Variáveis globais
@@ -6,6 +6,9 @@ let allLaunches = [];
 let allWithdrawals = [];
 let startDate = null;
 let endDate = null;
+let currentInstallmentPayments = [];
+let stopLaunchesListener = null;
+let stopWithdrawalsListener = null;
 
 // Elementos DOM
 const elements = {
@@ -48,10 +51,15 @@ const elements = {
     status4Count: null
 };
 
-// Inicializar quando o DOM carregar
-document.addEventListener('DOMContentLoaded', initFinanceiro);
+let financeiroInitialized = false;
 
-async function initFinanceiro() {
+export async function initFinanceiro() {
+    if (financeiroInitialized && elements.periodDisplay?.isConnected) {
+        return;
+    }
+
+    financeiroInitialized = true;
+
     try {
         // Carregar navbar
         await loadNavbar();
@@ -70,18 +78,34 @@ async function initFinanceiro() {
         
         console.log('Financeiro inicializado com sucesso!');
     } catch (error) {
+        financeiroInitialized = false;
         console.error('Erro ao inicializar financeiro:', error);
     }
 }
 
+if (!window.location.pathname.includes('app.html')) {
+    document.addEventListener('DOMContentLoaded', () => {
+        initFinanceiro();
+    });
+}
+
 // Carregar navbar
 async function loadNavbar() {
+    const navbarElement = document.getElementById("navbar");
+    if (!navbarElement) {
+        return;
+    }
+
+    if (navbarElement.innerHTML.trim() !== "") {
+        return;
+    }
+
     try {
         const response = await fetch("components/navbar.html");
         if (!response.ok) throw new Error('Falha ao carregar navbar');
         
         const html = await response.text();
-        document.getElementById("navbar").innerHTML = html;
+        navbarElement.innerHTML = html;
         
         // Inicializar navbar.js
         const navbarModule = await import("./navbar.js");
@@ -164,8 +188,8 @@ function setupEventListeners() {
     // Botão aplicar filtro personalizado
     elements.applyFilterBtn.addEventListener("click", () => {
         if (elements.startDate.value && elements.endDate.value) {
-            startDate = new Date(elements.startDate.value);
-            endDate = new Date(elements.endDate.value);
+            startDate = parseLocalDate(elements.startDate.value);
+            endDate = parseLocalDate(elements.endDate.value);
             
             // Ajusta fim do dia para incluir todo o dia
             endDate.setHours(23, 59, 59, 999);
@@ -200,6 +224,23 @@ function formatCurrency(value) {
 
 function formatPercentage(value) {
     return `${value.toFixed(2)}%`;
+}
+
+function parseLocalDate(dateValue) {
+    if (!dateValue) return null;
+    if (dateValue instanceof Date) return new Date(dateValue.getTime());
+
+    const normalized = String(dateValue).trim();
+    if (!normalized) return null;
+
+    const match = normalized.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (match) {
+        const [, year, month, day] = match;
+        return new Date(Number(year), Number(month) - 1, Number(day), 12, 0, 0, 0);
+    }
+
+    const parsed = new Date(normalized);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
 // Configurar períodos
@@ -244,8 +285,12 @@ function setActiveButton(activeBtn) {
 // Carregar dados do Firebase
 function loadData() {
     // Carregar lançamentos
-    const launchesRef = ref(db, "servicos/");
-    onValue(launchesRef, snapshot => {
+    const launchesRef = ref(database, "servicos/");
+    if (typeof stopLaunchesListener === "function") {
+        stopLaunchesListener();
+    }
+
+    stopLaunchesListener = onValue(launchesRef, snapshot => {
         allLaunches = [];
         const data = snapshot.val();
         
@@ -259,8 +304,12 @@ function loadData() {
     });
     
     // Carregar retiradas
-    const withdrawalsRef = ref(db, "retiradas/");
-    onValue(withdrawalsRef, snapshot => {
+    const withdrawalsRef = ref(database, "retiradas/");
+    if (typeof stopWithdrawalsListener === "function") {
+        stopWithdrawalsListener();
+    }
+
+    stopWithdrawalsListener = onValue(withdrawalsRef, snapshot => {
         allWithdrawals = [];
         const data = snapshot.val();
         
@@ -305,7 +354,8 @@ function calculateWithdrawals() {
     const filteredWithdrawals = allWithdrawals.filter(item => {
         if (!item.WithdrawalDate) return false;
         
-        const itemDate = new Date(item.WithdrawalDate);
+        const itemDate = parseLocalDate(item.WithdrawalDate);
+        if (!itemDate) return false;
         return itemDate >= startDate && itemDate <= endDate;
     });
     
@@ -366,7 +416,8 @@ function updateSummary() {
         
         if (!item.ProcessedDate) return false;
         
-        const itemDate = new Date(item.ProcessedDate);
+        const itemDate = parseLocalDate(item.ProcessedDate);
+        if (!itemDate) return false;
         return itemDate >= startDate && itemDate <= endDate;
     });
     
@@ -391,6 +442,7 @@ function updateSummary() {
     
     // B) Pagamentos parcelados
     const installmentPayments = calculateInstallmentPayments();
+    currentInstallmentPayments = installmentPayments.payments;
     
     // Somar pagamentos parcelados aos totais
     totals.deposit += installmentPayments.totalDeposit;
@@ -409,7 +461,7 @@ function updateSummary() {
     
     allLaunches.forEach(item => {
         const status = String(item.Status || '1');
-        const requestDate = item.Request ? new Date(item.Request) : null;
+        const requestDate = item.Request ? parseLocalDate(item.Request) : null;
         
         switch (status) {
             case '2': // EM ANDAMENTO
@@ -533,7 +585,7 @@ function updateUI(totals, expensesPerc, profitMargin, discountPerc,
     // Aplicar cores baseadas em valores
     applyValueStyles(totals, withdrawalsData, finalBalance);
 
-    showInstallmentDetails(installmentPayments.payments);
+    showInstallmentDetails(currentInstallmentPayments);
 }
 
 // Aplicar estilos baseados em valores
@@ -643,7 +695,8 @@ function calculateInstallmentPayments() {
             item.installmentData.installments.forEach(installment => {
                 // Verificar se a parcela está paga e dentro do período
                 if (installment.status === 'paid' && installment.dueDate) {
-                    const installmentDate = new Date(installment.dueDate);
+                    const installmentDate = parseLocalDate(installment.dueDate);
+                    if (!installmentDate) return;
                     
                     // Verificar se está no período filtrado
                     if (installmentDate >= startDate && installmentDate <= endDate) {
@@ -690,7 +743,8 @@ function showInstallmentDetails(payments) {
     let html = '<div class="installments-list">';
     
     payments.forEach(payment => {
-        const date = new Date(payment.date).toLocaleDateString('pt-BR');
+        const parsedDate = parseLocalDate(payment.date);
+        const date = parsedDate ? parsedDate.toLocaleDateString('pt-BR') : payment.date;
         html += `
             <div class="installment-item">
                 <div class="installment-info">

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contas Casa - Saida</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        if (!window.location.pathname.includes("app.html")) {
+            sessionStorage.setItem("dreamrocket:last-spa-page", "contas_casa_saida.html");
+            window.location.replace("app.html");
+        }
+    </script>
+</head>
+<body>
+    <h2>Contas Casa - Saida</h2>
+
+    <div class="contas-casa-layout">
+        <div class="list-area">
+            <h3>Contas cadastradas</h3>
+
+            <div class="filters-container contas-filtros">
+                <div class="filter-checkboxes">
+                    <label><input type="checkbox" id="filterAbertas" checked> Abertas</label>
+                    <label><input type="checkbox" id="filterQuitadas" checked> Quitadas</label>
+                    <label><input type="checkbox" id="filterFixas" checked> Fixas</label>
+                </div>
+                <div class="filter-group">
+                    <label for="searchContaInput">Buscar por titulo</label>
+                    <input id="searchContaInput" class="filter-select" placeholder="Digite o nome da conta">
+                </div>
+            </div>
+
+            <div class="contas-table-wrapper">
+                <table class="contas-table">
+                    <thead>
+                        <tr>
+                            <th>Titulo</th>
+                            <th>Categoria</th>
+                            <th>Mensal</th>
+                            <th>Prazo</th>
+                            <th>Parcelas</th>
+                            <th>Pago em</th>
+                            <th>Pago por</th>
+                            <th>Acoes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contasCasaTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-area">
+            <h3>Nova conta / editar</h3>
+
+            <div class="form-grid contas-casa-form">
+                <div>
+                    <label for="tipoConta">Tipo da conta</label>
+                    <select id="tipoConta">
+                        <option value="parcelada">Parcelada</option>
+                        <option value="fixa">Fixa</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="titulo">Titulo</label>
+                    <input id="titulo" placeholder="Nome da conta">
+                </div>
+
+                <div>
+                    <label for="dataContrato">Data contrato</label>
+                    <input type="date" id="dataContrato">
+                </div>
+
+                <div>
+                    <label for="parceladoTotal">Parcelado / total</label>
+                    <input type="number" id="parceladoTotal" min="0" step="1" placeholder="0">
+                </div>
+
+                <div>
+                    <label for="parceladoPagas">Parcelado / pagas</label>
+                    <input type="number" id="parceladoPagas" min="0" step="1" placeholder="0">
+                </div>
+
+                <div>
+                    <label for="parceladoSaldo">Parcelado / saldo</label>
+                    <input type="number" id="parceladoSaldo" min="0" step="1" placeholder="0">
+                </div>
+
+                <div>
+                    <label for="valorMensal">Valor mensal</label>
+                    <input type="number" id="valorMensal" min="0" step="0.01" placeholder="0.00">
+                </div>
+
+                <div>
+                    <label for="jurosAtrasoValor">Juros atraso valor</label>
+                    <input type="number" id="jurosAtrasoValor" min="0" step="0.01" placeholder="0.00">
+                </div>
+
+                <div>
+                    <label for="jurosAtrasoPerc">Juros atraso %</label>
+                    <input type="number" id="jurosAtrasoPerc" min="0" step="0.01" placeholder="0.00">
+                </div>
+
+                <div>
+                    <label for="valorComJuros">Valor c/ juros</label>
+                    <input type="number" id="valorComJuros" min="0" step="0.01" placeholder="0.00">
+                </div>
+
+                <div>
+                    <label for="prazoDia">Prazo dia</label>
+                    <input type="number" id="prazoDia" min="1" max="31" step="1" placeholder="Ex: 10">
+                </div>
+
+                <div>
+                    <label for="pagoData">Pago data</label>
+                    <input type="date" id="pagoData">
+                </div>
+
+                <div>
+                    <label for="pagoPor">Pago por</label>
+                    <select id="pagoPor">
+                        <option value="">Selecione</option>
+                        <option value="eu">Eu</option>
+                        <option value="conjuge">Conjuge</option>
+                        <option value="ambos">Ambos</option>
+                        <option value="outro">Outro</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="linkConta">Link da conta</label>
+                    <input type="url" id="linkConta" placeholder="https://...">
+                </div>
+
+                <div>
+                    <label for="quitarJuros">Quitar juros</label>
+                    <input type="number" id="quitarJuros" min="0" step="0.01" placeholder="0.00">
+                </div>
+
+                <div>
+                    <label for="quitarDesconto">Quitar desconto</label>
+                    <input type="number" id="quitarDesconto" min="0" step="0.01" placeholder="0.00">
+                </div>
+
+                <div class="observation-container">
+                    <label for="observacao">Observacao</label>
+                    <textarea id="observacao" placeholder="Observacoes extras..."></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button id="saveContaBtn" class="btn-success">Salvar nova</button>
+                    <button id="updateContaBtn" class="btn-primary" style="display: none;">Atualizar</button>
+                    <button id="clearContaBtn" class="btn-danger">Limpar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

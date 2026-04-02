@@ -5,40 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard - Dream Rocket</title>
 
-    <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
-
-    <!-- Firebase Scripts -->
-    <script type="module" src="js/firebase-config.js"></script>
-    
-    <!-- Proteção de página -->
-    <script type="module">
-        import { protectPage } from "./js/auth.js";
-        protectPage();
+    <script>
+        if (!window.location.pathname.includes("app.html")) {
+            sessionStorage.setItem("dreamrocket:last-spa-page", "dashboard.html");
+            window.location.replace("app.html");
+        }
     </script>
-    
-    <!-- Dashboard JS -->
-    <script type="module" src="js/dashboard.js" defer></script>
 </head>
-
 <body>
-    <!-- NAVBAR -->
-    <div id="navbar"></div>
-
-    <h2>Dashboard de Movimentações</h2>
+    <h2>Dashboard de Movimentacoes</h2>
 
     <div class="dash-container">
-
-        <!-- LISTA DE LANÇAMENTOS -->
         <div class="list-area">
-            <h3>Lançamentos</h3>
-            
-            <!-- Filtros -->
+            <h3>Lancamentos</h3>
+
             <div class="filters-container">
                 <div class="filter-group">
                     <label for="sortFilter">Ordenar por:</label>
                     <select id="sortFilter" class="filter-select">
-                        <option value="default" selected>Padrão</option>
+                        <option value="default" selected>Padrao</option>
                         <option value="processedDateDesc">Data pagamento (Mais Recente)</option>
                         <option value="processedDateAsc">Data pagamento (Mais Antiga)</option>
                         <option value="requestDesc">Data do pedido (Mais Recente)</option>
@@ -49,64 +35,72 @@
                         <option value="customerDesc">Cliente (Z-A)</option>
                     </select>
                 </div>
-                
+
                 <div class="filter-group">
                     <label for="statusFilter">Filtrar por Status:</label>
                     <select id="statusFilter" class="filter-select">
                         <option value="all">Todos os Status</option>
-                        <option value="1">Concluído</option>
+                        <option value="1">Concluido</option>
                         <option value="2">Em andamento</option>
                         <option value="3">Aguardando</option>
                         <option value="4">Cancelado</option>
                     </select>
                 </div>
+
+                <div class="filter-group">
+                    <label for="paymentFilter">Pagamento:</label>
+                    <select id="paymentFilter" class="filter-select">
+                        <option value="all">Todos</option>
+                        <option value="pending">Somente pendentes</option>
+                    </select>
+                </div>
             </div>
-            
+
             <ul id="launchList" class="list"></ul>
+            <div id="paginationContainer" class="pagination-container"></div>
         </div>
 
-        <!-- FORMULÁRIO -->
         <div class="form-area">
-            <h3>Editar / Novo Lançamento</h3>
+            <h3>Editar / Novo Lancamento</h3>
 
             <div class="form-grid">
                 <div>
                     <label for="Customer">Cliente:</label>
                     <input id="Customer" data-field placeholder="Nome do cliente">
                 </div>
-                
+
                 <div>
                     <label for="Business">Empresa:</label>
                     <input id="Business" data-field placeholder="Nome da empresa">
                 </div>
-                
+
                 <div>
-                    <label for="Identification">Identificação:</label>
-                    <input id="Identification" data-field placeholder="CPF/CNPJ ou código">
+                    <label for="Identification">Identificacao:</label>
+                    <input id="Identification" data-field placeholder="CPF/CNPJ ou codigo">
                 </div>
-                
+
                 <div>
-                    <label for="Description">Descrição:</label>
-                    <input id="Description" data-field placeholder="Descrição do serviço">
+                    <label for="Description">Descricao:</label>
+                    <input id="Description" data-field placeholder="Descricao do servico">
                 </div>
-                
+
                 <div>
                     <label for="Request">Data do Pedido:</label>
                     <input type="date" id="Request" data-field>
                 </div>
-                
+
                 <div>
                     <label for="Delivery">Data de Entrega:</label>
                     <input type="date" id="Delivery" data-field>
                 </div>
-                
+
                 <div>
                     <label for="ProcessedDate">Data Processada:</label>
                     <input type="date" id="ProcessedDate" data-field>
                 </div>
-                
+
                 <div>
-                    <label for="Deposit">Depósito (Total):</label>
+                    <label for="Deposit">Deposito (Total):</label>
                     <input type="number" id="Deposit" data-field placeholder="0.00" step="0.01">
                 </div>
 
@@ -114,45 +108,44 @@
                     <label for="Expenses">Despesas (R$):</label>
                     <input type="number" id="Expenses" data-field placeholder="0.00" step="0.01">
                 </div>
-                
+
                 <div>
                     <label for="PercExpenses">Despesas (%):</label>
                     <input type="number" id="PercExpenses" data-field placeholder="0.00" step="0.01">
                 </div>
-                
+
                 <div>
                     <label for="Profit">Lucro Bruto:</label>
                     <input id="Profit" placeholder="0.00" readonly>
-                    <small>Depósito - Despesas</small>
+                    <small>Deposito - Despesas</small>
                 </div>
-                
+
                 <div>
                     <label for="Discount">Desconto:</label>
                     <input type="number" id="Discount" data-field placeholder="0.00" step="0.01">
                 </div>
-                
+
                 <div>
-                    <label for="NetProfit">Lucro Líquido:</label>
+                    <label for="NetProfit">Lucro Liquido:</label>
                     <input id="NetProfit" placeholder="0.00" readonly>
                     <small>Lucro Bruto - Desconto</small>
                 </div>
 
-                <!-- SEÇÃO DE PARCELAMENTO -->
                 <div class="installment-section">
                     <h4>Parcelamento</h4>
-                    
+
                     <div class="installment-config">
                         <div>
                             <label for="paymentMethod">Forma de Pagamento:</label>
                             <select id="paymentMethod" data-field>
                                 <option value="pix">PIX</option>
-                                <option value="cartao_sem">Cartão (s/ juros)</option>
-                                <option value="cartao_com">Cartão (c/ juros)</option>
+                                <option value="cartao_sem">Cartao (s/ juros)</option>
+                                <option value="cartao_com">Cartao (c/ juros)</option>
                             </select>
                         </div>
-                        
+
                         <div>
-                            <label for="installmentCount">Número de Parcelas:</label>
+                            <label for="installmentCount">Numero de Parcelas:</label>
                             <select id="installmentCount" data-field>
                                 <option value="1">1x</option>
                                 <option value="2">2x</option>
@@ -171,9 +164,9 @@
                     </div>
 
                     <div id="firstInstallmentContainer" class="first-installment-container">
-                        <label for="firstInstallmentDate">Data da 1ª Parcela:</label>
+                        <label for="firstInstallmentDate">Data da 1a Parcela:</label>
                         <input type="date" id="firstInstallmentDate" data-field>
-                        <small>As demais parcelas serão calculadas automaticamente (1 mês de diferença cada)</small>
+                        <small>As demais parcelas serao calculadas automaticamente (1 mes de diferenca cada)</small>
                     </div>
 
                     <div class="installments-table-container">
@@ -188,9 +181,7 @@
                                     <th>Status</th>
                                 </tr>
                             </thead>
-                            <tbody id="installmentsTableBody">
-                                <!-- Parcelas serão geradas aqui dinamicamente -->
-                            </tbody>
+                            <tbody id="installmentsTableBody"></tbody>
                             <tfoot id="installmentsTableFooter" class="installments-footer">
                                 <tr>
                                     <td colspan="2">Total:</td>
@@ -208,7 +199,7 @@
                                 </tr>
                             </tfoot>
                         </table>
-                        
+
                         <button type="button" id="showInstallmentsBtn" class="show-installments-btn">
                             Mostrar/Editar Parcelas
                         </button>
@@ -218,7 +209,7 @@
                 <div>
                     <label for="Status">Status:</label>
                     <select id="Status" data-field>
-                        <option value="1">Concluído</option>
+                        <option value="1">Concluido</option>
                         <option value="2">Em andamento</option>
                         <option value="3">Aguardando</option>
                         <option value="4">Cancelado</option>
@@ -231,50 +222,46 @@
                 </div>
 
                 <div class="observation-container">
-                    <label for="Observation">Observações:</label>
-                    <textarea id="Observation" data-field placeholder="Observações adicionais..."></textarea>
+                    <label for="Observation">Observacoes:</label>
+                    <textarea id="Observation" data-field placeholder="Observacoes adicionais..."></textarea>
                 </div>
 
-                <!-- SEÇÃO DE LANÇAMENTO DE TEMPO E HISTÓRICO -->
                 <div class="work-history-section">
-                    <h4>Histórico de Serviço</h4>
-                    
+                    <h4>Historico de Servico</h4>
+
                     <div class="time-entry-form">
                         <div>
                             <label for="workDate">Data:</label>
                             <input type="date" id="workDate">
                         </div>
-                        
+
                         <div>
                             <label for="workHours">Tempo (horas):</label>
                             <input type="number" id="workHours" step="0.5" min="0" placeholder="Ex: 3.5">
                         </div>
-                        
+
                         <div>
-                            <label for="workDescription">Serviço:</label>
+                            <label for="workDescription">Servico:</label>
                             <input type="text" id="workDescription" placeholder="Ex: Corte e fitamento das chapas">
                         </div>
-                        
+
                         <div>
                             <button type="button" id="addWorkEntryBtn" class="btn-secondary">
                                 + Adicionar
                             </button>
                         </div>
                     </div>
-                    
+
                     <div class="work-history-container">
-                        <h5>Histórico Registrado:</h5>
-                        <div id="workHistoryList" class="history-list">
-                            <!-- Histórico será gerado dinamicamente aqui -->
-                        </div>
+                        <h5>Historico Registrado:</h5>
+                        <div id="workHistoryList" class="history-list"></div>
                     </div>
                 </div>
 
-                <!-- Modal para visualizar/editar histórico -->
                 <div id="workHistoryModal" class="modal" style="display: none;">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h3>Detalhes do Serviço</h3>
+                            <h3>Detalhes do Servico</h3>
                             <span class="close-modal">&times;</span>
                         </div>
                         <div class="modal-body">
@@ -288,11 +275,11 @@
                                     <input type="number" id="modalWorkHours" step="0.5" min="0">
                                 </div>
                                 <div>
-                                    <label for="modalWorkDescription">Serviço:</label>
+                                    <label for="modalWorkDescription">Servico:</label>
                                     <textarea id="modalWorkDescription" rows="3"></textarea>
                                 </div>
                                 <div class="modal-actions">
-                                    <button id="updateWorkEntryBtn" class="btn-primary">Salvar Alterações</button>
+                                    <button id="updateWorkEntryBtn" class="btn-primary">Salvar Alteracoes</button>
                                     <button id="deleteWorkEntryBtn" class="btn-danger">Excluir</button>
                                 </div>
                             </div>
@@ -300,7 +287,6 @@
                     </div>
                 </div>
 
-                <!-- Botões de ação -->
                 <div class="button-group">
                     <button id="saveBtn" class="save-btn btn-success">Salvar Novo</button>
                     <button id="updateBtn" class="update-btn btn-primary">Alterar</button>
@@ -308,8 +294,6 @@
                 </div>
             </div>
         </div>
-
     </div>
-
 </body>
 </html>

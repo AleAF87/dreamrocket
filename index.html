@@ -3,25 +3,21 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - Dream Rocket</title>
+    <title>Dream Rocket - Login</title>
 
-    <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
-
-    <!-- Firebase + Auth -->
-    <script type="module" src="js/auth.js" defer></script>
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/index.js" defer></script>
 </head>
 
-<body class="login-page">
+<body class="login-page auth-pending">
     <div class="login-container">
-        <!-- Logo/Título -->
         <div class="login-header">
             <h1 class="login-title">Dream Rocket</h1>
-            <h2 class="login-subtitle">Administração</h2>
-            <p class="login-description">Sistema de gerenciamento de movimentações</p>
+            <h2 class="login-subtitle">Administracao</h2>
+            <p class="login-description">Sistema de gerenciamento de movimentacoes.</p>
         </div>
 
-        <!-- Botão de Login -->
         <div class="login-button-container">
             <button id="googleLoginBtn" class="google-btn">
                 <svg class="google-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -34,27 +30,23 @@
             </button>
         </div>
 
-        <!-- Informações adicionais (opcional) -->
         <div class="login-footer">
-            <p class="login-note">Apenas usuários autorizados podem acessar o sistema.</p>
+            <p class="login-note">Apenas usuarios autorizados podem acessar o sistema.</p>
             <div class="login-features">
                 <div class="feature-item">
-                    <span class="feature-icon">📊</span>
-                    <span>Controle de movimentações</span>
+                    <span class="feature-icon">01</span>
+                    <span>Controle de movimentacoes</span>
                 </div>
                 <div class="feature-item">
-                    <span class="feature-icon">🔒</span>
-                    <span>Autenticação segura</span>
+                    <span class="feature-icon">02</span>
+                    <span>Autenticacao padronizada</span>
                 </div>
                 <div class="feature-item">
-                    <span class="feature-icon">📈</span>
-                    <span>Dashboard em tempo real</span>
+                    <span class="feature-icon">03</span>
+                    <span>Dashboard em SPA</span>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Scripts -->
-    <script src="js/auth-guard.js"></script>
 </body>
 </html>

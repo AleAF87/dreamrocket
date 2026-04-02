@@ -1,52 +1,39 @@
 <nav class="navbar">
     <div class="nav-left">
-        <img src="img/logo.png" alt="Logo" class="logo">
+        <a href="dashboard.html" class="brand-link">
+            <img src="img/logo.png" alt="Dream Rocket" class="logo">
+        </a>
     </div>
 
     <div class="nav-center">
-        <a href="dashboard.html">Dashboard</a>
-        <a href="financeiro.html">Financeiro</a>
-        <a href="retirada.html">Saques</a>
+        <a href="dashboard.html" id="navDashboard">Dashboard</a>
+        <a href="financeiro.html" id="navFinanceiro">Financeiro</a>
+        <a href="retirada.html" id="navRetirada">Saques</a>
+        <div class="nav-item-dropdown" id="navContasCasa" data-required-level="1">
+            <button class="nav-dropdown-toggle" id="navContasCasaToggle" type="button">Contas Casa</button>
+            <ul class="nav-dropdown-menu" id="navContasCasaMenu">
+                <li><a href="contas_casa_saida.html" id="navContasCasaSaida">Saida</a></li>
+                <li><a href="contas_casa_entrada.html" id="navContasCasaEntrada">Entrada</a></li>
+            </ul>
+        </div>
     </div>
 
     <div class="nav-right" id="userArea">
-        <!-- Estado: Não logado -->
-        <div id="authButtons" style="display: none;">
-            <span class="login-btn" onclick="loginGoogle()">Acessar</span>
-        </div>
-        
-        <!-- Estado: Logado -->
-        <div id="userInfo" style="display: none;">
-            <div class="user-profile">
-                <div class="avatar-container" id="avatarContainer">
-                    <!-- Avatar será inserido aqui dinamicamente -->
+        <div id="userInfo" class="user-dropdown">
+            <button id="userGreetingDropdown" class="user-greeting-dropdown" type="button">
+                <div class="user-profile">
+                    <div class="avatar-container" id="avatarContainer"></div>
+                    <div class="user-details">
+                        <span class="user-name" id="userName">Usuario</span>
+                        <span class="user-email" id="userEmail"></span>
+                    </div>
                 </div>
-                <div class="user-details">
-                    <span class="user-name" id="userName"></span>
-                    <span class="user-email" id="userEmail"></span>
-                </div>
-                <!-- Botão de logout visível como fallback -->
-                <button id="logoutBtn" class="logout-btn">Sair</button>
-            </div>
+            </button>
+            <ul class="user-dropdown-menu" id="userDropdownMenu">
+                <li>
+                    <a href="#" id="navLogout" class="user-dropdown-item user-dropdown-item-danger">Sair</a>
+                </li>
+            </ul>
         </div>
     </div>
 </nav>
-
-<!-- Fallback: se o avatar não aparecer, mostra texto "Logout" -->
-<style>
-    /* Estilo de fallback */
-    .avatar-container:empty::after {
-        content: "Logout";
-        display: inline-block;
-        padding: 8px 16px;
-        background-color: #e63946;
-        color: white;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-    }
-    
-    .avatar-container:empty:hover::after {
-        background-color: #c1121f;
-    }
-</style>

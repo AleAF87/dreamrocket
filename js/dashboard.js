@@ -1,4 +1,4 @@
-import { db, auth } from "./firebase-config.js";
+import { database } from "./firebase-config.js";
 import { ref, onValue, set, update, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 // Variáveis globais
@@ -7,8 +7,12 @@ let formChanged = false;
 let allLaunches = [];
 let currentSort = 'default';
 let currentStatusFilter = 'all';
+let currentPaymentFilter = 'all';
+let currentPage = 1;
 let selectedWorkEntryIndex = null;
 let workHistory = [];
+const ITEMS_PER_PAGE = 10;
+let stopLaunchesListener = null;
 
 // Elementos DOM
 const elements = {
@@ -18,7 +22,9 @@ const elements = {
     updateBtn: null,
     clearBtn: null,
     sortFilter: null,
-    statusFilter: null
+    statusFilter: null,
+    paymentFilter: null,
+    paginationContainer: null
 };
 
 // Elementos de parcelamento
@@ -33,10 +39,15 @@ const installmentElements = {
     firstInstallmentDate: null
 };
 
-// Inicializar quando o DOM carregar
-document.addEventListener('DOMContentLoaded', initDashboard);
+let dashboardInitialized = false;
 
-async function initDashboard() {
+export async function initDashboard() {
+    if (dashboardInitialized && elements.list?.isConnected) {
+        return;
+    }
+
+    dashboardInitialized = true;
+
     try {
         // Carregar navbar
         await loadNavbar();
@@ -67,18 +78,34 @@ async function initDashboard() {
         
         console.log('Dashboard inicializado com sucesso!');
     } catch (error) {
+        dashboardInitialized = false;
         console.error('Erro ao inicializar dashboard:', error);
     }
 }
 
+if (!window.location.pathname.includes('app.html')) {
+    document.addEventListener('DOMContentLoaded', () => {
+        initDashboard();
+    });
+}
+
 // Carregar navbar
 async function loadNavbar() {
+    const navbarElement = document.getElementById("navbar");
+    if (!navbarElement) {
+        return;
+    }
+
+    if (navbarElement.innerHTML.trim() !== "") {
+        return;
+    }
+
     try {
         const response = await fetch("components/navbar.html");
         if (!response.ok) throw new Error('Falha ao carregar navbar');
         
         const html = await response.text();
-        document.getElementById("navbar").innerHTML = html;
+        navbarElement.innerHTML = html;
         
         // Inicializar navbar.js
         const navbarModule = await import("./navbar.js");
@@ -97,6 +124,8 @@ function initializeElements() {
     elements.clearBtn = document.getElementById("clearBtn");
     elements.sortFilter = document.getElementById("sortFilter");
     elements.statusFilter = document.getElementById("statusFilter");
+    elements.paymentFilter = document.getElementById("paymentFilter");
+    elements.paginationContainer = document.getElementById("paginationContainer");
     elements.workDate = document.getElementById("workDate");
     elements.workHours = document.getElementById("workHours");
     elements.workDescription = document.getElementById("workDescription");
@@ -129,11 +158,19 @@ function setupEventListeners() {
     // Eventos dos filtros
     elements.sortFilter.addEventListener("change", () => {
         currentSort = elements.sortFilter.value;
+        currentPage = 1;
         renderList();
     });
 
     elements.statusFilter.addEventListener("change", () => {
         currentStatusFilter = elements.statusFilter.value;
+        currentPage = 1;
+        renderList();
+    });
+
+    elements.paymentFilter.addEventListener("change", () => {
+        currentPaymentFilter = elements.paymentFilter.value;
+        currentPage = 1;
         renderList();
     });
 
@@ -290,14 +327,10 @@ function generateInstallments() {
         // Calcula data da parcela
         let installmentDate = "";
         if (firstInstallmentDate) {
-            const date = new Date(firstInstallmentDate);
-            date.setMonth(date.getMonth() + (i - 1));
+            const installmentDateSafe = addMonthsToDateString(firstInstallmentDate, i - 1);
             
             // Formata data manualmente para evitar problema de fuso horário
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            installmentDate = `${year}-${month}-${day}`;
+            installmentDate = installmentDateSafe;
         }
 
         // Calcula juros apenas para cartão com juros
@@ -707,8 +740,12 @@ function loadForm(id, item) {
 // ============================================
 
 function loadList() {
-    const launchesRef = ref(db, "servicos/");
-    onValue(launchesRef, snapshot => {
+    const launchesRef = ref(database, "servicos/");
+    if (typeof stopLaunchesListener === "function") {
+        stopLaunchesListener();
+    }
+
+    stopLaunchesListener = onValue(launchesRef, snapshot => {
         allLaunches = [];
         const data = snapshot.val();
         
@@ -733,6 +770,7 @@ function renderList() {
         emptyMsg.className = "empty-message";
         emptyMsg.textContent = "Nenhum lançamento encontrado.";
         elements.list.appendChild(emptyMsg);
+        renderPagination(0, 0, 0, 0);
         return;
     }
 
@@ -742,6 +780,10 @@ function renderList() {
         filteredLaunches = allLaunches.filter(item => 
             String(item.Status) === currentStatusFilter
         );
+    }
+
+    if (currentPaymentFilter === 'pending') {
+        filteredLaunches = filteredLaunches.filter(item => hasPendingPayment(item));
     }
 
     // Ordenar lançamentos
@@ -798,10 +840,10 @@ function renderList() {
     });
 
     // Limitar número de itens exibidos para melhor performance
-    const MAX_ITEMS_TO_SHOW = 10;
-    const itemsToShow = filteredLaunches.slice(0, MAX_ITEMS_TO_SHOW);
-    
-    // Contador total
+    const totalPages = Math.max(1, Math.ceil(filteredLaunches.length / ITEMS_PER_PAGE));
+    currentPage = Math.min(currentPage, totalPages);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const itemsToShow = filteredLaunches.slice(startIndex, startIndex + ITEMS_PER_PAGE);
     const totalCount = filteredLaunches.length;
     const showingCount = itemsToShow.length;
 
@@ -810,9 +852,10 @@ function renderList() {
         const li = createListItem(item);
         elements.list.appendChild(li);
     });
+    renderPagination(totalCount, showingCount, startIndex, totalPages);
     
     // Adicionar mensagem se houver mais itens
-    if (totalCount > showingCount) {
+    if (false && totalCount > showingCount) {
         const moreItemsMsg = document.createElement("li");
         moreItemsMsg.className = "more-items-message";
         moreItemsMsg.innerHTML = `
@@ -821,6 +864,58 @@ function renderList() {
         `;
         elements.list.appendChild(moreItemsMsg);
     }
+}
+
+function renderPagination(totalCount, showingCount, startIndex, totalPages) {
+    if (!elements.paginationContainer) return;
+
+    elements.paginationContainer.innerHTML = "";
+
+    if (totalCount === 0) {
+        return;
+    }
+
+    const paginationInfo = document.createElement("div");
+    paginationInfo.className = "pagination-info";
+    paginationInfo.textContent = `Mostrando ${startIndex + 1}-${startIndex + showingCount} de ${totalCount} lancamentos`;
+
+    const controls = document.createElement("div");
+    controls.className = "pagination-controls";
+
+    const prevBtn = document.createElement("button");
+    prevBtn.type = "button";
+    prevBtn.className = "pagination-btn";
+    prevBtn.textContent = "Anterior";
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => {
+        if (currentPage > 1) {
+            currentPage -= 1;
+            renderList();
+        }
+    };
+
+    const pageLabel = document.createElement("span");
+    pageLabel.className = "pagination-page";
+    pageLabel.textContent = `Pagina ${currentPage} de ${totalPages}`;
+
+    const nextBtn = document.createElement("button");
+    nextBtn.type = "button";
+    nextBtn.className = "pagination-btn";
+    nextBtn.textContent = "Proxima";
+    nextBtn.disabled = currentPage >= totalPages;
+    nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+            currentPage += 1;
+            renderList();
+        }
+    };
+
+    controls.appendChild(prevBtn);
+    controls.appendChild(pageLabel);
+    controls.appendChild(nextBtn);
+
+    elements.paginationContainer.appendChild(paginationInfo);
+    elements.paginationContainer.appendChild(controls);
 }
 
 function createListItem(item) {
@@ -854,9 +949,7 @@ function createListItem(item) {
         }
     };
     
-    const processedDate = item.ProcessedDate ? 
-        formatDateForDisplay(item.ProcessedDate) : 
-        '<span class="pending-text">PENDENTE</span>';
+    const processedDate = getPaymentDisplayText(item, formatDateForDisplay);
     
     const requestDate = formatDateForDisplay(item.Request);
     const deliveryDate = formatDateForDisplay(item.Delivery);
@@ -864,12 +957,15 @@ function createListItem(item) {
     // Lucro Bruto
     const grossProfit = parseFloat(item.Deposit || 0);
     const netProfit = getNetProfit(item);
+    const totalWorkHours = calculateTotalHours(item.workHistory);
+    const hourlyNetValue = totalWorkHours > 0 ? netProfit / totalWorkHours : 0;
     
     // Informações de parcelamento
     let installmentInfo = "";
     if (item.installmentData && item.installmentData.installmentCount > 1) {
-        const paidCount = item.installmentData.installments ? 
-            item.installmentData.installments.filter(i => i.status === 'paid').length : 0;
+        const paidCount = getPaidInstallmentsCount(item);
+        const installmentCount = getInstallmentCount(item);
+        const isFullyPaid = installmentCount > 0 && paidCount >= installmentCount;
         
         // Determina texto do método de pagamento
         let paymentMethodText = "PIX";
@@ -879,7 +975,7 @@ function createListItem(item) {
             paymentMethodText = "Cartão (c/ juros)";
         }
         
-        installmentInfo = `<br><small>${item.installmentData.installmentCount}x ${paymentMethodText} - ${paidCount}/${item.installmentData.installmentCount} pagas</small>`;
+        installmentInfo = `<br><small>${installmentCount}x ${paymentMethodText} - ${paidCount}/${installmentCount} pagas${isFullyPaid ? ' <span class="paid-text">(quitado)</span>' : ''}</small>`;
     }
 
     // Criar conteúdo do item
@@ -900,6 +996,7 @@ function createListItem(item) {
                 `<span class="history-icon" title="Possui histórico de serviços">📋</span>` : 
                 '<span class="separator">|</span>'} Bruto: R$ ${grossProfit.toFixed(2)} | Líquido: R$ ${netProfit.toFixed(2)} | 
                 <span class="work-hours" style="color: #2196F3; font-weight: bold;">⏱️ ${calculateTotalHoursFromItem(item.workHistory)}</span>
+                <span class="hourly-rate">R$ ${formatCurrencyValue(hourlyNetValue)} / hora</span>
             </small>
         </div>
     `;
@@ -958,6 +1055,79 @@ function calculateTotalHoursFromItem(workHistory) {
     
     if (minutes === 0) return `${hours}h`;
     return `${hours}h ${minutes}min`;
+}
+
+function formatCurrencyValue(value) {
+    return (parseFloat(value) || 0).toFixed(2).replace(".", ",");
+}
+
+function parseDateStringParts(dateString) {
+    if (!dateString || typeof dateString !== "string") return null;
+
+    const match = dateString.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return null;
+
+    return {
+        year: Number(match[1]),
+        month: Number(match[2]),
+        day: Number(match[3])
+    };
+}
+
+function formatDateParts(year, month, day) {
+    return `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function getDaysInMonth(year, month) {
+    return new Date(year, month, 0).getDate();
+}
+
+function addMonthsToDateString(dateString, monthsToAdd) {
+    const parts = parseDateStringParts(dateString);
+    if (!parts) return "";
+
+    const totalMonths = (parts.year * 12) + (parts.month - 1) + monthsToAdd;
+    const targetYear = Math.floor(totalMonths / 12);
+    const targetMonth = (totalMonths % 12) + 1;
+    const maxDay = getDaysInMonth(targetYear, targetMonth);
+    const targetDay = Math.min(parts.day, maxDay);
+
+    return formatDateParts(targetYear, targetMonth, targetDay);
+}
+
+function getInstallmentCount(item) {
+    return parseInt(item?.installmentData?.installmentCount, 10) || 0;
+}
+
+function getPaidInstallmentsCount(item) {
+    const installments = item?.installmentData?.installments || [];
+    return installments.filter(installment => installment?.status === "paid").length;
+}
+
+function isInstallmentFullyPaid(item) {
+    const installmentCount = getInstallmentCount(item);
+    if (installmentCount <= 1) return false;
+    return getPaidInstallmentsCount(item) >= installmentCount;
+}
+
+function hasPendingPayment(item) {
+    if (item?.installmentData && getInstallmentCount(item) > 1) {
+        return !isInstallmentFullyPaid(item);
+    }
+
+    return !item?.ProcessedDate || String(item.ProcessedDate).trim() === "";
+}
+
+function getPaymentDisplayText(item, formatDateForDisplay) {
+    if (item?.ProcessedDate && String(item.ProcessedDate).trim() !== "") {
+        return formatDateForDisplay(item.ProcessedDate);
+    }
+
+    if (isInstallmentFullyPaid(item)) {
+        return '<span class="paid-text">QUITADO</span>';
+    }
+
+    return '<span class="pending-text">PENDENTE</span>';
 }
 
 function generateId() {
@@ -1020,7 +1190,7 @@ async function deleteLaunch(id, itemName) {
     }
     
     try {
-        await remove(ref(db, "servicos/" + id));
+        await remove(ref(database, "servicos/" + id));
         alert("Lançamento excluído com sucesso!");
         loadList();
     } catch (error) {
@@ -1131,7 +1301,7 @@ async function saveNewLaunch() {
     
     try {
         const id = generateId();
-        await set(ref(db, "servicos/" + id), obj);
+        await set(ref(database, "servicos/" + id), obj);
         alert("Lançamento salvo com sucesso!");
         clearForm();
         loadList();
@@ -1151,7 +1321,7 @@ async function updateLaunch() {
     const obj = collectFormData();
     
     try {
-        await update(ref(db, "servicos/" + selectedId), obj);
+        await update(ref(database, "servicos/" + selectedId), obj);
         alert("Lançamento alterado com sucesso!");
         clearForm();
         loadList();
