@@ -25,9 +25,17 @@ class AppCore {
                 loader: () => import("./contas-casa-saida.js"),
                 method: "initContasCasaSaida"
             },
+            "contas_casa_atrasadas.html": {
+                loader: () => import("./contas-casa-saida.js"),
+                method: "initContasCasaAtrasadas"
+            },
+            "contas_casa_excluidas.html": {
+                loader: () => import("./contas-casa-saida.js"),
+                method: "initContasCasaExcluidas"
+            },
             "contas_casa_entrada.html": {
-                loader: null,
-                method: null
+                loader: () => import("./contas-casa-entrada.js"),
+                method: "initContasCasaEntrada"
             }
         };
     }

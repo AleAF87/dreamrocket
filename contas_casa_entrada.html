@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Contas Casa - Entrada</title>
 
+    <link rel="icon" type="image/png" href="img/logo.png">
     <link rel="stylesheet" href="css/style.css">
     <script>
         if (!window.location.pathname.includes("app.html")) {
@@ -14,11 +15,198 @@
     </script>
 </head>
 <body>
-    <h2>Contas Casa - Entrada</h2>
+    <div class="contas-casa-layout entrada-layout">
+        <div class="list-area">
+            <div class="section-header-inline">
+                <h2>Contas Casa - Entrada</h2>
+            </div>
 
-    <div class="status-message">
-        <h3>Modulo em preparacao</h3>
-        <p>Esta area foi reservada para o controle de entradas particulares.</p>
+            <div class="month-navigation-card entrada-period-card">
+                <div class="month-navigation-controls entrada-period-controls">
+                    <div class="filter-group entrada-search-inline">
+                        <label for="entradaSearchInput">Buscar por título ou observação</label>
+                        <input id="entradaSearchInput" class="filter-select" placeholder="Digite para filtrar as entradas">
+                    </div>
+                    <button id="entradaPrevMonthBtn" class="btn-secondary" type="button">Mês anterior</button>
+                    <div class="filter-group">
+                        <label for="entradaPeriodoInicio">Período inicial</label>
+                        <input id="entradaPeriodoInicio" type="date" class="filter-select">
+                    </div>
+                    <div class="filter-group">
+                        <label for="entradaPeriodoFim">Período final</label>
+                        <input id="entradaPeriodoFim" type="date" class="filter-select">
+                    </div>
+                    <button id="entradaNextMonthBtn" class="btn-secondary" type="button">Próximo mês</button>
+                    <button id="novaEntradaBtn" type="button" class="btn-success">Novo lançamento</button>
+                </div>
+            </div>
+
+            <div id="entradaSummaryCards" class="entrada-summary-cards">
+                <div class="contas-summary-card entrada-summary-card entrada-summary-card-gross">
+                    <strong>Total bruto</strong>
+                    <span id="entradaResumoBrutoRecebido">R$ 0,00</span>
+                    <small>Selecionados: <span id="entradaResumoBruto">R$ 0,00</span></small>
+                </div>
+                <div class="contas-summary-card entrada-summary-card entrada-summary-card-discount">
+                    <strong>Total descontos</strong>
+                    <span id="entradaResumoDescontoRecebido">R$ 0,00</span>
+                    <small>Selecionados: <span id="entradaResumoDesconto">R$ 0,00</span></small>
+                </div>
+                <div class="contas-summary-card entrada-summary-card entrada-summary-card-net">
+                    <strong>Total líquido</strong>
+                    <span id="entradaResumoLiquidoRecebido">R$ 0,00</span>
+                    <small>Selecionados: <span id="entradaResumoLiquido">R$ 0,00</span></small>
+                </div>
+                <div class="contas-summary-card entrada-summary-card entrada-summary-card-primicia">
+                    <strong>Primícia</strong>
+                    <div class="entrada-percentual-fields">
+                        <label for="entradaPrimiciaPerc">%</label>
+                        <input id="entradaPrimiciaPerc" type="number" min="0" step="0.01" class="filter-select entrada-percentual-input" value="0">
+                        <label for="entradaPrimiciaValor">Divisor</label>
+                        <input id="entradaPrimiciaValor" type="number" min="0" step="0.01" class="filter-select entrada-percentual-input" value="0">
+                    </div>
+                    <span id="entradaPrimiciaRecebido">R$ 0,00</span>
+                    <small>Selecionados: <span id="entradaPrimiciaSelecionado">R$ 0,00</span></small>
+                </div>
+                <div class="contas-summary-card entrada-summary-card entrada-summary-card-dizimo">
+                    <strong>Dízimo</strong>
+                    <div class="entrada-percentual-fields">
+                        <label for="entradaDizimoPerc">%</label>
+                        <input id="entradaDizimoPerc" type="number" min="0" step="0.01" class="filter-select entrada-percentual-input" value="0">
+                        <label for="entradaDizimoValor">Divisor</label>
+                        <input id="entradaDizimoValor" type="number" min="0" step="0.01" class="filter-select entrada-percentual-input" value="0">
+                    </div>
+                    <span id="entradaDizimoRecebido">R$ 0,00</span>
+                    <small>Selecionados: <span id="entradaDizimoSelecionado">R$ 0,00</span></small>
+                </div>
+            </div>
+
+            <div class="contas-table-wrapper">
+                <table class="contas-table entradas-table">
+                    <thead>
+                        <tr>
+                            <th>Ordem</th>
+                            <th>Sel.</th>
+                            <th>Título</th>
+                            <th>Data</th>
+                            <th>Valor bruto</th>
+                            <th>Valor desconto</th>
+                            <th>Valor líquido</th>
+                            <th>Status</th>
+                            <th>Observação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="entradasTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="entradaModal" class="contas-modal" style="display: none;">
+        <div class="contas-modal-content entrada-modal-content">
+            <div class="modal-header">
+                <h3 id="entradaModalTitle">Novo lançamento</h3>
+                <button id="closeEntradaModalBtn" type="button" class="close-modal">&times;</button>
+            </div>
+
+            <div class="form-grid contas-casa-form entrada-main-form">
+                <div>
+                    <label for="entradaTitulo">Título</label>
+                    <input id="entradaTitulo" type="text" placeholder="Ex.: Holerite Abril">
+                </div>
+
+                <div>
+                    <label for="entradaData">Data</label>
+                    <input id="entradaData" type="date">
+                </div>
+
+                <div>
+                    <label for="entradaStatus">Status</label>
+                    <select id="entradaStatus">
+                        <option value="pendente">Não recebido</option>
+                        <option value="recebido">Recebido</option>
+                        <option value="dispensado">Dispensado</option>
+                    </select>
+                </div>
+
+                <div class="observation-container">
+                    <label for="entradaObservacao">Observação geral</label>
+                    <textarea id="entradaObservacao" placeholder="Observação geral do lançamento"></textarea>
+                </div>
+            </div>
+
+            <section class="entrada-itens-section">
+                <div class="section-header-inline">
+                    <h4>Acréscimos</h4>
+                    <button id="addEntradaAcrescimoBtn" type="button" class="btn-secondary">Adicionar acréscimo</button>
+                </div>
+                <div class="contas-table-wrapper">
+                    <table class="contas-table entrada-itens-table">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Qtde</th>
+                                <th>Valor unitário</th>
+                                <th>Valor total</th>
+                                <th>Observação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="entradaAcrescimosBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="entrada-itens-section">
+                <div class="section-header-inline">
+                    <h4>Descontos</h4>
+                    <button id="addEntradaDescontoBtn" type="button" class="btn-secondary">Adicionar desconto</button>
+                </div>
+                <div class="contas-table-wrapper">
+                    <table class="contas-table entrada-itens-table">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Qtde</th>
+                                <th>Valor unitário</th>
+                                <th>Valor total</th>
+                                <th>Observação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="entradaDescontosBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <div class="entrada-totals-grid">
+                <div><strong>Valor bruto</strong><span id="entradaTotalBruto">R$ 0,00</span></div>
+                <div><strong>Descontos</strong><span id="entradaTotalDesconto">R$ 0,00</span></div>
+                <div><strong>Valor líquido</strong><span id="entradaTotalLiquido">R$ 0,00</span></div>
+            </div>
+
+            <div class="button-group entrada-modal-actions">
+                <button id="saveEntradaBtn" type="button" class="btn-success">Salvar</button>
+                <button id="cancelEntradaBtn" type="button" class="btn-secondary">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="entradaPercentualModal" class="contas-modal" style="display: none;">
+        <div class="contas-modal-content entrada-percentual-modal-content">
+            <div class="modal-header">
+                <h3>Alterar percentual</h3>
+                <button id="closeEntradaPercentualModalBtn" type="button" class="close-modal">&times;</button>
+            </div>
+
+            <p id="entradaPercentualModalText" class="modal-helper-text"></p>
+
+            <div class="button-group entrada-modal-actions">
+                <button id="entradaPercentualOnlyMonthBtn" type="button" class="btn-secondary">Alterar somente deste mês</button>
+                <button id="entradaPercentualFromMonthBtn" type="button" class="btn-success">Alterar deste mês em diante</button>
+            </div>
+        </div>
     </div>
 </body>
 </html>

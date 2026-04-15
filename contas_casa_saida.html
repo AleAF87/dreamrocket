@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Contas Casa - Saida</title>
+    <title>Contas Casa - Saída</title>
 
+    <link rel="icon" type="image/png" href="img/logo.png">
     <link rel="stylesheet" href="css/style.css">
     <script>
         if (!window.location.pathname.includes("app.html")) {
@@ -14,21 +15,46 @@
     </script>
 </head>
 <body>
-    <h2>Contas Casa - Saida</h2>
+    <h2>Contas Casa - Saída</h2>
 
-    <div class="contas-casa-layout">
+    <div class="contas-casa-layout contas-casa-layout-wide">
         <div class="list-area">
             <h3>Contas cadastradas</h3>
 
-            <div class="filters-container contas-filtros">
-                <div class="filter-checkboxes">
-                    <label><input type="checkbox" id="filterAbertas" checked> Abertas</label>
-                    <label><input type="checkbox" id="filterQuitadas" checked> Quitadas</label>
-                    <label><input type="checkbox" id="filterFixas" checked> Fixas</label>
+            <div class="month-navigation-card">
+                <div class="month-navigation-controls">
+                    <button id="prevMonthBtn" class="btn-secondary" type="button">Mês anterior</button>
+                    <strong id="currentMonthLabel">-</strong>
+                    <button id="nextMonthBtn" class="btn-secondary" type="button">Próximo mês</button>
+                    <div class="month-jump-control">
+                        <label for="viewMonthSelect">Ir para mês/ano</label>
+                        <input type="month" id="viewMonthSelect" class="filter-select">
+                    </div>
                 </div>
-                <div class="filter-group">
-                    <label for="searchContaInput">Buscar por titulo</label>
-                    <input id="searchContaInput" class="filter-select" placeholder="Digite o nome da conta">
+                <div id="monthActionWarning" class="month-action-warning" style="display: none;"></div>
+            </div>
+
+            <div class="contas-filters-summary-row">
+                <div class="filters-container contas-filtros">
+                    <div class="filter-checkboxes">
+                        <label><input type="checkbox" id="filterQuitadas" checked> Quitadas</label>
+                        <label><input type="checkbox" id="filterFixas" checked> Fixas</label>
+                        <label><input type="checkbox" id="filterParceladas" checked> Parceladas</label>
+                        <label><input type="checkbox" id="filterCartoes" checked> Cartões</label>
+                        <label><input type="checkbox" id="filterAtrasadasStatus" checked> Atrasadas</label>
+                        <label><input type="checkbox" id="filterPagasStatus" checked> Pagas</label>
+                        <label><input type="checkbox" id="filterPendentesStatus" checked> Pendentes</label>
+                    </div>
+                    <div class="filter-group">
+                        <label for="searchContaInput">Buscar por título</label>
+                        <input id="searchContaInput" class="filter-select" placeholder="Digite o nome da conta">
+                    </div>
+                </div>
+
+                <div id="contasMonthSummary" class="contas-month-summary">
+                    <div class="contas-summary-card"><strong>Total fixas</strong><span>R$ 0,00</span></div>
+                    <div class="contas-summary-card"><strong>Total parc</strong><span>R$ 0,00</span></div>
+                    <div class="contas-summary-card"><strong>Total</strong><span>R$ 0,00</span></div>
                 </div>
             </div>
 
@@ -36,14 +62,27 @@
                 <table class="contas-table">
                     <thead>
                         <tr>
-                            <th>Titulo</th>
-                            <th>Categoria</th>
-                            <th>Mensal</th>
-                            <th>Prazo</th>
-                            <th>Parcelas</th>
-                            <th>Pago em</th>
-                            <th>Pago por</th>
-                            <th>Acoes</th>
+                            <th rowspan="2">Título</th>
+                            <th colspan="4" class="parcelamento-group-header">Parcelamento</th>
+                            <th rowspan="2">Valor mensal</th>
+                            <th class="juros-group-header">Juros por atraso</th>
+                            <th rowspan="2">Valor c/ juros</th>
+                            <th rowspan="2">Valor pago</th>
+                            <th rowspan="2">Prazo</th>
+                            <th rowspan="2">Data pag.</th>
+                            <th rowspan="2">Pago por</th>
+                            <th rowspan="2">Link</th>
+                            <th rowspan="2">Valor p/ quitar</th>
+                            <th rowspan="2">Observações</th>
+                            <th rowspan="2">Status</th>
+                            <th rowspan="2">Ações</th>
+                        </tr>
+                        <tr>
+                            <th class="parcelamento-col">Qtde de parcelas</th>
+                            <th class="parcelamento-col">Parcela do mês</th>
+                            <th class="parcelamento-col">Pagas</th>
+                            <th class="parcelamento-col">Qtde que restam</th>
+                            <th class="juros-subheader"><span>Perc</span><span>Valor</span></th>
                         </tr>
                     </thead>
                     <tbody id="contasCasaTableBody"></tbody>
@@ -52,107 +91,356 @@
         </div>
 
         <div class="form-area">
-            <h3>Nova conta / editar</h3>
+            <section class="contas-section-card contas-cadastro-card">
+                <h3>Nova conta / editar</h3>
+
+                <div class="form-grid contas-casa-form contas-cadastro-form">
+                    <div>
+                        <label for="tipoConta">Tipo da conta</label>
+                        <select id="tipoConta">
+                            <option value="parcelada">Parcelada</option>
+                            <option value="fixa">Fixa</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="titulo">Título</label>
+                        <input id="titulo" placeholder="Nome da conta">
+                    </div>
+
+                    <div>
+                        <label for="dataPrimeiraParcela">Data da 1ª parcela</label>
+                        <input type="date" id="dataPrimeiraParcela">
+                    </div>
+
+                    <div>
+                        <label for="formaPagamento">Forma de pagamento</label>
+                        <select id="formaPagamento">
+                            <option value="direto">Direto</option>
+                            <option value="cartao">Cartão</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="cartaoContaId">Cartão</label>
+                        <select id="cartaoContaId"></select>
+                    </div>
+
+                    <div id="contaFixaMesUnicoWrapper" style="display: none;">
+                        <label for="contaFixaMesUnico">Conta fixa sÃ³ deste mÃªs</label>
+                        <select id="contaFixaMesUnico">
+                            <option value="nao">NÃ£o</option>
+                            <option value="sim">Sim</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="parceladoTotal">Qtde de parcelas</label>
+                        <input type="number" id="parceladoTotal" min="0" step="1" placeholder="0">
+                    </div>
+
+                    <div>
+                        <label for="parceladoPagas">Parcela do mês</label>
+                        <input type="number" id="parceladoPagas" min="0" step="1" placeholder="0" readonly>
+                    </div>
+
+                    <div>
+                        <label for="parceladoPagasTotal">Parcelas pagas</label>
+                        <input type="number" id="parceladoPagasTotal" min="0" step="1" placeholder="0" readonly>
+                    </div>
+
+                    <div>
+                        <label for="parceladoSaldo">Qtde que restam</label>
+                        <input type="number" id="parceladoSaldo" min="0" step="1" placeholder="0" readonly>
+                    </div>
+
+                    <div>
+                        <label for="valorMensal">Valor mensal</label>
+                        <input type="number" id="valorMensal" min="0" step="0.01" placeholder="0.00">
+                    </div>
+
+                    <div>
+                        <label for="prazoDia">Dia prazo</label>
+                        <input type="number" id="prazoDia" min="1" max="31" step="1" placeholder="Ex: 10">
+                    </div>
+
+                    <div>
+                        <label for="linkConta">Link da conta</label>
+                        <input type="url" id="linkConta" placeholder="https://...">
+                    </div>
+
+                    <div>
+                        <label for="quitarJuros">P/ quitar (c/ juros)</label>
+                        <input type="number" id="quitarJuros" min="0" step="0.01" placeholder="0.00" readonly>
+                    </div>
+
+                    <div>
+                        <label for="quitarDesconto">Quitar (c/ desconto)</label>
+                        <input type="number" id="quitarDesconto" min="0" step="0.01" placeholder="0.00">
+                    </div>
+
+                    <div class="observation-container conta-observacao-field">
+                        <label for="observacao">Observação</label>
+                        <textarea id="observacao" placeholder="Observações extras..."></textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="saveContaBtn" class="btn-success">Salvar nova</button>
+                        <button id="updateContaBtn" class="btn-primary" style="display: none;">Salvar</button>
+                        <button id="clearContaBtn" class="btn-danger">Limpar</button>
+                    </div>
+
+                    <div class="form-section-divider"></div>
+
+                    <div id="parcelasManagementSection" class="observation-container" style="display: none;">
+                        <label>Parcelas não pagas / baixa em massa</label>
+                        <div class="parcelas-bulk-toolbar">
+                            <div class="parcelas-bulk-fields">
+                                <input type="month" id="parcelasRangeStart" placeholder="Início">
+                                <input type="month" id="parcelasRangeEnd" placeholder="Fim">
+                            </div>
+                            <button id="parcelasSelectRangeBtn" type="button" class="btn-secondary">Selecionar faixa</button>
+                            <button id="parcelasClearSelectionBtn" type="button" class="btn-secondary">Limpar seleção</button>
+                        </div>
+                        <div id="parcelasManagementList" class="parcelas-management-list"></div>
+                        <div class="parcelas-bulk-actions">
+                            <input type="number" id="parcelasBulkPaymentDay" min="1" max="28" step="1" placeholder="Dia pagamento">
+                            <select id="parcelasBulkPaidBy">
+                                <option value="">Pago por</option>
+                                <option value="eu">Eu</option>
+                                <option value="conjuge">Cônjuge</option>
+                                <option value="ambos">Ambos</option>
+                                <option value="outro">Outro</option>
+                            </select>
+                            <button id="parcelasApplyPaymentBtn" type="button" class="btn-success">Lançar pagamento das selecionadas</button>
+                            <button id="parcelasApplyLateBtn" type="button" class="btn-secondary">Lançar atrasadas das selecionadas</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="contas-cartoes-group">
+            <section class="contas-section-card">
+                <h3>Cartões cadastrados</h3>
+
+                <div class="form-grid contas-casa-form cartoes-cadastro-form">
+                    <div>
+                        <label for="cartaoTitulo">Título</label>
+                        <input id="cartaoTitulo" placeholder="Ex: Nubank">
+                    </div>
+
+                    <div>
+                        <label for="cartaoUltimosDigitos">4 últimos dígitos</label>
+                        <input id="cartaoUltimosDigitos" maxlength="4" inputmode="numeric" placeholder="0000">
+                    </div>
+
+                    <div>
+                        <label for="cartaoVencimentoDia">Dia do vencimento</label>
+                        <input type="number" id="cartaoVencimentoDia" min="1" max="31" step="1" placeholder="Ex: 10">
+                    </div>
+
+                    <div>
+                        <label for="cartaoMelhorDiaCompra">Melhor dia para compra</label>
+                        <input type="number" id="cartaoMelhorDiaCompra" min="1" max="31" step="1" placeholder="Ex: 6">
+                    </div>
+
+                    <div class="button-group">
+                        <button id="saveCartaoBtn" class="btn-success">Salvar cartão</button>
+                        <button id="updateCartaoBtn" class="btn-primary" style="display: none;">Atualizar cartão</button>
+                        <button id="clearCartaoBtn" class="btn-danger">Limpar</button>
+                    </div>
+                </div>
+
+                <div class="contas-table-wrapper">
+                    <table class="contas-table">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Dígitos</th>
+                                <th>Vencimento</th>
+                                <th>Melhor dia</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartoesTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="contas-section-card">
+                <div class="section-header-inline">
+                    <h3>Faturas dos cartões</h3>
+                    <div id="faturaCompetenciaLabel" class="fatura-competencia-label">-</div>
+                </div>
+
+                <div class="contas-table-wrapper">
+                    <table class="contas-table cartoes-faturas-table">
+                        <thead>
+                            <tr>
+                                <th>Cartão</th>
+                                <th>Lançamentos</th>
+                                <th>Saldo anterior</th>
+                                <th>Juros</th>
+                                <th>Total fatura</th>
+                                <th>Pago no mês</th>
+                                <th>Saldo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartoesFaturasTableBody"></tbody>
+                    </table>
+                </div>
+
+                <div id="faturaDetailsSection" class="fatura-details-section" style="display: none;">
+                    <h4 id="faturaDetailsTitle">Detalhes da fatura</h4>
+                    <div id="faturaSummary" class="fatura-summary-grid"></div>
+                    <div class="contas-table-wrapper">
+                        <table class="contas-table fatura-lancamentos-table">
+                            <thead>
+                                <tr>
+                                    <th>Título</th>
+                                    <th>Descrição</th>
+                                    <th>Vencimento</th>
+                                    <th>Valor</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="faturaLancamentos"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="form-grid contas-casa-form fatura-details-form">
+                        <div>
+                            <label for="faturaValorPago">Valor pago no mês</label>
+                            <input type="number" id="faturaValorPago" min="0" step="0.01" placeholder="0.00">
+                        </div>
+
+                        <div>
+                            <label for="faturaJurosValor">Juros valor</label>
+                            <input type="number" id="faturaJurosValor" min="0" step="0.01" placeholder="0.00">
+                        </div>
+
+                        <div>
+                            <label for="faturaJurosPerc">Juros %</label>
+                            <input type="number" id="faturaJurosPerc" min="0" step="0.01" placeholder="0.00">
+                        </div>
+
+                        <div class="button-group">
+                            <button id="saveFaturaBtn" class="btn-success">Salvar fatura</button>
+                            <button id="clearFaturaBtn" class="btn-secondary">Fechar detalhes</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div id="mensalidadeModal" class="contas-modal" style="display: none;">
+        <div class="contas-modal-content">
+            <div class="modal-header">
+                <h3>Alterar mensalidade</h3>
+                <button id="closeMensalidadeModalBtn" type="button" class="close-modal">&times;</button>
+            </div>
 
             <div class="form-grid contas-casa-form">
                 <div>
-                    <label for="tipoConta">Tipo da conta</label>
-                    <select id="tipoConta">
-                        <option value="parcelada">Parcelada</option>
-                        <option value="fixa">Fixa</option>
+                    <label for="mensalidadeValorAtual">Valor atual</label>
+                    <input type="number" id="mensalidadeValorAtual" readonly>
+                </div>
+
+                <div>
+                    <label for="mensalidadeEscopo">Aplicar alteração</label>
+                    <select id="mensalidadeEscopo">
+                        <option value="somente_mes">Somente este mês</option>
+                        <option value="mes_em_diante">Este mês em diante</option>
                     </select>
                 </div>
 
                 <div>
-                    <label for="titulo">Titulo</label>
-                    <input id="titulo" placeholder="Nome da conta">
-                </div>
-
-                <div>
-                    <label for="dataContrato">Data contrato</label>
-                    <input type="date" id="dataContrato">
-                </div>
-
-                <div>
-                    <label for="parceladoTotal">Parcelado / total</label>
-                    <input type="number" id="parceladoTotal" min="0" step="1" placeholder="0">
-                </div>
-
-                <div>
-                    <label for="parceladoPagas">Parcelado / pagas</label>
-                    <input type="number" id="parceladoPagas" min="0" step="1" placeholder="0">
-                </div>
-
-                <div>
-                    <label for="parceladoSaldo">Parcelado / saldo</label>
-                    <input type="number" id="parceladoSaldo" min="0" step="1" placeholder="0">
-                </div>
-
-                <div>
-                    <label for="valorMensal">Valor mensal</label>
-                    <input type="number" id="valorMensal" min="0" step="0.01" placeholder="0.00">
-                </div>
-
-                <div>
-                    <label for="jurosAtrasoValor">Juros atraso valor</label>
-                    <input type="number" id="jurosAtrasoValor" min="0" step="0.01" placeholder="0.00">
-                </div>
-
-                <div>
-                    <label for="jurosAtrasoPerc">Juros atraso %</label>
-                    <input type="number" id="jurosAtrasoPerc" min="0" step="0.01" placeholder="0.00">
-                </div>
-
-                <div>
-                    <label for="valorComJuros">Valor c/ juros</label>
-                    <input type="number" id="valorComJuros" min="0" step="0.01" placeholder="0.00">
-                </div>
-
-                <div>
-                    <label for="prazoDia">Prazo dia</label>
-                    <input type="number" id="prazoDia" min="1" max="31" step="1" placeholder="Ex: 10">
-                </div>
-
-                <div>
-                    <label for="pagoData">Pago data</label>
-                    <input type="date" id="pagoData">
-                </div>
-
-                <div>
-                    <label for="pagoPor">Pago por</label>
-                    <select id="pagoPor">
-                        <option value="">Selecione</option>
-                        <option value="eu">Eu</option>
-                        <option value="conjuge">Conjuge</option>
-                        <option value="ambos">Ambos</option>
-                        <option value="outro">Outro</option>
+                    <label for="mensalidadeOperacao">Operação</label>
+                    <select id="mensalidadeOperacao">
+                        <option value="adicionar">Adicionar</option>
+                        <option value="subtrair">Subtrair</option>
                     </select>
                 </div>
 
                 <div>
-                    <label for="linkConta">Link da conta</label>
-                    <input type="url" id="linkConta" placeholder="https://...">
+                    <label for="mensalidadeValorAlteracao">Valor da alteração</label>
+                    <input type="number" id="mensalidadeValorAlteracao" min="0" step="0.01" placeholder="0.00">
                 </div>
 
                 <div>
-                    <label for="quitarJuros">Quitar juros</label>
-                    <input type="number" id="quitarJuros" min="0" step="0.01" placeholder="0.00">
-                </div>
-
-                <div>
-                    <label for="quitarDesconto">Quitar desconto</label>
-                    <input type="number" id="quitarDesconto" min="0" step="0.01" placeholder="0.00">
+                    <label for="mensalidadeResultado">Novo valor</label>
+                    <input type="number" id="mensalidadeResultado" readonly>
                 </div>
 
                 <div class="observation-container">
-                    <label for="observacao">Observacao</label>
-                    <textarea id="observacao" placeholder="Observacoes extras..."></textarea>
+                    <label for="mensalidadeMotivo">Motivo da alteração</label>
+                    <textarea id="mensalidadeMotivo" placeholder="Informe o motivo..."></textarea>
+                </div>
+
+                <div class="button-group mensalidade-actions">
+                    <button id="saveMensalidadeChangeBtn" class="btn-success" type="button">Salvar alteração</button>
+                    <button id="cancelMensalidadeChangeBtn" class="btn-secondary" type="button">Cancelar</button>
+                </div>
+
+                <div class="observation-container">
+                    <label>Alterações realizadas</label>
+                    <div id="mensalidadeChangesList" class="mensalidade-changes-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="anexosContaModal" class="contas-modal" style="display: none;">
+        <div class="contas-modal-content">
+            <div class="modal-header">
+                <h3 id="anexosContaTitle">Anexos da conta</h3>
+                <button id="closeAnexosContaModalBtn" type="button" class="close-modal">&times;</button>
+            </div>
+
+            <div class="anexos-conta-body">
+                <div>
+                    <label for="anexosContaInput">Adicionar imagem ou PDF</label>
+                    <input id="anexosContaInput" type="file" multiple accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf">
+                    <small>Você pode enviar mais de um anexo por conta.</small>
+                </div>
+
+                <div id="anexosContaList" class="anexos-conta-list"></div>
+
+                <div class="button-group">
+                    <button id="uploadAnexosContaBtn" type="button" class="btn-success">Enviar anexos</button>
+                    <button id="cancelAnexosContaBtn" type="button" class="btn-secondary">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteContaModal" class="contas-modal" style="display: none;">
+        <div class="contas-modal-content contas-delete-modal-content">
+            <div class="modal-header">
+                <h3>Excluir conta</h3>
+                <button id="closeDeleteContaModalBtn" type="button" class="close-modal">&times;</button>
+            </div>
+
+            <div class="form-grid contas-casa-form">
+                <div class="observation-container">
+                    <p id="deleteContaTitle" class="modal-helper-text"></p>
+                </div>
+
+                <div class="observation-container">
+                    <label for="deleteContaScope">O que deseja excluir?</label>
+                    <select id="deleteContaScope">
+                        <option value="somente_mes">Somente o mês corrente</option>
+                        <option value="mes_em_diante">Mês corrente e futuras</option>
+                        <option value="todas">Todas, anteriores e futuras</option>
+                    </select>
                 </div>
 
                 <div class="button-group">
-                    <button id="saveContaBtn" class="btn-success">Salvar nova</button>
-                    <button id="updateContaBtn" class="btn-primary" style="display: none;">Atualizar</button>
-                    <button id="clearContaBtn" class="btn-danger">Limpar</button>
+                    <button id="confirmDeleteContaBtn" class="btn-danger" type="button">Confirmar exclusão</button>
+                    <button id="cancelDeleteContaBtn" class="btn-secondary" type="button">Cancelar</button>
                 </div>
             </div>
         </div>

@@ -65,6 +65,18 @@ function setupDropdown() {
         });
     }
 
+    document.querySelectorAll(".nav-center a, .nav-dropdown-menu a").forEach((link) => {
+        if (link.dataset.closeDropdownBound === "true") {
+            return;
+        }
+
+        link.dataset.closeDropdownBound = "true";
+        link.addEventListener("click", () => {
+            dropdownWrapper.classList.remove("open");
+            contasCasaWrapper?.classList.remove("open");
+        });
+    });
+
     if (!document.body.dataset.userDropdownBound) {
         document.body.dataset.userDropdownBound = "true";
         document.addEventListener("click", (event) => {
@@ -114,7 +126,7 @@ function updateNavbarActiveMenu(pageUrl = "dashboard.html") {
         link.classList.toggle("active", isActive);
     });
 
-    const contasCasaLinks = ["contas_casa_saida.html", "contas_casa_entrada.html"];
+    const contasCasaLinks = ["contas_casa_saida.html", "contas_casa_atrasadas.html", "contas_casa_excluidas.html", "contas_casa_entrada.html"];
     const contasCasaWrapper = document.getElementById("navContasCasa");
     if (contasCasaWrapper) {
         contasCasaWrapper.classList.toggle("active", contasCasaLinks.includes(pageUrl));

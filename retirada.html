@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Controle de Saques - Dream Rocket</title>
+    <title>Retirada - Dream Rocket</title>
 
+    <link rel="icon" type="image/png" href="img/logo.png">
     <link rel="stylesheet" href="css/style.css">
     <script>
         if (!window.location.pathname.includes("app.html")) {
@@ -14,52 +15,102 @@
     </script>
 </head>
 <body>
-    <h2>Controle de Saques</h2>
-
-    <div class="retirada-container">
-        <div class="list-area">
-            <h3>Ultimos Saques</h3>
-            <div class="total-info">
-                <small>Total do Mes: <strong id="monthTotal">R$ 0,00</strong></small>
+    <div class="retirada-page">
+        <div class="section-header-inline retirada-header">
+            <div>
+                <h2>Retirada</h2>
+                <p>Valor disponível com base no lucro líquido da empresa.</p>
             </div>
-            <ul id="withdrawalList" class="list"></ul>
+            <button id="openRetiradaModalBtn" type="button" class="btn-success">Novo saque</button>
         </div>
 
-        <div class="form-area">
-            <h3>Novo Saque / Editar</h3>
-
-            <div class="form-grid">
-                <label>Data do Saque</label>
-                <input type="date" id="WithdrawalDate" data-field required>
-
-                <input id="Description" data-field placeholder="Descricao do saque" required>
-
-                <input type="number" id="Amount" data-field placeholder="Valor (R$)" step="0.01" min="0.01" required>
-
-                <label>Categoria</label>
-                <select id="Category" data-field>
-                    <option value="pessoal">Pessoal</option>
-                    <option value="empresa">Empresa</option>
-                    <option value="investimento">Investimento</option>
-                    <option value="outros">Outros</option>
-                </select>
-
-                <label>Metodo de Saque</label>
-                <select id="Method" data-field>
-                    <option value="pix">PIX</option>
-                    <option value="ted">TED/DOC</option>
-                    <option value="dinheiro">Dinheiro</option>
-                    <option value="cartao">Cartao</option>
-                    <option value="outro">Outro</option>
-                </select>
-
-                <textarea id="Notes" data-field placeholder="Observacoes (opcional)"></textarea>
-
-                <div class="button-group" style="grid-column: span 2;">
-                    <button id="saveBtn" class="save-btn btn-success">Salvar Novo</button>
-                    <button id="updateBtn" class="update-btn btn-primary" style="display: none;">Alterar</button>
-                    <button id="clearBtn" class="clear-btn btn-danger" style="display: none;">Limpar Campos</button>
+        <div class="month-navigation-card retirada-period-card">
+            <div class="month-navigation-controls retirada-period-controls">
+                <button id="retiradaPrevMonthBtn" class="btn-secondary" type="button">Mês anterior</button>
+                <div class="filter-group">
+                    <label for="retiradaPeriodoInicio">Período inicial</label>
+                    <input id="retiradaPeriodoInicio" type="date" class="filter-select">
                 </div>
+                <div class="filter-group">
+                    <label for="retiradaPeriodoFim">Período final</label>
+                    <input id="retiradaPeriodoFim" type="date" class="filter-select">
+                </div>
+                <button id="retiradaNextMonthBtn" class="btn-secondary" type="button">Próximo mês</button>
+            </div>
+        </div>
+
+        <div class="retirada-summary-cards">
+            <div class="contas-summary-card retirada-summary-card retirada-summary-profit">
+                <strong>Total da empresa</strong>
+                <span id="retiradaLucroLiquido">R$ 0,00</span>
+                <small>Lucro líquido de toda a existência</small>
+                <small>Mês selecionado: <span id="retiradaLucroMesAtual">R$ 0,00</span></small>
+                <small>Mês anterior: <span id="retiradaLucroMesAnterior">R$ 0,00</span></small>
+            </div>
+            <div class="contas-summary-card retirada-summary-card retirada-summary-withdrawn">
+                <strong>Já sacado</strong>
+                <span id="retiradaTotalSacado">R$ 0,00</span>
+                <small id="retiradaTotalSacadoInfo">Toda a existência</small>
+            </div>
+            <div class="contas-summary-card retirada-summary-card retirada-summary-available">
+                <strong>Disponível</strong>
+                <span id="retiradaSaldoDisponivel">R$ 0,00</span>
+                <small>Disponível de toda a existência</small>
+            </div>
+        </div>
+
+        <section class="list-area retirada-list-area">
+            <div class="section-header-inline">
+                <h3>Saques lançados</h3>
+                <small id="retiradaPeriodoLabel">-</small>
+            </div>
+            <div class="contas-table-wrapper">
+                <table class="contas-table retirada-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Título</th>
+                            <th>Valor</th>
+                            <th>Observação</th>
+                            <th>Entrada</th>
+                        </tr>
+                    </thead>
+                    <tbody id="retiradasTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <div id="retiradaModal" class="contas-modal" style="display: none;">
+        <div class="contas-modal-content retirada-modal-content">
+            <div class="modal-header">
+                <h3>Novo saque</h3>
+                <button id="closeRetiradaModalBtn" type="button" class="close-modal">&times;</button>
+            </div>
+
+            <div class="form-grid retirada-form-grid">
+                <div>
+                    <label for="retiradaValor">Valor</label>
+                    <input id="retiradaValor" type="number" step="0.01" min="0.01" placeholder="0,00">
+                </div>
+                <div>
+                    <label for="retiradaData">Data</label>
+                    <input id="retiradaData" type="date">
+                </div>
+                <div class="observation-container">
+                    <label for="retiradaObservacao">Observação</label>
+                    <textarea id="retiradaObservacao" placeholder="Observação do saque"></textarea>
+                </div>
+            </div>
+
+            <p class="modal-helper-text">
+                Ao salvar, o valor será lançado em Contas Casa - Entrada como
+                <strong>Dream Rocket - Alexandre</strong>, item <strong>Recebimentos</strong>.
+            </p>
+
+            <div class="button-group entrada-modal-actions">
+                <button id="saveRetiradaBtn" type="button" class="btn-success">Lançar saque</button>
+                <button id="cancelRetiradaBtn" type="button" class="btn-secondary">Cancelar</button>
             </div>
         </div>
     </div>

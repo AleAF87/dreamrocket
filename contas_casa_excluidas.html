@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contas Casa - Excluídas</title>
+
+    <link rel="icon" type="image/png" href="img/logo.png">
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        if (!window.location.pathname.includes("app.html")) {
+            sessionStorage.setItem("dreamrocket:last-spa-page", "contas_casa_excluidas.html");
+            window.location.replace("app.html");
+        }
+    </script>
+</head>
+<body>
+    <h2>Contas Casa - Excluídas</h2>
+
+    <section class="contas-section-card" id="contasExcluidasSection">
+        <div class="section-header-inline">
+            <h3>Contas excluídas</h3>
+            <div id="contasExcluidasSummary"></div>
+        </div>
+
+        <div class="contas-table-wrapper">
+            <table class="contas-table contas-excluidas-table">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Parcelamento</th>
+                        <th>Meses restaurados</th>
+                        <th>Valor mensal</th>
+                        <th>Prazo</th>
+                        <th>Pago por</th>
+                        <th>Link</th>
+                        <th>Valor p/ quitar</th>
+                        <th>Observações</th>
+                        <th>Excluída em</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="contasExcluidasTableBody"></tbody>
+            </table>
+        </div>
+    </section>
+</body>
+</html>
