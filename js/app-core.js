@@ -133,7 +133,7 @@ class AppCore {
 
         return doc.body.innerHTML.trim() || `
             <div class="status-message error">
-                Conteudo nao encontrado.
+                Conteúdo não encontrado.
             </div>
         `;
     }
@@ -171,8 +171,8 @@ class AppCore {
     getErrorHtml(pageUrl, error) {
         return `
             <div class="status-message error">
-                <h3>Erro ao carregar a pagina</h3>
-                <p>Nao foi possivel abrir <strong>${pageUrl}</strong>.</p>
+                <h3>Erro ao carregar a página</h3>
+                <p>Não foi possível abrir <strong>${pageUrl}</strong>.</p>
                 <p>${error.message}</p>
             </div>
         `;
@@ -186,7 +186,7 @@ class AppCore {
 
         appContent.innerHTML = `
             <div class="status-message error">
-                <h3>Erro de autenticacao</h3>
+                <h3>Erro de autenticação</h3>
                 <p>${error.message}</p>
                 <a href="index.html" class="login-btn" data-ignore-spa="true">Voltar ao login</a>
             </div>

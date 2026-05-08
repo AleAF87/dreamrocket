@@ -884,13 +884,68 @@ function setupTableActionsMenu(menu) {
 
         if (!menu.open) {
             actions.removeAttribute("style");
+            teardownTableActionsMenuPosition(menu);
             return;
         }
 
-        const rect = menu.getBoundingClientRect();
-        actions.style.top = `${Math.round(rect.bottom + 4)}px`;
-        actions.style.left = `${Math.round(Math.max(8, rect.right - 150))}px`;
+        positionTableActionsMenu(menu);
+        setupTableActionsMenuPosition(menu);
     });
+}
+
+function setupTableActionsMenuPosition(menu) {
+    teardownTableActionsMenuPosition(menu);
+
+    let pendingFrame = null;
+    const reposition = () => {
+        if (pendingFrame) {
+            return;
+        }
+
+        pendingFrame = requestAnimationFrame(() => {
+            pendingFrame = null;
+            if (menu.open) {
+                positionTableActionsMenu(menu);
+            }
+        });
+    };
+
+    menu._actionsPositionHandler = reposition;
+    window.addEventListener("scroll", reposition, true);
+    window.addEventListener("resize", reposition);
+}
+
+function teardownTableActionsMenuPosition(menu) {
+    if (!menu._actionsPositionHandler) {
+        return;
+    }
+
+    window.removeEventListener("scroll", menu._actionsPositionHandler, true);
+    window.removeEventListener("resize", menu._actionsPositionHandler);
+    menu._actionsPositionHandler = null;
+}
+
+function positionTableActionsMenu(menu) {
+    const actions = menu.querySelector(".table-actions");
+    const summary = menu.querySelector("summary");
+    if (!actions || !summary) {
+        return;
+    }
+
+    const gap = 4;
+    const viewportPadding = 8;
+    const rect = summary.getBoundingClientRect();
+    const actionWidth = actions.offsetWidth || 150;
+    const actionHeight = actions.offsetHeight || 0;
+    const spaceBelow = window.innerHeight - rect.bottom - viewportPadding;
+    const spaceAbove = rect.top - viewportPadding;
+    const openAbove = actionHeight > spaceBelow && spaceAbove > spaceBelow;
+    const top = openAbove
+        ? Math.max(viewportPadding, rect.top - actionHeight - gap)
+        : Math.max(viewportPadding, Math.min(rect.bottom + gap, window.innerHeight - actionHeight - viewportPadding));
+
+    actions.style.left = `${Math.round(Math.max(viewportPadding, rect.right - actionWidth))}px`;
+    actions.style.top = `${Math.round(top)}px`;
 }
 
 function buildStatusBadge(status) {

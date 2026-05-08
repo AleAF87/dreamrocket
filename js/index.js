@@ -14,19 +14,19 @@ function saveUserSession(userKey, userData) {
     const level = Number(userData?.nivel || 1);
 
     sessionStorage.setItem("userKey", userKey);
-    sessionStorage.setItem("userName", userData?.nome || "Usuario");
+    sessionStorage.setItem("userName", userData?.nome || "Usuário");
     sessionStorage.setItem("userEmail", userData?.email || "");
     sessionStorage.setItem("currentUserLevel", String(level));
 
     localStorage.setItem("userKey", userKey);
-    localStorage.setItem("userName", userData?.nome || "Usuario");
+    localStorage.setItem("userName", userData?.nome || "Usuário");
     localStorage.setItem("userEmail", userData?.email || "");
 }
 
 async function syncUserStructure(user) {
     const userKey = getUserKey(user);
     if (!userKey) {
-        throw new Error("Usuario invalido para autenticacao.");
+        throw new Error("Usuário inválido para autenticação.");
     }
 
     const loginRef = ref(database, `login/${userKey}`);
@@ -42,7 +42,7 @@ async function syncUserStructure(user) {
 
     const mergedData = {
         chave: userKey,
-        nome: usuarioData.nome || loginData.nome || user.displayName || "Usuario",
+        nome: usuarioData.nome || loginData.nome || user.displayName || "Usuário",
         email: usuarioData.email || loginData.email || user.email || "",
         foto: usuarioData.foto || loginData.foto || user.photoURL || "",
         status: String(loginData.status || usuarioData.status || "ativo").trim().toLowerCase(),
@@ -88,7 +88,7 @@ async function loginWithGoogle() {
         const { userData } = await syncUserStructure(result.user);
 
         if (userData.status !== "ativo") {
-            throw new Error("Seu cadastro nao esta ativo.");
+            throw new Error("Seu cadastro não está ativo.");
         }
 
         window.location.href = "app.html";

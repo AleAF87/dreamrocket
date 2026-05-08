@@ -18,6 +18,7 @@ const state = {
     selectedPath: null,
     selectedCardId: null,
     selectedFaturaCardId: null,
+    selectedFaturaLancamento: null,
     selectedMensalidadeConta: null,
     selectedAnexosConta: null,
     selectedDeleteConta: null,
@@ -28,6 +29,7 @@ const state = {
     contasAtrasadasSort: { field: "data", direction: "asc" },
     cartoes: [],
     posicoes: {},
+    faturaJurosSource: "",
     stopListeners: [],
     initialized: false
 };
@@ -103,6 +105,7 @@ function initializeElements() {
     elements.tipoConta = document.getElementById("tipoConta");
     elements.titulo = document.getElementById("titulo");
     elements.dataPrimeiraParcela = document.getElementById("dataPrimeiraParcela");
+    elements.dataPrimeiraParcelaLabel = document.getElementById("dataPrimeiraParcelaLabel");
     elements.parceladoTotal = document.getElementById("parceladoTotal");
     elements.parceladoPagas = document.getElementById("parceladoPagas");
     elements.parceladoPagasTotal = document.getElementById("parceladoPagasTotal");
@@ -156,6 +159,16 @@ function initializeElements() {
     elements.faturaJurosPerc = document.getElementById("faturaJurosPerc");
     elements.saveFaturaBtn = document.getElementById("saveFaturaBtn");
     elements.clearFaturaBtn = document.getElementById("clearFaturaBtn");
+    elements.faturaLancamentoModal = document.getElementById("faturaLancamentoModal");
+    elements.closeFaturaLancamentoModalBtn = document.getElementById("closeFaturaLancamentoModalBtn");
+    elements.cancelFaturaLancamentoBtn = document.getElementById("cancelFaturaLancamentoBtn");
+    elements.saveFaturaLancamentoBtn = document.getElementById("saveFaturaLancamentoBtn");
+    elements.deleteFaturaLancamentoBtn = document.getElementById("deleteFaturaLancamentoBtn");
+    elements.faturaLancamentoTitulo = document.getElementById("faturaLancamentoTitulo");
+    elements.faturaLancamentoData = document.getElementById("faturaLancamentoData");
+    elements.faturaLancamentoValor = document.getElementById("faturaLancamentoValor");
+    elements.faturaLancamentoObservacao = document.getElementById("faturaLancamentoObservacao");
+    elements.faturaLancamentoHelper = document.getElementById("faturaLancamentoHelper");
 
     elements.mensalidadeModal = document.getElementById("mensalidadeModal");
     elements.closeMensalidadeModalBtn = document.getElementById("closeMensalidadeModalBtn");
@@ -211,7 +224,12 @@ function setupEventListeners() {
     elements.searchAtrasadasInput?.addEventListener("input", renderAtrasadasTable);
     elements.tipoConta?.addEventListener("change", updateParceladoVisibility);
     elements.dataPrimeiraParcela?.addEventListener("change", applyAutomaticParceladoProgress);
-    elements.formaPagamento?.addEventListener("change", updatePagamentoCartaoVisibility);
+    elements.formaPagamento?.addEventListener("change", () => {
+        updatePagamentoCartaoVisibility();
+        updateParceladoVisibility();
+        applyAutomaticParceladoProgress();
+    });
+    elements.cartaoContaId?.addEventListener("change", applyAutomaticParceladoProgress);
     elements.valorMensal?.addEventListener("input", () => {
         syncJurosFields("valor");
         syncQuitarJurosPreview();
@@ -244,6 +262,10 @@ function setupEventListeners() {
     elements.faturaJurosPerc?.addEventListener("input", () => syncFaturaJurosFields("perc"));
     elements.saveFaturaBtn?.addEventListener("click", saveFatura);
     elements.clearFaturaBtn?.addEventListener("click", clearFaturaSelection);
+    elements.closeFaturaLancamentoModalBtn?.addEventListener("click", closeFaturaLancamentoModal);
+    elements.cancelFaturaLancamentoBtn?.addEventListener("click", closeFaturaLancamentoModal);
+    elements.saveFaturaLancamentoBtn?.addEventListener("click", saveFaturaLancamentoEdit);
+    elements.deleteFaturaLancamentoBtn?.addEventListener("click", deleteSelectedFaturaLancamento);
     elements.closeMensalidadeModalBtn?.addEventListener("click", closeMensalidadeModal);
     elements.cancelMensalidadeChangeBtn?.addEventListener("click", closeMensalidadeModal);
     elements.saveMensalidadeChangeBtn?.addEventListener("click", saveMensalidadeChange);
@@ -271,6 +293,11 @@ function setupEventListeners() {
     elements.deleteContaModal?.addEventListener("click", (event) => {
         if (event.target === elements.deleteContaModal) {
             closeDeleteContaModal();
+        }
+    });
+    elements.faturaLancamentoModal?.addEventListener("click", (event) => {
+        if (event.target === elements.faturaLancamentoModal) {
+            closeFaturaLancamentoModal();
         }
     });
 }
@@ -459,7 +486,7 @@ function renderTable() {
         const statusMes = getRowMonthStatus(item, selectedMonthKey);
         if (statusMes?.status === "atrasada") {
             tr.classList.add("conta-atrasada-row");
-        } else if (statusMes?.status === "paga" || statusMes?.status === "paga_atrasada") {
+        } else if (statusMes?.status === "paga" || statusMes?.status === "paga_atrasada" || statusMes?.status === "feito") {
             tr.classList.add("conta-paga-row");
         } else if (statusMes?.status === "dispensada") {
             tr.classList.add("conta-dispensada-row");
@@ -492,7 +519,10 @@ function renderTable() {
                 <details class="table-actions-menu">
                     <summary aria-label="Ações">&#9776;</summary>
                     <div class="table-actions">
-                    ${isCartaoResumoRow(item) ? `<button class="table-action-btn" data-action="view-card-invoice" data-id="${item.id}" data-path="${item.path}">Ver fatura</button>` : `
+                    ${isCartaoResumoRow(item) ? `
+                    <button class="table-action-btn" data-action="view-card-invoice" data-id="${item.id}" data-path="${item.path}">Ver fatura</button>
+                    ${statusMes?.status === "feito" || statusMes?.status === "paga" ? "" : `<button class="table-action-btn success" data-action="card-done" data-id="${item.id}" data-path="${item.path}">Feito</button>`}
+                    <button class="table-action-btn danger" data-action="card-abandon" data-id="${item.id}" data-path="${item.path}">Abandonar</button>` : `
                     <button class="table-action-btn" data-action="edit" data-id="${item.id}" data-path="${item.path}">Editar</button>
                     <button class="table-action-btn" data-action="attachments" data-id="${item.id}" data-path="${item.path}">Anexos</button>
                     <button class="table-action-btn" data-action="change-monthly" data-id="${item.id}" data-path="${item.path}">Alterar mensalidade</button>
@@ -701,7 +731,7 @@ function getVisibleContasForMonth(monthKey) {
             return false;
         }
 
-        if ((statusFilter === "paga" || statusFilter === "paga_atrasada" || statusFilter === "quitada" || statusFilter === "dispensada") && !elements.filterPagasStatus?.checked) {
+        if ((statusFilter === "paga" || statusFilter === "paga_atrasada" || statusFilter === "quitada" || statusFilter === "dispensada" || statusFilter === "feito") && !elements.filterPagasStatus?.checked) {
             return false;
         }
 
@@ -735,10 +765,11 @@ function getVisibleCartaoResumoRowsForMonth(monthKey) {
     return state.cartoes
         .map((cartao) => buildCardMonthSummary(cartao, monthKey))
         .filter((summary) => summary.lancamentos.length > 0)
+        .filter((summary) => !isCartaoAbandonedFrom(summary.cartao, monthKey))
         .map((summary) => buildCartaoResumoRow(summary))
         .filter((row) => {
             const statusFilter = normalizeContaMonthStatus(row.status_mensal?.[monthKey]?.status);
-            if ((statusFilter === "paga" || statusFilter === "paga_atrasada" || statusFilter === "quitada" || statusFilter === "dispensada") && !elements.filterPagasStatus?.checked) {
+            if ((statusFilter === "paga" || statusFilter === "paga_atrasada" || statusFilter === "quitada" || statusFilter === "dispensada" || statusFilter === "feito") && !elements.filterPagasStatus?.checked) {
                 return false;
             }
 
@@ -755,7 +786,7 @@ function getVisibleCartaoResumoRowsForMonth(monthKey) {
 }
 
 function buildCartaoResumoRow(summary) {
-    const status = summary.valorPago > 0 && summary.valorPago >= summary.totalFatura ? "paga" : "pendente";
+    const status = getCartaoFaturaStatus(summary);
     return {
         id: summary.cartao.id,
         path: PATHS.cartoes,
@@ -767,7 +798,7 @@ function buildCartaoResumoRow(summary) {
         status_mensal: {
             [summary.competencia]: {
                 status,
-                valor_pago: Number(summary.valorPago || summary.totalFatura || 0),
+                valor_pago: Number(summary.valorPago || 0),
                 pago_data: summary.cartao.faturas?.[summary.competencia]?.pago_data || "",
                 pago_por: summary.cartao.faturas?.[summary.competencia]?.pago_por || ""
             }
@@ -776,7 +807,7 @@ function buildCartaoResumoRow(summary) {
 }
 
 function normalizeContaMonthStatus(status) {
-    if (status === "paga" || status === "paga_atrasada" || status === "quitada" || status === "atrasada" || status === "dispensada") {
+    if (status === "paga" || status === "paga_atrasada" || status === "quitada" || status === "atrasada" || status === "dispensada" || status === "feito") {
         return status;
     }
 
@@ -858,7 +889,7 @@ function getRowMonthlyData(item, monthKey) {
         juros_atraso_perc: Number(summary.jurosPerc || 0),
         valor_com_juros_calculado: Number(summary.totalFatura || 0),
         link_conta: "",
-        valor_para_quitar: Number(summary.saldoAtual || 0),
+        valor_para_quitar: Number(summary.saldoParaProximo || 0),
         observacao: `${summary.lancamentos.length} lançamento(s) na fatura`
     };
 }
@@ -874,9 +905,9 @@ function updateContasMonthSummary(items, monthKey) {
             return acc;
         }
 
-        const monthlyData = getMonthlyContaData(item, monthKey);
+        const monthlyData = getRowMonthlyData(item, monthKey);
         const valor = Number(monthlyData.valor_mensal || 0);
-        const statusMes = getContaMonthStatus(item, monthKey) || {};
+        const statusMes = getRowMonthStatus(item, monthKey) || {};
         const valorPago = Number(statusMes.valor_pago ?? monthlyData.valor_com_juros_calculado ?? valor);
         if (isContaFixa(item)) {
             acc.fixas += valor;
@@ -1087,7 +1118,8 @@ function getStatusLabel(status) {
         paga_atrasada: "Paga atrasada",
         atrasada: "Atrasada",
         quitada: "Quitada",
-        dispensada: "Dispensada"
+        dispensada: "Dispensada",
+        feito: "Feito"
     };
 
     return labels[status] || "Pendente";
@@ -1186,7 +1218,7 @@ function renderFaturasTable() {
     if (!rows.length) {
         elements.faturasTableBody.innerHTML = `
             <tr>
-                <td colspan="8" class="empty-table-row">Cadastre um cartão para acompanhar as faturas.</td>
+                <td colspan="9" class="empty-table-row">Cadastre um cartão para acompanhar as faturas.</td>
             </tr>
         `;
         return;
@@ -1197,11 +1229,12 @@ function renderFaturasTable() {
         tr.innerHTML = `
             <td>${buildCartaoLabel(summary.cartao)}</td>
             <td>${formatCurrency(summary.totalLancamentos)}</td>
-            <td>${formatCurrency(summary.saldoAnterior)}</td>
-            <td>${formatCurrency(summary.jurosValor)}</td>
+            <td>${formatCurrency(summary.saldoAnteriorPendente)}</td>
+            <td>${formatCurrency(summary.jurosAnterior)}</td>
             <td>${formatCurrency(summary.totalFatura)}</td>
             <td>${formatCurrency(summary.valorPago)}</td>
-            <td>${formatCurrency(summary.saldoAtual)}</td>
+            <td>${formatCurrency(summary.jurosValor)}</td>
+            <td>${formatCurrency(summary.saldoParaProximo)}</td>
             <td>
                 <div class="table-actions">
                     <button class="table-action-btn" data-id="${summary.cartao.id}">Lançamentos</button>
@@ -1406,12 +1439,12 @@ function appendAtrasadaRow(item, tableBody) {
         <td>${buildLateDateInput("pago_data", item.pago_data)}</td>
         <td>${buildLatePagoPorSelect(item.pago_por || "")}</td>
         <td>${buildLateLinkIcon(item.link_conta)}</td>
-        <td>${buildLateTextarea("observacao", item.observacao, "ObservaÃ§Ãµes")}</td>
+        <td>${buildLateTextarea("observacao", item.observacao, "Observações")}</td>
         <td>${getStatusLabel(item.status || "atrasada")}</td>
         <td>
             <div class="table-actions late-actions">
                 ${(item.status === "paga_atrasada" || item.status === "quitada") ? "" : `<button class="table-action-btn success" data-action="pay-late" data-id="${item.id}">Pagar</button>`}
-                ${(item.origem === "pagamento_parcial") ? "" : `<button class="table-action-btn late-return-btn" data-action="return-pending" data-id="${item.id}" title="Voltar para pendentes" aria-label="Voltar para pendentes">â†©</button>`}
+                ${(item.origem === "pagamento_parcial") ? "" : `<button class="table-action-btn late-return-btn" data-action="return-pending" data-id="${item.id}" title="Voltar para pendentes" aria-label="Voltar para pendentes">↩</button>`}
             </div>
         </td>
     `;
@@ -1520,13 +1553,17 @@ function buildPendingActionRows() {
     const rows = [];
 
     state.contas.forEach((conta) => {
+        if (conta.pagamento?.metodo === "cartao") {
+            return;
+        }
+
         getPendingMonthsForConta(conta, currentMonthKey).forEach((monthKey) => {
             if (lateIds.has(`${conta.id}:${monthKey}`)) {
                 return;
             }
 
             const status = conta.status_mensal?.[monthKey]?.status;
-            if (status === "paga" || status === "paga_atrasada" || status === "atrasada" || status === "quitada" || status === "dispensada") {
+            if (status === "paga" || status === "paga_atrasada" || status === "atrasada" || status === "quitada" || status === "dispensada" || status === "feito") {
                 return;
             }
 
@@ -1713,6 +1750,16 @@ function handleTableAction(action, id, path, sourceButton = null) {
         return;
     }
 
+    if (action === "card-done") {
+        marcarCartaoFeito(id);
+        return;
+    }
+
+    if (action === "card-abandon") {
+        abandonarCartaoFatura(id);
+        return;
+    }
+
     const conta = state.contas.find((item) => item.id === id && item.path === path);
     if (!conta) {
         return;
@@ -1867,7 +1914,7 @@ function fillForm(conta) {
     elements.titulo.value = conta.titulo || "";
     elements.dataPrimeiraParcela.value = conta.data_primeira_parcela || conta.data_contrato || "";
     elements.parceladoTotal.value = conta.parcelado?.total ?? "";
-    const monthSnapshot = getParceladoSnapshot(conta, getCurrentMonthKey());
+    const monthSnapshot = getParceladoSnapshot(conta, state.viewMonthKey || getCurrentMonthKey());
     elements.parceladoPagas.value = String(monthSnapshot.posicao || 0);
     elements.parceladoPagasTotal.value = conta.parcelas_pagas_total ?? "";
     elements.parceladoSaldo.value = String(monthSnapshot.saldo || 0);
@@ -1952,6 +1999,8 @@ function clearCartaoForm() {
 
 function clearFaturaSelection() {
     state.selectedFaturaCardId = null;
+    state.faturaJurosSource = "";
+    closeFaturaLancamentoModal();
     if (elements.faturaValorPago) elements.faturaValorPago.value = "";
     if (elements.faturaJurosValor) elements.faturaJurosValor.value = "";
     if (elements.faturaJurosPerc) elements.faturaJurosPerc.value = "";
@@ -1960,7 +2009,19 @@ function clearFaturaSelection() {
 
 function updateParceladoVisibility() {
     const isParcelada = elements.tipoConta?.value === "parcelada";
-    ["dataPrimeiraParcela", "parceladoTotal", "parceladoPagas", "parceladoPagasTotal", "parceladoSaldo", "quitarJuros", "quitarDesconto"].forEach((id) => {
+    const isCartao = elements.formaPagamento?.value === "cartao";
+    const showDateField = isParcelada || isCartao;
+    if (elements.dataPrimeiraParcelaLabel) {
+        elements.dataPrimeiraParcelaLabel.textContent = isCartao ? "Data da compra" : "Data da 1ª parcela";
+    }
+    ["dataPrimeiraParcela"].forEach((id) => {
+        const field = document.getElementById(id);
+        const wrapper = field?.closest("div");
+        if (wrapper) {
+            wrapper.style.display = showDateField ? "flex" : "none";
+        }
+    });
+    ["parceladoTotal", "parceladoPagas", "parceladoPagasTotal", "parceladoSaldo", "quitarJuros", "quitarDesconto"].forEach((id) => {
         const field = document.getElementById(id);
         const wrapper = field?.closest("div");
         if (wrapper) {
@@ -2037,7 +2098,7 @@ function applyAutomaticParceladoProgress() {
         return;
     }
 
-    const posicao = getAutoPaidInstallments(elements.dataPrimeiraParcela.value, getCurrentMonthKey(), total);
+    const posicao = getAutoPaidInstallmentsForForm(total);
     if (elements.parceladoPagas) {
         elements.parceladoPagas.value = String(posicao);
     }
@@ -2049,7 +2110,7 @@ function applyAutomaticParceladoProgress() {
 
 function syncParceladoSaldo() {
     const total = Number(elements.parceladoTotal?.value || 0);
-    const posicao = getAutoPaidInstallments(elements.dataPrimeiraParcela?.value || "", getCurrentMonthKey(), total);
+    const posicao = getAutoPaidInstallmentsForForm(total);
     if (elements.parceladoPagas) {
         elements.parceladoPagas.value = String(posicao);
     }
@@ -2104,15 +2165,21 @@ function syncFaturaJurosFields(source) {
 
     const competencia = state.viewMonthKey || getCurrentMonthKey();
     const summary = buildCardMonthSummary(cartao, competencia);
-    const base = Number(summary.saldoAnterior || summary.totalAntesJuros || 0);
+    const sourceType = source === "valor" || source === "perc" ? source : "";
+    if (sourceType) {
+        state.faturaJurosSource = sourceType;
+    }
+    const effectiveSource = sourceType || state.faturaJurosSource || (elements.faturaJurosPerc?.value ? "perc" : "valor");
+    const valorPago = Number(elements.faturaValorPago?.value || 0);
+    const base = roundMoney(Math.max(Number(summary.totalFatura || 0) - valorPago, 0));
 
     if (!base) {
-        if (source === "valor" && elements.faturaJurosPerc) elements.faturaJurosPerc.value = "";
-        if (source === "perc" && elements.faturaJurosValor) elements.faturaJurosValor.value = "";
+        if (elements.faturaJurosPerc) elements.faturaJurosPerc.value = "";
+        if (elements.faturaJurosValor) elements.faturaJurosValor.value = "";
         return;
     }
 
-    if (source === "valor") {
+    if (effectiveSource === "valor") {
         const valor = Number(elements.faturaJurosValor?.value || 0);
         elements.faturaJurosPerc.value = valor ? ((valor / base) * 100).toFixed(2) : "";
         return;
@@ -2140,14 +2207,17 @@ function updateFaturaDetails() {
 
     const competencia = state.viewMonthKey || getCurrentMonthKey();
     const summary = buildCardMonthSummary(cartao, competencia);
+    state.faturaJurosSource = summary.jurosPerc ? "perc" : (summary.jurosValor ? "valor" : "");
 
     elements.faturaDetailsSection.style.display = "block";
     elements.faturaDetailsTitle.textContent = `${buildCartaoLabel(cartao)} - ${formatMonthKeyLabel(competencia)}`;
     elements.faturaSummary.innerHTML = `
         <div class="fatura-summary-chip"><strong>Fatura</strong><span>${formatCurrency(summary.totalFatura)}</span></div>
         <div class="fatura-summary-chip"><strong>Pago</strong><span>${formatCurrency(summary.valorPago)}</span></div>
-        <div class="fatura-summary-chip"><strong>Saldo anterior</strong><span>${formatCurrency(summary.saldoAnterior)}</span></div>
+        <div class="fatura-summary-chip"><strong>Pendente anterior</strong><span>${formatCurrency(summary.saldoAnteriorPendente)}</span></div>
+        <div class="fatura-summary-chip"><strong>Juros anterior</strong><span>${formatCurrency(summary.jurosAnterior)}</span></div>
         <div class="fatura-summary-chip"><strong>Saldo atual</strong><span>${formatCurrency(summary.saldoAtual)}</span></div>
+        <div class="fatura-summary-chip"><strong>Saldo p/ próximo</strong><span>${formatCurrency(summary.saldoParaProximo)}</span></div>
     `;
 
     elements.faturaLancamentos.innerHTML = summary.lancamentos.length
@@ -2157,11 +2227,26 @@ function updateFaturaDetails() {
                 <td>${escapeHtmlText(item.descricao || "-")}</td>
                 <td>${formatDateShort(item.vencimento || "") || "-"}</td>
                 <td>${formatCurrency(item.valor)}</td>
-                <td><button class="table-action-btn" type="button" data-fatura-anexo-id="${escapeHtmlAttr(item.conta_id || "")}" data-fatura-anexo-path="${escapeHtmlAttr(item.conta_path || "")}">Anexos</button></td>
+                <td>
+                    <details class="table-actions-menu">
+                        <summary aria-label="Ações">&#9776;</summary>
+                        <div class="table-actions">
+                            <button class="table-action-btn" type="button" data-fatura-edit-id="${escapeHtmlAttr(item.id || "")}">Editar</button>
+                            <button class="table-action-btn" type="button" data-fatura-anexo-id="${escapeHtmlAttr(item.conta_id || "")}" data-fatura-anexo-path="${escapeHtmlAttr(item.conta_path || "")}">Anexos</button>
+                            <button class="table-action-btn danger" type="button" data-fatura-delete-id="${escapeHtmlAttr(item.id || "")}">Excluir</button>
+                        </div>
+                    </details>
+                </td>
             </tr>
         `).join("")
         : '<tr><td colspan="5" class="empty-table-row">Nenhum lançamento nesta competência.</td></tr>';
 
+    elements.faturaLancamentos.querySelectorAll(".table-actions-menu").forEach((menu) => {
+        setupTableActionsMenu(menu);
+    });
+    elements.faturaLancamentos.querySelectorAll("[data-fatura-edit-id]").forEach((button) => {
+        button.addEventListener("click", () => openFaturaLancamentoModal(button.dataset.faturaEditId));
+    });
     elements.faturaLancamentos.querySelectorAll("[data-fatura-anexo-id]").forEach((button) => {
         button.addEventListener("click", () => {
             const conta = state.contas.find((item) => item.id === button.dataset.faturaAnexoId && item.path === button.dataset.faturaAnexoPath);
@@ -2170,10 +2255,158 @@ function updateFaturaDetails() {
             }
         });
     });
+    elements.faturaLancamentos.querySelectorAll("[data-fatura-delete-id]").forEach((button) => {
+        button.addEventListener("click", () => deleteFaturaLancamentoById(button.dataset.faturaDeleteId));
+    });
 
     elements.faturaValorPago.value = summary.valorPago || "";
     elements.faturaJurosValor.value = summary.jurosValor || "";
     elements.faturaJurosPerc.value = summary.jurosPerc || "";
+}
+
+function getAutoPaidInstallmentsForForm(totalParcelas) {
+    const monthKey = state.viewMonthKey || getCurrentMonthKey();
+    const dateInput = elements.dataPrimeiraParcela?.value || "";
+    if (elements.formaPagamento?.value !== "cartao") {
+        return getAutoPaidInstallments(dateInput, monthKey, totalParcelas);
+    }
+
+    const cartao = state.cartoes.find((item) => item.id === elements.cartaoContaId?.value);
+    return getCardInstallmentPositionForInvoiceMonth(dateInput, monthKey, totalParcelas, cartao);
+}
+
+function getCurrentFaturaSummary() {
+    if (!state.selectedFaturaCardId) {
+        return null;
+    }
+
+    const cartao = state.cartoes.find((item) => item.id === state.selectedFaturaCardId);
+    if (!cartao) {
+        return null;
+    }
+
+    return buildCardMonthSummary(cartao, state.viewMonthKey || getCurrentMonthKey());
+}
+
+function findFaturaLancamento(lancamentoId) {
+    const summary = getCurrentFaturaSummary();
+    return summary?.lancamentos.find((item) => item.id === lancamentoId) || null;
+}
+
+function openFaturaLancamentoModal(lancamentoId) {
+    const lancamento = findFaturaLancamento(lancamentoId);
+    const conta = lancamento ? state.contas.find((item) => item.id === lancamento.conta_id && item.path === lancamento.conta_path) : null;
+    if (!lancamento || !conta) {
+        alert("Não foi possível localizar o lançamento da fatura.");
+        return;
+    }
+
+    state.selectedFaturaLancamento = { ...lancamento, conta };
+    if (elements.faturaLancamentoTitulo) elements.faturaLancamentoTitulo.value = conta.titulo || lancamento.titulo || "";
+    if (elements.faturaLancamentoData) elements.faturaLancamentoData.value = lancamento.data_compra || lancamento.vencimento || "";
+    if (elements.faturaLancamentoValor) elements.faturaLancamentoValor.value = Number(lancamento.valor || 0).toFixed(2);
+    if (elements.faturaLancamentoObservacao) elements.faturaLancamentoObservacao.value = lancamento.observacao || getMonthlyContaData(conta, lancamento.source_month_key || state.viewMonthKey || getCurrentMonthKey()).observacao || "";
+    if (elements.faturaLancamentoHelper) {
+        elements.faturaLancamentoHelper.textContent = `${lancamento.descricao || "Lançamento"} | Competência da fatura: ${formatMonthKeyLabel(state.viewMonthKey || getCurrentMonthKey())}`;
+    }
+    if (elements.faturaLancamentoModal) {
+        elements.faturaLancamentoModal.style.display = "flex";
+    }
+}
+
+function closeFaturaLancamentoModal() {
+    state.selectedFaturaLancamento = null;
+    if (elements.faturaLancamentoModal) {
+        elements.faturaLancamentoModal.style.display = "none";
+    }
+}
+
+async function saveFaturaLancamentoEdit() {
+    const selected = state.selectedFaturaLancamento;
+    if (!selected?.conta) {
+        closeFaturaLancamentoModal();
+        return;
+    }
+
+    const titulo = elements.faturaLancamentoTitulo?.value.trim() || "";
+    const data = elements.faturaLancamentoData?.value || "";
+    const valor = Number(elements.faturaLancamentoValor?.value || 0);
+    const observacao = elements.faturaLancamentoObservacao?.value.trim() || "";
+    if (!titulo) {
+        alert("Informe o título do lançamento.");
+        elements.faturaLancamentoTitulo?.focus();
+        return;
+    }
+    if (!data) {
+        alert("Informe a data do lançamento.");
+        elements.faturaLancamentoData?.focus();
+        return;
+    }
+    if (valor <= 0) {
+        alert("Informe um valor válido.");
+        elements.faturaLancamentoValor?.focus();
+        return;
+    }
+
+    const conta = selected.conta;
+    const sourceMonthKey = isContaFixa(conta)
+        ? (selected.source_month_key || getMonthKeyFromDateInput(data) || state.viewMonthKey || getCurrentMonthKey())
+        : (getMonthKeyFromDateInput(data) || selected.source_month_key || state.viewMonthKey || getCurrentMonthKey());
+    const updates = {
+        titulo,
+        atualizado_em: new Date().toISOString()
+    };
+
+    if (isContaFixa(conta)) {
+        updates[`dados_mensais/${sourceMonthKey}/data_compra`] = data;
+        updates[`dados_mensais/${sourceMonthKey}/valor_mensal`] = valor;
+        updates[`dados_mensais/${sourceMonthKey}/observacao`] = observacao;
+    } else {
+        const totalParcelas = Number(conta.parcelado?.total || 0);
+        const installmentNumber = Number(selected.installment_number || 0);
+        if (installmentNumber > 0) {
+            updates[`parcelas/${installmentNumber}/data`] = data;
+        } else {
+            updates.data_primeira_parcela = data;
+            updates.parcelas = buildParcelasNode(data, totalParcelas, conta.parcelas || {}, Number(conta.parcelado?.pagas || 0));
+        }
+        updates[`dados_mensais/${sourceMonthKey}/valor_mensal`] = valor;
+        updates[`dados_mensais/${sourceMonthKey}/observacao`] = observacao;
+    }
+
+    await update(ref(database, `${conta.path}/${conta.id}`), updates);
+    closeFaturaLancamentoModal();
+}
+
+async function deleteSelectedFaturaLancamento() {
+    const selected = state.selectedFaturaLancamento;
+    if (!selected) {
+        closeFaturaLancamentoModal();
+        return;
+    }
+
+    await deleteFaturaLancamento(selected);
+    closeFaturaLancamentoModal();
+}
+
+async function deleteFaturaLancamentoById(lancamentoId) {
+    const lancamento = findFaturaLancamento(lancamentoId);
+    if (!lancamento) {
+        alert("Não foi possível localizar o lançamento da fatura.");
+        return;
+    }
+
+    await deleteFaturaLancamento(lancamento);
+}
+
+async function deleteFaturaLancamento(lancamento) {
+    const conta = lancamento.conta || state.contas.find((item) => item.id === lancamento.conta_id && item.path === lancamento.conta_path);
+    if (!conta) {
+        alert("Não foi possível localizar a conta vinculada ao lançamento.");
+        return;
+    }
+
+    openDeleteContaModal(conta);
 }
 
 async function saveInlineContaField(item, fieldElement) {
@@ -2908,7 +3141,12 @@ function getParceladoSnapshot(item, monthKey) {
         return { total: 0, posicao: 0, pagas: 0, saldo: 0 };
     }
 
-    const autoPosicao = getAutoPaidInstallments(item.data_primeira_parcela || item.data_contrato, monthKey, total);
+    const cartao = item.pagamento?.metodo === "cartao"
+        ? state.cartoes.find((card) => card.id === item.pagamento?.cartao_id)
+        : null;
+    const autoPosicao = cartao
+        ? getCardInstallmentPositionForInvoiceMonth(item.data_primeira_parcela || item.data_contrato, monthKey, total, cartao, item.parcelas || {})
+        : getAutoPaidInstallments(item.data_primeira_parcela || item.data_contrato, monthKey, total);
     const posicao = clampNumber(autoPosicao, 0, total, 0);
     const pagas = clampNumber(item.parcelas_pagas_total, 0, total, 0);
     const saldo = Math.max(total - posicao, 0);
@@ -3182,7 +3420,9 @@ function updateMonthActionWarning() {
     }
 
     const previousMonthKey = addMonthsToMonthKey(state.viewMonthKey || getCurrentMonthKey(), -1);
-    const pending = state.contas.filter((item) => shouldWarnPendingAction(item, previousMonthKey));
+    const pendingContas = state.contas.filter((item) => shouldWarnPendingAction(item, previousMonthKey));
+    const pendingCartoes = state.cartoes.filter((cartao) => shouldWarnPendingCardAction(cartao, previousMonthKey));
+    const pending = [...pendingContas, ...pendingCartoes];
 
     if (!pending.length) {
         elements.monthActionWarning.style.display = "none";
@@ -3199,6 +3439,10 @@ function shouldWarnPendingAction(item, monthKey) {
         return false;
     }
 
+    if (item.pagamento?.metodo === "cartao") {
+        return false;
+    }
+
     const monthlyView = getMonthlyView(item, monthKey);
     if (!monthlyView) {
         return false;
@@ -3206,6 +3450,20 @@ function shouldWarnPendingAction(item, monthKey) {
 
     const monthStatus = getContaMonthStatus(item, monthKey);
     return !monthStatus?.status;
+}
+
+function shouldWarnPendingCardAction(cartao, monthKey) {
+    if (!monthKey || isCartaoAbandonedFrom(cartao, monthKey)) {
+        return false;
+    }
+
+    const summary = buildCardMonthSummary(cartao, monthKey);
+    if (!summary.lancamentos.length) {
+        return false;
+    }
+
+    const status = getCartaoFaturaStatus(summary);
+    return status === "pendente";
 }
 
 function getAutoPaidInstallments(dataContrato, monthKey, totalParcelas) {
@@ -3218,6 +3476,23 @@ function getAutoPaidInstallments(dataContrato, monthKey, totalParcelas) {
     const monthDiff = (monthDate.getFullYear() - contrato.getFullYear()) * 12 + (monthDate.getMonth() - contrato.getMonth());
     const installmentPosition = monthDiff + 1;
     return Math.max(Math.min(installmentPosition, totalParcelas), 0);
+}
+
+function getCardInstallmentPositionForInvoiceMonth(dataCompra, monthKey, totalParcelas, cartao, parcelas = {}) {
+    if (!cartao) {
+        return getAutoPaidInstallments(dataCompra, monthKey, totalParcelas);
+    }
+
+    for (let index = 0; index < Number(totalParcelas || 0); index += 1) {
+        const position = index + 1;
+        const parcela = parcelas?.[position] || parcelas?.[String(position)] || {};
+        const installmentDate = parcela.data || addMonthsToDateInput(dataCompra, index);
+        if (resolveInvoiceMonthKey(installmentDate, cartao) === monthKey) {
+            return position;
+        }
+    }
+
+    return 0;
 }
 
 function addMonthsToDateInput(dateInput, increment) {
@@ -3275,6 +3550,10 @@ function clampNumber(value, min, max, fallback = min) {
     return Math.min(Math.max(numeric, min), max);
 }
 
+function roundMoney(value) {
+    return Number(Number(value || 0).toFixed(2));
+}
+
 function validateForm() {
     if (!elements.titulo.value.trim()) {
         alert("Informe o título da conta.");
@@ -3291,6 +3570,12 @@ function validateForm() {
     if (elements.tipoConta.value === "parcelada" && !elements.parceladoTotal.value) {
         alert("Informe o total de parcelas.");
         elements.parceladoTotal.focus();
+        return false;
+    }
+
+    if (elements.formaPagamento.value === "cartao" && !elements.dataPrimeiraParcela.value) {
+        alert("Informe a data da compra para lançar no cartão.");
+        elements.dataPrimeiraParcela.focus();
         return false;
     }
 
@@ -3395,9 +3680,13 @@ function buildContaPayload(existingConta = null) {
     };
 
     if (elements.tipoConta.value !== "parcelada") {
-        payload.inicio_mes = existingConta?.inicio_mes || getMonthKeyFromDateInput(existingConta?.data_primeira_parcela || existingConta?.data_contrato) || selectedMonthKey;
+        const fixedStartDate = primeiraParcela || existingConta?.data_primeira_parcela || existingConta?.data_contrato || "";
+        payload.inicio_mes = existingConta?.inicio_mes || getMonthKeyFromDateInput(fixedStartDate) || selectedMonthKey;
         payload.fim_mes = elements.contaFixaMesUnico?.value === "sim" ? payload.inicio_mes : "";
-        payload.data_primeira_parcela = existingConta?.data_primeira_parcela || "";
+        payload.data_primeira_parcela = elements.formaPagamento.value === "cartao" ? primeiraParcela : (existingConta?.data_primeira_parcela || "");
+        if (elements.formaPagamento.value === "cartao" && primeiraParcela && !Number(payload.prazo_dia || 0)) {
+            payload.prazo_dia = parseDateOnly(primeiraParcela)?.getDate() || 0;
+        }
         payload.parcelado = { total: 0, pagas: 0, saldo: 0 };
         payload.parcelas_pagas_total = 0;
         payload.parcelas = {};
@@ -3780,8 +4069,8 @@ async function saveFatura() {
     const competencia = state.viewMonthKey || getCurrentMonthKey();
     const summary = buildCardMonthSummary(cartao, competencia);
     const valorPago = Number(elements.faturaValorPago?.value || 0);
-    const jurosValor = Number(elements.faturaJurosValor?.value || 0);
-    const jurosPerc = Number(elements.faturaJurosPerc?.value || 0);
+    let jurosValor = Number(elements.faturaJurosValor?.value || 0);
+    let jurosPerc = Number(elements.faturaJurosPerc?.value || 0);
 
     if (valorPago < 0) {
         alert("Informe um valor pago válido.");
@@ -3789,20 +4078,109 @@ async function saveFatura() {
         return;
     }
 
-    if (summary.saldoAnterior > 0 && !jurosValor && !jurosPerc) {
-        alert("Como existe saldo vindo do mês anterior, informe o juros em valor ou percentual.");
-        elements.faturaJurosValor.focus();
+    const saldoNaoPago = roundMoney(Math.max(Number(summary.totalFatura || 0) - valorPago, 0));
+    if (saldoNaoPago <= 0) {
+        jurosValor = 0;
+        jurosPerc = 0;
+    } else if (jurosPerc > 0 && !jurosValor) {
+        jurosValor = roundMoney((saldoNaoPago * jurosPerc) / 100);
+    } else if (jurosValor > 0 && !jurosPerc) {
+        jurosPerc = roundMoney((jurosValor / saldoNaoPago) * 100);
+    }
+
+    const status = valorPago > 0 ? "paga" : (cartao.faturas?.[competencia]?.status || "pendente");
+    const updates = {
+        valor_pago: valorPago,
+        juros_valor: jurosValor,
+        juros_perc: jurosPerc,
+        status,
+        atualizado_em: new Date().toISOString()
+    };
+
+    if (status === "paga") {
+        updates.pago_em = new Date().toISOString();
+    }
+
+    await Promise.all([
+        update(ref(database, `${PATHS.cartoes}/${cartao.id}/faturas/${competencia}`), updates),
+        status === "paga"
+            ? remove(ref(database, `${PATHS.abertasAtrasadas}/${cartao.id}/${competencia.replace("-", "")}_cartao`))
+            : Promise.resolve()
+    ]);
+
+    state.selectedFaturaCardId = cartao.id;
+}
+
+async function marcarCartaoFeito(cartaoId) {
+    const cartao = state.cartoes.find((item) => item.id === cartaoId);
+    if (!cartao) {
+        return;
+    }
+
+    const competencia = state.viewMonthKey || getCurrentMonthKey();
+    if (!confirm(`Marcar a fatura de "${buildCartaoLabel(cartao)}" em ${formatMonthKeyLabel(competencia)} como feita?`)) {
         return;
     }
 
     await update(ref(database, `${PATHS.cartoes}/${cartao.id}/faturas/${competencia}`), {
-        valor_pago: valorPago,
-        juros_valor: jurosValor,
-        juros_perc: jurosPerc,
+        status: "feito",
+        feito_em: new Date().toISOString(),
         atualizado_em: new Date().toISOString()
     });
+}
 
-    state.selectedFaturaCardId = cartao.id;
+async function abandonarCartaoFatura(cartaoId) {
+    const cartao = state.cartoes.find((item) => item.id === cartaoId);
+    if (!cartao) {
+        return;
+    }
+
+    const competencia = state.viewMonthKey || getCurrentMonthKey();
+    const summary = buildCardMonthSummary(cartao, competencia);
+    const message = [
+        `Abandonar a fatura de "${buildCartaoLabel(cartao)}" em ${formatMonthKeyLabel(competencia)}?`,
+        "Ela vai sair das tabelas dos meses seguintes e ficará apenas na página dos atrasados, levando os lançamentos futuros para consulta."
+    ].join("\n\n");
+    if (!confirm(message)) {
+        return;
+    }
+
+    const atrasoId = `${competencia.replace("-", "")}_cartao`;
+    const futureLaunches = buildCardFutureLaunchesSnapshot(cartao, competencia);
+    const atrasoPayload = {
+        conta_id: cartao.id,
+        conta_path: PATHS.cartoes,
+        origem: "cartao_abandonado",
+        titulo: buildCartaoLabel(cartao),
+        mes_referencia: competencia,
+        parcela_numero: "",
+        prazo: `Fatura ${formatMonthKeyLabel(competencia)}`,
+        data_vencida: buildCardInvoiceDueDate(cartao, competencia),
+        valor_mensal: Number(summary.totalFatura || 0),
+        juros_valor: Number(summary.jurosValor || 0),
+        juros_perc: Number(summary.jurosPerc || 0),
+        valor_pago_total: Number(summary.valorPago || 0),
+        status: "atrasada",
+        pago_data: "",
+        pago_por: "",
+        link_conta: "",
+        observacao: `Cartão abandonado em ${formatMonthKeyLabel(competencia)}. Lançamentos futuros anexados para consulta.`,
+        lancamentos: summary.lancamentos,
+        lancamentos_futuros: futureLaunches,
+        criado_em: new Date().toISOString()
+    };
+
+    await Promise.all([
+        set(ref(database, `${PATHS.abertasAtrasadas}/${cartao.id}/${atrasoId}`), atrasoPayload),
+        update(ref(database, `${PATHS.cartoes}/${cartao.id}/faturas/${competencia}`), {
+            status: "abandonada",
+            abandonada_em: new Date().toISOString(),
+            valor_pago: Number(summary.valorPago || 0),
+            juros_valor: Number(summary.jurosValor || 0),
+            juros_perc: Number(summary.jurosPerc || 0),
+            atualizado_em: new Date().toISOString()
+        })
+    ]);
 }
 
 async function marcarContaAtrasada(conta, monthOverride = "", options = {}) {
@@ -3898,6 +4276,18 @@ async function pagarContaAtrasada(atraso, row) {
         return;
     }
 
+    if (atraso.origem === "cartao_abandonado") {
+        await pagarCartaoAtrasado(atraso, {
+            jurosValorRaw,
+            valorPagoTotalRaw,
+            pagoData,
+            pagoPor,
+            linkConta,
+            observacao
+        });
+        return;
+    }
+
     const conta = state.contas.find((item) => item.id === atraso.conta_id && item.path === atraso.conta_path);
     const monthStatus = conta?.status_mensal?.[atraso.mes_referencia] || {};
     const jurosValor = Number(jurosValorRaw || 0);
@@ -3952,6 +4342,19 @@ async function devolverContaAtrasadaParaPendente(atraso) {
         return;
     }
 
+    if (atraso.origem === "cartao_abandonado") {
+        await Promise.all([
+            update(ref(database, `${PATHS.cartoes}/${atraso.conta_id}/faturas/${atraso.mes_referencia}`), {
+                status: "pendente",
+                abandonada_em: null,
+                devolvida_para_pendente_em: new Date().toISOString(),
+                atualizado_em: new Date().toISOString()
+            }),
+            remove(ref(database, getAtrasadaRefPath(atraso)))
+        ]);
+        return;
+    }
+
     const conta = state.contas.find((item) => item.id === atraso.conta_id && item.path === atraso.conta_path);
     const monthStatus = conta?.status_mensal?.[atraso.mes_referencia] || {};
     const contaUpdates = {
@@ -3980,6 +4383,102 @@ async function devolverContaAtrasadaParaPendente(atraso) {
         update(ref(database, `${atraso.conta_path}/${atraso.conta_id}`), contaUpdates),
         remove(ref(database, getAtrasadaRefPath(atraso)))
     ]);
+}
+
+async function pagarCartaoAtrasado(atraso, paymentData) {
+    const jurosValor = Number(paymentData.jurosValorRaw || 0);
+    const valorMensal = Number(atraso.valor_mensal || 0);
+    const jurosPerc = valorMensal ? Number(((jurosValor / valorMensal) * 100).toFixed(2)) : 0;
+    const total = Number((valorMensal + jurosValor).toFixed(2));
+    const valorPagoTotal = Number(paymentData.valorPagoTotalRaw || total);
+
+    await Promise.all([
+        update(ref(database, `${PATHS.cartoes}/${atraso.conta_id}/faturas/${atraso.mes_referencia}`), {
+            status: "paga_atrasada",
+            valor_pago: valorPagoTotal,
+            juros_valor: jurosValor,
+            juros_perc: jurosPerc,
+            pago_data: paymentData.pagoData,
+            pago_por: paymentData.pagoPor,
+            atualizado_em: new Date().toISOString()
+        }),
+        update(ref(database, getAtrasadaRefPath(atraso)), {
+            status: "paga_atrasada",
+            juros_valor: jurosValor,
+            juros_perc: jurosPerc,
+            total,
+            valor_pago_total: valorPagoTotal,
+            pago_data: paymentData.pagoData,
+            pago_mes: getMonthKeyFromDateInput(paymentData.pagoData),
+            pago_por: paymentData.pagoPor,
+            link_conta: paymentData.linkConta,
+            observacao: paymentData.observacao,
+            quitada_em: new Date().toISOString(),
+            atualizado_em: new Date().toISOString()
+        })
+    ]);
+}
+
+function getCartaoFaturaStatus(summary) {
+    const savedInvoice = summary.cartao.faturas?.[summary.competencia] || {};
+    if (Number(summary.valorPago || 0) > 0) {
+        return "paga";
+    }
+
+    if (savedInvoice.status === "abandonada") {
+        return "atrasada";
+    }
+
+    return savedInvoice.status || "pendente";
+}
+
+function isCartaoAbandonedFrom(cartao, monthKey) {
+    const abandonedMonth = Object.entries(cartao.faturas || {})
+        .filter(([, fatura]) => fatura?.status === "abandonada")
+        .map(([competencia]) => competencia)
+        .filter((competencia) => competencia <= monthKey)
+        .sort()
+        .pop();
+
+    return Boolean(abandonedMonth);
+}
+
+function buildCardInvoiceDueDate(cartao, monthKey) {
+    const baseDate = monthKeyToDate(monthKey);
+    if (!baseDate) {
+        return "";
+    }
+
+    const dueDay = clampNumber(cartao?.vencimento_dia, 1, 31, 1);
+    const maxDay = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0).getDate();
+    return toDateInputValue(new Date(baseDate.getFullYear(), baseDate.getMonth(), Math.min(dueDay, maxDay), 12, 0, 0));
+}
+
+function buildCardFutureLaunchesSnapshot(cartao, fromMonthKey, monthsAhead = 24) {
+    const snapshot = {};
+    for (let index = 1; index <= monthsAhead; index += 1) {
+        const monthKey = addMonthsToMonthKey(fromMonthKey, index);
+        if (!monthKey) {
+            continue;
+        }
+
+        const summary = buildCardMonthSummary(cartao, monthKey);
+        if (!summary.lancamentos.length) {
+            continue;
+        }
+
+        snapshot[monthKey] = summary.lancamentos.map((item) => ({
+            id: item.id || "",
+            conta_id: item.conta_id || "",
+            conta_path: item.conta_path || "",
+            titulo: item.titulo || "",
+            descricao: item.descricao || "",
+            data_compra: item.data_compra || item.vencimento || "",
+            valor: Number(item.valor || 0)
+        }));
+    }
+
+    return snapshot;
 }
 
 async function quitarContaParcelada(conta, sourceButton = null) {
@@ -4070,13 +4569,17 @@ function buildCardMonthSummary(cartao, competencia, cache = new Map()) {
         : null;
     const lancamentos = collectLaunchesForCard(cartao, competencia);
     const savedInvoice = cartao.faturas?.[competencia] || {};
-    const saldoAnterior = previousSummary ? Math.max(previousSummary.totalFatura - previousSummary.valorPago, 0) : 0;
+    const saldoAnteriorPendente = previousSummary ? previousSummary.saldoAtual : 0;
+    const jurosAnterior = previousSummary && previousSummary.saldoAtual > 0 ? previousSummary.jurosValor : 0;
+    const saldoAnterior = roundMoney(saldoAnteriorPendente + jurosAnterior);
     const totalLancamentos = lancamentos.reduce((total, item) => total + Number(item.valor || 0), 0);
-    const jurosValor = Number(savedInvoice.juros_valor || 0);
+    const savedJurosValor = Number(savedInvoice.juros_valor || 0);
     const jurosPerc = Number(savedInvoice.juros_perc || 0);
     const valorPago = Number(savedInvoice.valor_pago || 0);
-    const totalAntesJuros = totalLancamentos + saldoAnterior;
-    const totalFatura = totalAntesJuros + jurosValor;
+    const totalFatura = roundMoney(totalLancamentos + saldoAnterior);
+    const saldoAtual = roundMoney(Math.max(totalFatura - valorPago, 0));
+    const jurosValor = savedJurosValor || (saldoAtual > 0 && jurosPerc > 0 ? roundMoney((saldoAtual * jurosPerc) / 100) : 0);
+    const saldoParaProximo = roundMoney(saldoAtual + (saldoAtual > 0 ? jurosValor : 0));
 
     const summary = {
         cartao,
@@ -4084,12 +4587,15 @@ function buildCardMonthSummary(cartao, competencia, cache = new Map()) {
         lancamentos,
         totalLancamentos,
         saldoAnterior,
+        saldoAnteriorPendente,
+        jurosAnterior,
         jurosValor,
         jurosPerc,
         valorPago,
-        totalAntesJuros,
+        totalAntesJuros: totalFatura,
         totalFatura,
-        saldoAtual: Math.max(totalFatura - valorPago, 0)
+        saldoAtual,
+        saldoParaProximo
     };
 
     cache.set(cacheKey, summary);
@@ -4114,19 +4620,27 @@ function collectLaunchesForCard(cartao, competencia) {
 
             const firstMonth = resolveInvoiceMonthKey(conta.data_primeira_parcela || conta.data_contrato, cartao);
             for (let index = 0; index < totalParcelas; index += 1) {
-                const installmentMonthKey = addMonthsToMonthKey(firstMonth, index);
+                const installmentNumber = index + 1;
+                const savedInstallment = conta.parcelas?.[installmentNumber] || conta.parcelas?.[String(installmentNumber)] || {};
+                const purchaseDate = savedInstallment.data || addMonthsToDateInput(conta.data_primeira_parcela || conta.data_contrato, index);
+                const sourceMonthKey = getMonthKeyFromDateInput(purchaseDate);
+                const installmentMonthKey = resolveInvoiceMonthKey(purchaseDate, cartao) || addMonthsToMonthKey(firstMonth, index);
                 if (installmentMonthKey !== competencia || isContaDeletedInMonth(conta, installmentMonthKey)) {
                     continue;
                 }
 
                 launches.push({
-                    id: `${conta.id}-${index + 1}`,
+                    id: `${conta.id}-${installmentNumber}`,
                     conta_id: conta.id,
                     conta_path: conta.path,
+                    installment_number: installmentNumber,
+                    source_month_key: sourceMonthKey,
+                    data_compra: purchaseDate,
                     titulo: conta.titulo || "Conta",
-                    descricao: `Parcela ${index + 1}/${totalParcelas}`,
-                    vencimento: getCurrentMonthInstallment(conta.data_primeira_parcela || conta.data_contrato, totalParcelas, installmentMonthKey)?.vencimento || "",
-                    valor: Number(getMonthlyContaData(conta, installmentMonthKey).valor_mensal || 0)
+                    descricao: `Parcela ${installmentNumber}/${totalParcelas}`,
+                    vencimento: purchaseDate,
+                    observacao: getMonthlyContaData(conta, sourceMonthKey).observacao,
+                    valor: Number(getMonthlyContaData(conta, sourceMonthKey).valor_mensal || 0)
                 });
             }
 
@@ -4141,13 +4655,15 @@ function collectLaunchesForCard(cartao, competencia) {
 
 function buildFixedCardLaunches(conta, cartao, competencia, forceInstallmentDescription = false) {
     const launches = [];
+    const candidateMonths = [competencia, addMonthsToMonthKey(competencia, -1), addMonthsToMonthKey(competencia, -2)]
+        .filter(Boolean);
 
-    [competencia, addMonthsToMonthKey(competencia, -1)].forEach((candidateMonthKey) => {
-        if (isContaDeletedInMonth(conta, candidateMonthKey) || isBeforeContaFixedStart(conta, candidateMonthKey) || isAfterContaFixedEnd(conta, candidateMonthKey)) {
+    candidateMonths.forEach((candidateMonthKey) => {
+        if (isContaDeletedInMonth(conta, candidateMonthKey) || isContaDeletedInMonth(conta, competencia) || isBeforeContaFixedStart(conta, candidateMonthKey) || isAfterContaFixedEnd(conta, candidateMonthKey)) {
             return;
         }
 
-        const purchaseDate = buildRecurringPurchaseDate(conta, candidateMonthKey);
+        const purchaseDate = conta.dados_mensais?.[candidateMonthKey]?.data_compra || buildRecurringPurchaseDate(conta, candidateMonthKey);
         if (!purchaseDate || resolveInvoiceMonthKey(purchaseDate, cartao) !== competencia) {
             return;
         }
@@ -4156,11 +4672,14 @@ function buildFixedCardLaunches(conta, cartao, competencia, forceInstallmentDesc
             id: `${conta.id}-${candidateMonthKey}`,
             conta_id: conta.id,
             conta_path: conta.path,
+            source_month_key: candidateMonthKey,
+            data_compra: purchaseDate,
             titulo: conta.titulo || "Conta fixa",
             descricao: forceInstallmentDescription
                 ? `Lançamento mensal parcelado em ${formatMonthKeyLabel(competencia)}`
                 : `Lançamento recorrente de ${formatMonthKeyLabel(candidateMonthKey)}`,
             vencimento: buildCurrentMonthDueDate(conta.prazo_dia, conta.data_primeira_parcela || conta.data_contrato, candidateMonthKey),
+            observacao: getMonthlyContaData(conta, candidateMonthKey).observacao,
             valor: Number(getMonthlyContaData(conta, candidateMonthKey).valor_mensal || 0)
         });
     });
@@ -4187,9 +4706,13 @@ function resolveInvoiceMonthKey(dateValue, cartao) {
         return "";
     }
 
-    const bestDay = Number(cartao?.melhor_dia_compra || 1);
+    const bestDay = clampNumber(cartao?.melhor_dia_compra, 1, 31, 1);
+    const dueDay = clampNumber(cartao?.vencimento_dia, 1, 31, bestDay);
     const invoiceDate = new Date(date.getFullYear(), date.getMonth(), 1, 12, 0, 0);
     if (date.getDate() >= bestDay) {
+        invoiceDate.setMonth(invoiceDate.getMonth() + 1);
+    }
+    if (bestDay > dueDay) {
         invoiceDate.setMonth(invoiceDate.getMonth() + 1);
     }
 
