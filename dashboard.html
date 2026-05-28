@@ -14,23 +14,23 @@
     </script>
 </head>
 <body>
-    <h2>Dashboard de Movimentacoes</h2>
+    <h2>Dashboard de Movimentações</h2>
 
     <div class="dash-container">
         <div class="list-area">
-            <h3>Lancamentos</h3>
+            <h3>Lançamentos</h3>
 
             <div class="filters-container">
                 <div class="filter-group">
                     <label for="sortFilter">Ordenar por:</label>
                     <select id="sortFilter" class="filter-select">
-                        <option value="default" selected>Padrao</option>
-                        <option value="processedDateDesc">Data pagamento (Mais Recente)</option>
-                        <option value="processedDateAsc">Data pagamento (Mais Antiga)</option>
-                        <option value="requestDesc">Data do pedido (Mais Recente)</option>
-                        <option value="requestAsc">Data do pedido (Mais Antiga)</option>
-                        <option value="deliveryDesc">Data de entrega (Mais Recente)</option>
-                        <option value="deliveryAsc">Data de entrega (Mais Antiga)</option>
+                        <option value="default" selected>Padrão</option>
+                        <option value="processedDateDesc">Data pagamento (mais recente)</option>
+                        <option value="processedDateAsc">Data pagamento (mais antiga)</option>
+                        <option value="requestDesc">Data do pedido (mais recente)</option>
+                        <option value="requestAsc">Data do pedido (mais antiga)</option>
+                        <option value="deliveryDesc">Data de entrega (mais recente)</option>
+                        <option value="deliveryAsc">Data de entrega (mais antiga)</option>
                         <option value="customerAsc">Cliente (A-Z)</option>
                         <option value="customerDesc">Cliente (Z-A)</option>
                     </select>
@@ -40,7 +40,7 @@
                     <label for="statusFilter">Filtrar por Status:</label>
                     <select id="statusFilter" class="filter-select">
                         <option value="all">Todos os Status</option>
-                        <option value="1">Concluido</option>
+                        <option value="1">Concluído</option>
                         <option value="2">Em andamento</option>
                         <option value="3">Aguardando</option>
                         <option value="4">Cancelado</option>
@@ -61,7 +61,7 @@
         </div>
 
         <div class="form-area">
-            <h3>Editar / Novo Lancamento</h3>
+            <h3>Editar / Novo lançamento</h3>
 
             <div class="form-grid">
                 <div>
@@ -75,32 +75,32 @@
                 </div>
 
                 <div>
-                    <label for="Identification">Identificacao:</label>
-                    <input id="Identification" data-field placeholder="CPF/CNPJ ou codigo">
+                    <label for="Identification">Identificação:</label>
+                    <input id="Identification" data-field placeholder="CPF/CNPJ ou código">
                 </div>
 
                 <div>
-                    <label for="Description">Descricao:</label>
-                    <input id="Description" data-field placeholder="Descricao do servico">
+                    <label for="Description">Descrição:</label>
+                    <input id="Description" data-field placeholder="Descrição do serviço">
                 </div>
 
                 <div>
-                    <label for="Request">Data do Pedido:</label>
+                    <label for="Request">Data do pedido:</label>
                     <input type="date" id="Request" data-field>
                 </div>
 
                 <div>
-                    <label for="Delivery">Data de Entrega:</label>
+                    <label for="Delivery">Data de entrega:</label>
                     <input type="date" id="Delivery" data-field>
                 </div>
 
                 <div>
-                    <label for="ProcessedDate">Data Processada:</label>
+                    <label for="ProcessedDate">Data processada:</label>
                     <input type="date" id="ProcessedDate" data-field>
                 </div>
 
                 <div>
-                    <label for="Deposit">Deposito (Total):</label>
+                    <label for="Deposit">Depósito (total):</label>
                     <input type="number" id="Deposit" data-field placeholder="0.00" step="0.01">
                 </div>
 
@@ -117,7 +117,7 @@
                 <div>
                     <label for="Profit">Lucro Bruto:</label>
                     <input id="Profit" placeholder="0.00" readonly>
-                    <small>Deposito - Despesas</small>
+                    <small>Depósito - Despesas</small>
                 </div>
 
                 <div>
@@ -126,7 +126,7 @@
                 </div>
 
                 <div>
-                    <label for="NetProfit">Lucro Liquido:</label>
+                    <label for="NetProfit">Lucro líquido:</label>
                     <input id="NetProfit" placeholder="0.00" readonly>
                     <small>Lucro Bruto - Desconto</small>
                 </div>
@@ -136,16 +136,16 @@
 
                     <div class="installment-config">
                         <div>
-                            <label for="paymentMethod">Forma de Pagamento:</label>
+                            <label for="paymentMethod">Forma de pagamento:</label>
                             <select id="paymentMethod" data-field>
                                 <option value="pix">PIX</option>
-                                <option value="cartao_sem">Cartao (s/ juros)</option>
-                                <option value="cartao_com">Cartao (c/ juros)</option>
+                                <option value="cartao_sem">Cartão (s/ juros)</option>
+                                <option value="cartao_com">Cartão (c/ juros)</option>
                             </select>
                         </div>
 
                         <div>
-                            <label for="installmentCount">Numero de Parcelas:</label>
+                            <label for="installmentCount">Número de parcelas:</label>
                             <select id="installmentCount" data-field>
                                 <option value="1">1x</option>
                                 <option value="2">2x</option>
@@ -164,9 +164,9 @@
                     </div>
 
                     <div id="firstInstallmentContainer" class="first-installment-container">
-                        <label for="firstInstallmentDate">Data da 1a Parcela:</label>
+                        <label for="firstInstallmentDate">Data da 1ª parcela:</label>
                         <input type="date" id="firstInstallmentDate" data-field>
-                        <small>As demais parcelas serao calculadas automaticamente (1 mes de diferenca cada)</small>
+                        <small>As demais parcelas serão calculadas automaticamente (1 mês de diferença cada)</small>
                     </div>
 
                     <div class="installments-table-container">
@@ -174,10 +174,10 @@
                             <thead>
                                 <tr>
                                     <th>Parcela</th>
-                                    <th>Data de Vencimento</th>
-                                    <th>Valor da Parcela</th>
+                                    <th>Data de vencimento</th>
+                                    <th>Valor da parcela</th>
                                     <th>Juros</th>
-                                    <th>Valor com Juros</th>
+                                    <th>Valor com juros</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -191,7 +191,7 @@
                                     <td></td>
                                 </tr>
                                 <tr class="informed-row">
-                                    <td colspan="2">Valor Total Informado:</td>
+                                    <td colspan="2">Valor total informado:</td>
                                     <td colspan="3" id="totalInformedValue"></td>
                                     <td>
                                         <span id="totalDifference" class="difference"></span>
@@ -201,7 +201,7 @@
                         </table>
 
                         <button type="button" id="showInstallmentsBtn" class="show-installments-btn">
-                            Mostrar/Editar Parcelas
+                            Mostrar/editar parcelas
                         </button>
                     </div>
                 </div>
@@ -209,7 +209,7 @@
                 <div>
                     <label for="Status">Status:</label>
                     <select id="Status" data-field>
-                        <option value="1">Concluido</option>
+                        <option value="1">Concluído</option>
                         <option value="2">Em andamento</option>
                         <option value="3">Aguardando</option>
                         <option value="4">Cancelado</option>
@@ -217,17 +217,17 @@
                 </div>
 
                 <div id="reasonContainer" class="reason-container">
-                    <label for="Reason">Motivo do Aguardamento:</label>
-                    <textarea id="Reason" data-field placeholder="Descreva o motivo do aguardamento..."></textarea>
+                    <label for="Reason">Motivo da espera:</label>
+                    <textarea id="Reason" data-field placeholder="Descreva o motivo da espera..."></textarea>
                 </div>
 
                 <div class="observation-container">
-                    <label for="Observation">Observacoes:</label>
-                    <textarea id="Observation" data-field placeholder="Observacoes adicionais..."></textarea>
+                    <label for="Observation">Observações:</label>
+                    <textarea id="Observation" data-field placeholder="Observações adicionais..."></textarea>
                 </div>
 
                 <div class="work-history-section">
-                    <h4>Historico de Servico</h4>
+                    <h4>Histórico de serviço</h4>
 
                     <div class="time-entry-form">
                         <div>
@@ -241,7 +241,7 @@
                         </div>
 
                         <div>
-                            <label for="workDescription">Servico:</label>
+                            <label for="workDescription">Serviço:</label>
                             <input type="text" id="workDescription" placeholder="Ex: Corte e fitamento das chapas">
                         </div>
 
@@ -253,7 +253,7 @@
                     </div>
 
                     <div class="work-history-container">
-                        <h5>Historico Registrado:</h5>
+                        <h5>Histórico registrado:</h5>
                         <div id="workHistoryList" class="history-list"></div>
                     </div>
                 </div>
@@ -261,7 +261,7 @@
                 <div id="workHistoryModal" class="modal" style="display: none;">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h3>Detalhes do Servico</h3>
+                            <h3>Detalhes do serviço</h3>
                             <span class="close-modal">&times;</span>
                         </div>
                         <div class="modal-body">
@@ -275,11 +275,11 @@
                                     <input type="number" id="modalWorkHours" step="0.5" min="0">
                                 </div>
                                 <div>
-                                    <label for="modalWorkDescription">Servico:</label>
+                                    <label for="modalWorkDescription">Serviço:</label>
                                     <textarea id="modalWorkDescription" rows="3"></textarea>
                                 </div>
                                 <div class="modal-actions">
-                                    <button id="updateWorkEntryBtn" class="btn-primary">Salvar Alteracoes</button>
+                                    <button id="updateWorkEntryBtn" class="btn-primary">Salvar alterações</button>
                                     <button id="deleteWorkEntryBtn" class="btn-danger">Excluir</button>
                                 </div>
                             </div>
@@ -288,9 +288,9 @@
                 </div>
 
                 <div class="button-group">
-                    <button id="saveBtn" class="save-btn btn-success">Salvar Novo</button>
+                    <button id="saveBtn" class="save-btn btn-success">Salvar novo</button>
                     <button id="updateBtn" class="update-btn btn-primary">Alterar</button>
-                    <button id="clearBtn" class="clear-btn btn-danger">Limpar Campos</button>
+                    <button id="clearBtn" class="clear-btn btn-danger">Limpar campos</button>
                 </div>
             </div>
         </div>

@@ -1,7 +1,7 @@
 import { logoutCurrentUser } from "./auth-check.js";
 
 function updateUserInfo() {
-    const userName = sessionStorage.getItem("userName") || localStorage.getItem("userName") || "Usuario";
+    const userName = sessionStorage.getItem("userName") || localStorage.getItem("userName") || "Usuário";
     const userEmail = sessionStorage.getItem("userEmail") || localStorage.getItem("userEmail") || "";
 
     const userNameElement = document.getElementById("userName");

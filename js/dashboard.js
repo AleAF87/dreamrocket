@@ -877,7 +877,7 @@ function renderPagination(totalCount, showingCount, startIndex, totalPages) {
 
     const paginationInfo = document.createElement("div");
     paginationInfo.className = "pagination-info";
-    paginationInfo.textContent = `Mostrando ${startIndex + 1}-${startIndex + showingCount} de ${totalCount} lancamentos`;
+    paginationInfo.textContent = `Mostrando ${startIndex + 1}-${startIndex + showingCount} de ${totalCount} lançamentos`;
 
     const controls = document.createElement("div");
     controls.className = "pagination-controls";

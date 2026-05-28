@@ -25,19 +25,19 @@ function getStoredUserKey(user) {
 
 function saveUserSession(userKey, userData) {
     sessionStorage.setItem("userKey", userKey);
-    sessionStorage.setItem("userName", userData.nome || "Usuario");
+    sessionStorage.setItem("userName", userData.nome || "Usuário");
     sessionStorage.setItem("userEmail", userData.email || "");
     sessionStorage.setItem("currentUserLevel", String(userData.nivel || 1));
 
     localStorage.setItem("userKey", userKey);
-    localStorage.setItem("userName", userData.nome || "Usuario");
+    localStorage.setItem("userName", userData.nome || "Usuário");
     localStorage.setItem("userEmail", userData.email || "");
 }
 
 async function syncUserAccess(user) {
     const userKey = getStoredUserKey(user);
     if (!userKey) {
-        throw new Error("Chave do usuario nao encontrada.");
+        throw new Error("Chave do usuário não encontrada.");
     }
 
     const loginRef = ref(database, `login/${userKey}`);
@@ -54,7 +54,7 @@ async function syncUserAccess(user) {
     const userData = {
         chave: userKey,
         uid: user.uid,
-        nome: usuarioData.nome || loginData.nome || user.displayName || "Usuario",
+        nome: usuarioData.nome || loginData.nome || user.displayName || "Usuário",
         email: usuarioData.email || loginData.email || user.email || "",
         foto: usuarioData.foto || loginData.foto || user.photoURL || "",
         status: String(loginData.status || usuarioData.status || "ativo").trim().toLowerCase(),
@@ -83,7 +83,7 @@ export function checkAuth(requiredLevel = 1) {
             if (!user) {
                 clearUserData();
                 redirectToLogin();
-                reject(new Error("Usuario nao autenticado"));
+                reject(new Error("Usuário não autenticado"));
                 return;
             }
 

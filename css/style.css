@@ -2173,12 +2173,15 @@ h2::after {
 
 .cartoes-faturas-table th:nth-child(1),
 .cartoes-faturas-table td:nth-child(1) {
-    width: 16%;
+    width: 11%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .cartoes-faturas-table th:nth-child(2),
 .cartoes-faturas-table td:nth-child(2) {
-    width: 13%;
+    width: 11%;
     text-align: right;
     white-space: nowrap;
 }
@@ -2193,32 +2196,29 @@ h2::after {
 .cartoes-faturas-table th:nth-child(4),
 .cartoes-faturas-table td:nth-child(4),
 .cartoes-faturas-table th:nth-child(5),
-.cartoes-faturas-table td:nth-child(5) {
+.cartoes-faturas-table td:nth-child(5),
+.cartoes-faturas-table th:nth-child(6),
+.cartoes-faturas-table td:nth-child(6),
+.cartoes-faturas-table th:nth-child(7),
+.cartoes-faturas-table td:nth-child(7),
+.cartoes-faturas-table th:nth-child(8),
+.cartoes-faturas-table td:nth-child(8) {
     width: 11%;
     text-align: right;
     white-space: nowrap;
 }
 
-.cartoes-faturas-table th:nth-child(6),
-.cartoes-faturas-table td:nth-child(6),
-.cartoes-faturas-table th:nth-child(7),
-.cartoes-faturas-table td:nth-child(7) {
+.cartoes-faturas-table th:nth-child(9),
+.cartoes-faturas-table td:nth-child(9) {
     width: 10%;
-    text-align: right;
-    white-space: nowrap;
-}
-
-.cartoes-faturas-table th:nth-child(8),
-.cartoes-faturas-table td:nth-child(8) {
-    width: 8%;
     text-align: center;
 }
 
-.cartoes-faturas-table td:nth-child(8) .table-actions {
+.cartoes-faturas-table td:nth-child(9) .table-actions {
     align-items: center;
 }
 
-.cartoes-faturas-table td:nth-child(8) .table-action-btn {
+.cartoes-faturas-table td:nth-child(9) .table-action-btn {
     width: 100%;
     max-width: 92px;
     padding: 5px 6px;
@@ -2620,6 +2620,10 @@ h2::after {
 
 .entrada-layout .section-header-inline {
     align-items: center;
+}
+
+.entrada-layout .section-header-inline h2 {
+    color: #253244;
 }
 
 .entrada-layout {
@@ -3304,6 +3308,11 @@ h2::after {
 
 .conta-status-badge.status-dispensada {
     background: #2f80ed;
+    color: #ffffff;
+}
+
+.conta-status-badge.status-feito {
+    background: #1d4ed8;
     color: #ffffff;
 }
 
