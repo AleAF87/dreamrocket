@@ -78,6 +78,8 @@ function initializeElements() {
     elements.tableBody = document.getElementById("contasCasaTableBody");
     elements.contasAtrasadasTableBody = document.getElementById("contasAtrasadasTableBody");
     elements.contasAtrasadasSummary = document.getElementById("contasAtrasadasSummary");
+    elements.contasAtrasadasSumMensalidade = document.getElementById("contasAtrasadasSumMensalidade");
+    elements.contasAtrasadasSumTotal = document.getElementById("contasAtrasadasSumTotal");
     elements.contasQuitadasTableBody = document.getElementById("contasQuitadasTableBody");
     elements.contasQuitadasSummary = document.getElementById("contasQuitadasSummary");
     elements.searchAtrasadasInput = document.getElementById("searchAtrasadasInput");
@@ -1228,6 +1230,7 @@ function renderAtrasadasTableLegacy() {
 
     const rows = sortAtrasadasRows(getFilteredAtrasadasRows());
     updateAtrasadasSortHeaders();
+    updateAtrasadasFilteredTotals(rows);
 
     elements.contasAtrasadasTableBody.innerHTML = "";
     if (elements.contasAtrasadasSummary) {
@@ -1279,6 +1282,21 @@ function renderAtrasadasTableLegacy() {
     });
 }
 
+function updateAtrasadasFilteredTotals(rows) {
+    if (!elements.contasAtrasadasSumMensalidade || !elements.contasAtrasadasSumTotal) {
+        return;
+    }
+
+    const totals = rows.reduce((acc, item) => {
+        acc.valorMensalidade += Number(item.valor_mensal || 0);
+        acc.total += Number(item.valor_mensal || 0) + Number(item.juros_valor || 0);
+        return acc;
+    }, { valorMensalidade: 0, total: 0 });
+
+    elements.contasAtrasadasSumMensalidade.textContent = formatCurrency(totals.valorMensalidade);
+    elements.contasAtrasadasSumTotal.textContent = formatCurrency(totals.total);
+}
+
 function getFilteredAtrasadasRows() {
     const search = (elements.searchAtrasadasInput?.value || "").trim().toLowerCase();
     if (!search) {
@@ -1307,6 +1325,7 @@ function renderAtrasadasTable() {
     }
 
     const filteredRows = getFilteredAtrasadasRows();
+    updateAtrasadasFilteredTotals(filteredRows);
     const rows = sortAtrasadasRows(filteredRows.filter((item) => item.status !== "paga_atrasada" && item.status !== "quitada"));
     const quitadasRows = sortAtrasadasRows(filteredRows.filter((item) => item.status === "paga_atrasada" || item.status === "quitada"));
     updateAtrasadasSortHeaders();

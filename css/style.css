@@ -523,6 +523,7 @@ h2::after {
     padding: 25px;
     box-shadow: 0 8px 24px rgba(10, 25, 47, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 20px;
 }
 
 .list-area h3, .form-area h3, .contas-cartoes-group h3 {

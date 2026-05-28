@@ -17,15 +17,26 @@
 <body>
     <h2>Contas Casa - Atrasadas</h2>
 
-    <section class="contas-section-card" id="contasAtrasadasSection">
-        <div class="section-header-inline">
-            <h3>Contas atrasadas</h3>
-            <div class="atrasadas-header-tools">
+    <div class="list-area">
+        <h3>Contas atrasadas</h3>
+
+        <div class="contas-filters-summary-row">
+            <div class="filters-container contas-filtros">
                 <div class="filter-group atrasadas-search-field">
                     <label for="searchAtrasadasInput">Buscar</label>
                     <input id="searchAtrasadasInput" class="filter-select" placeholder="Título, observação, link ou mês">
                 </div>
-                <div id="contasAtrasadasSummary"></div>
+                <div id="contasAtrasadasSummary" class="filter-summary-text"></div>
+            </div>
+            <div id="contasAtrasadasTotals" class="contas-month-summary">
+                <div class="contas-summary-card">
+                    <strong>Valor mensalidade</strong>
+                    <span id="contasAtrasadasSumMensalidade">R$ 0,00</span>
+                </div>
+                <div class="contas-summary-card total">
+                    <strong>Total</strong>
+                    <span id="contasAtrasadasSumTotal">R$ 0,00</span>
+                </div>
             </div>
         </div>
 
@@ -51,13 +62,11 @@
                 <tbody id="contasAtrasadasTableBody"></tbody>
             </table>
         </div>
-    </section>
+    </div>
 
-    <section class="contas-section-card" id="contasQuitadasSection">
-        <div class="section-header-inline">
-            <h3>Quitadas</h3>
-            <div id="contasQuitadasSummary"></div>
-        </div>
+    <section class="list-area" id="contasQuitadasSection">
+        <h3>Quitadas</h3>
+        <div id="contasQuitadasSummary" class="section-summary"></div>
 
         <div class="contas-table-wrapper">
             <table class="contas-table contas-atrasadas-table">
@@ -83,11 +92,9 @@
         </div>
     </section>
 
-    <section class="contas-section-card contas-pendentes-card" id="contasPendentesAcaoSection">
-        <div class="section-header-inline">
-            <h3>Pendentes de ação</h3>
-            <div id="contasPendentesAcaoSummary"></div>
-        </div>
+    <section class="list-area contas-pendentes-card" id="contasPendentesAcaoSection">
+        <h3>Pendentes de ação</h3>
+        <div id="contasPendentesAcaoSummary" class="section-summary"></div>
 
         <div class="contas-table-wrapper contas-pendentes-wrapper">
             <table class="contas-table contas-pendentes-table">
