@@ -40,10 +40,57 @@
             </div>
         </div>
 
+        <div id="acordoAtrasadasPanel" class="acordo-atrasadas-panel" style="display: none;">
+            <div class="acordo-atrasadas-summary">
+                <div>
+                    <strong>Selecionadas</strong>
+                    <span id="acordoAtrasadasCount">0</span>
+                </div>
+                <div>
+                    <strong>Total original</strong>
+                    <span id="acordoAtrasadasOriginal">R$ 0,00</span>
+                </div>
+                <div>
+                    <strong>Desconto</strong>
+                    <span id="acordoAtrasadasDesconto">R$ 0,00</span>
+                    <small id="acordoAtrasadasDescontoPerc">0%</small>
+                </div>
+            </div>
+            <div class="acordo-atrasadas-fields">
+                <div class="filter-group">
+                    <label for="acordoAtrasadasValor">Valor negociado</label>
+                    <input id="acordoAtrasadasValor" class="filter-select" type="number" min="0" step="0.01" placeholder="0.00">
+                </div>
+                <div class="filter-group">
+                    <label for="acordoAtrasadasData">Data paga</label>
+                    <input id="acordoAtrasadasData" class="filter-select" type="date">
+                </div>
+                <div class="filter-group">
+                    <label for="acordoAtrasadasPagoPor">Pago por</label>
+                    <select id="acordoAtrasadasPagoPor" class="filter-select">
+                        <option value="">Selecione</option>
+                        <option value="eu">Eu</option>
+                        <option value="conjuge">Conjuge</option>
+                        <option value="ambos">Ambos</option>
+                        <option value="outro">Outro</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="acordoAtrasadasFormaPagamento">Forma de pagamento</label>
+                    <input id="acordoAtrasadasFormaPagamento" class="filter-select" placeholder="Pix, boleto, cartao...">
+                </div>
+                <div class="filter-group acordo-atrasadas-actions">
+                    <button id="quitarAcordoAtrasadasBtn" class="btn-success" type="button">Quitar acordo</button>
+                    <button id="limparAcordoAtrasadasBtn" class="btn-secondary" type="button">Limpar selecao</button>
+                </div>
+            </div>
+        </div>
+
         <div class="contas-table-wrapper">
             <table class="contas-table contas-atrasadas-table">
                 <thead>
                     <tr>
+                        <th>Sel.</th>
                         <th><button type="button" class="table-sort-btn" data-late-sort="titulo">Título <span data-late-sort-icon="titulo"></span></button></th>
                         <th><button type="button" class="table-sort-btn" data-late-sort="data">Data vencida <span data-late-sort-icon="data"></span></button></th>
                         <th>Valor mensalidade</th>
@@ -72,6 +119,7 @@
             <table class="contas-table contas-atrasadas-table">
                 <thead>
                     <tr>
+                        <th>Acordo</th>
                         <th><button type="button" class="table-sort-btn" data-late-sort="titulo">Título <span data-late-sort-icon="titulo"></span></button></th>
                         <th><button type="button" class="table-sort-btn" data-late-sort="data">Data vencida <span data-late-sort-icon="data"></span></button></th>
                         <th>Valor mensalidade</th>

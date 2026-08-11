@@ -6,6 +6,7 @@ const PATHS = {
     abertasFixas: "contas_casa/saida/abertas/fixas",
     abertasParceladas: "contas_casa/saida/abertas/parceladas",
     abertasAtrasadas: "contas_casa/saida/abertas/atrasadas",
+    acordosAtrasadas: "contas_casa/saida/acordos_atrasadas",
     quitadasFixas: "contas_casa/saida/quitadas/fixas",
     quitadasParceladas: "contas_casa/saida/quitadas/parceladas",
     excluidas: "contas_casa/saida/excluidas",
@@ -25,6 +26,7 @@ const state = {
     viewMonthKey: "",
     contas: [],
     contasAtrasadas: [],
+    selectedAtrasadasAcordo: new Set(),
     contasExcluidas: [],
     contasAtrasadasSort: { field: "data", direction: "asc" },
     cartoes: [],
@@ -85,6 +87,17 @@ function initializeElements() {
     elements.contasQuitadasTableBody = document.getElementById("contasQuitadasTableBody");
     elements.contasQuitadasSummary = document.getElementById("contasQuitadasSummary");
     elements.searchAtrasadasInput = document.getElementById("searchAtrasadasInput");
+    elements.acordoAtrasadasPanel = document.getElementById("acordoAtrasadasPanel");
+    elements.acordoAtrasadasCount = document.getElementById("acordoAtrasadasCount");
+    elements.acordoAtrasadasOriginal = document.getElementById("acordoAtrasadasOriginal");
+    elements.acordoAtrasadasValor = document.getElementById("acordoAtrasadasValor");
+    elements.acordoAtrasadasDesconto = document.getElementById("acordoAtrasadasDesconto");
+    elements.acordoAtrasadasDescontoPerc = document.getElementById("acordoAtrasadasDescontoPerc");
+    elements.acordoAtrasadasData = document.getElementById("acordoAtrasadasData");
+    elements.acordoAtrasadasPagoPor = document.getElementById("acordoAtrasadasPagoPor");
+    elements.acordoAtrasadasFormaPagamento = document.getElementById("acordoAtrasadasFormaPagamento");
+    elements.quitarAcordoAtrasadasBtn = document.getElementById("quitarAcordoAtrasadasBtn");
+    elements.limparAcordoAtrasadasBtn = document.getElementById("limparAcordoAtrasadasBtn");
     elements.contasAtrasadasSortButtons = Array.from(document.querySelectorAll("[data-late-sort]"));
     elements.contasPendentesAcaoTableBody = document.getElementById("contasPendentesAcaoTableBody");
     elements.contasPendentesAcaoSummary = document.getElementById("contasPendentesAcaoSummary");
@@ -224,6 +237,9 @@ function setupEventListeners() {
 
     elements.searchContaInput?.addEventListener("input", renderTable);
     elements.searchAtrasadasInput?.addEventListener("input", renderAtrasadasTable);
+    elements.acordoAtrasadasValor?.addEventListener("input", updateAcordoAtrasadasPanel);
+    elements.quitarAcordoAtrasadasBtn?.addEventListener("click", quitarAcordoAtrasadas);
+    elements.limparAcordoAtrasadasBtn?.addEventListener("click", clearAcordoAtrasadasSelection);
     elements.tipoConta?.addEventListener("change", updateParceladoVisibility);
     elements.dataPrimeiraParcela?.addEventListener("change", applyAutomaticParceladoProgress);
     elements.formaPagamento?.addEventListener("change", () => {
@@ -445,6 +461,12 @@ function getAtrasadaRefPath(item) {
     const contaId = item.conta_group_id || item.conta_id;
     const competenciaId = item.competencia_id || item.id || String(item.mes_referencia || "").replace("-", "");
     return `${PATHS.abertasAtrasadas}/${contaId}/${competenciaId}`;
+}
+
+function getAtrasadaSelectionKey(item) {
+    const contaId = item.conta_group_id || item.conta_id || "";
+    const competenciaId = item.competencia_id || item.id || String(item.mes_referencia || "").replace("-", "");
+    return `${contaId}:${competenciaId}`;
 }
 
 function getCategoryLabel(category) {
@@ -1361,6 +1383,8 @@ function renderAtrasadasTable() {
     updateAtrasadasFilteredTotals(filteredRows);
     const rows = sortAtrasadasRows(filteredRows.filter((item) => item.status !== "paga_atrasada" && item.status !== "quitada"));
     const quitadasRows = sortAtrasadasRows(filteredRows.filter((item) => item.status === "paga_atrasada" || item.status === "quitada"));
+    syncAcordoAtrasadasSelection(rows);
+    updateAcordoAtrasadasPanel();
     updateAtrasadasSortHeaders();
 
     if (elements.contasAtrasadasTableBody) {
@@ -1380,7 +1404,7 @@ function renderAtrasadasTable() {
     if (elements.contasAtrasadasTableBody && !rows.length) {
         elements.contasAtrasadasTableBody.innerHTML = `
             <tr>
-                <td colspan="13" class="empty-table-row">Nenhuma conta atrasada.</td>
+                <td colspan="14" class="empty-table-row">Nenhuma conta atrasada.</td>
             </tr>
         `;
     }
@@ -1388,7 +1412,7 @@ function renderAtrasadasTable() {
     if (elements.contasQuitadasTableBody && !quitadasRows.length) {
         elements.contasQuitadasTableBody.innerHTML = `
             <tr>
-                <td colspan="13" class="empty-table-row">Nenhuma conta quitada.</td>
+                <td colspan="14" class="empty-table-row">Nenhuma conta quitada.</td>
             </tr>
         `;
     }
@@ -1407,8 +1431,14 @@ function appendAtrasadaRowClean(item, tableBody) {
     const jurosPerc = item.juros_perc ?? "";
     const total = Number(item.valor_mensal || 0) + Number(item.juros_valor || 0);
     const valorPagoTotal = item.valor_pago_total ?? total;
+    const selectionKey = getAtrasadaSelectionKey(item);
+    const isPaid = item.status === "paga_atrasada" || item.status === "quitada";
+    const acordoCell = isPaid
+        ? buildAcordoBadge(item)
+        : `<input type="checkbox" class="atrasada-acordo-check" data-acordo-key="${escapeHtmlAttr(selectionKey)}" ${state.selectedAtrasadasAcordo.has(selectionKey) ? "checked" : ""} aria-label="Selecionar para acordo">`;
 
     tr.innerHTML = `
+        <td>${acordoCell}</td>
         <td>${item.titulo || "-"}</td>
         <td>${formatDate(item.data_vencida || item.prazo)}</td>
         <td>${formatCurrency(item.valor_mensal)}</td>
@@ -1423,18 +1453,255 @@ function appendAtrasadaRowClean(item, tableBody) {
         <td>${getStatusLabel(item.status || "atrasada")}</td>
         <td>
             <div class="table-actions late-actions">
-                ${(item.status === "paga_atrasada" || item.status === "quitada") ? "" : `<button class="table-action-btn success" data-action="pay-late" data-id="${item.id}">Pagar</button>`}
+                ${isPaid ? "" : `<button class="table-action-btn success" data-action="pay-late" data-id="${item.id}">Pagar</button>`}
                 ${(item.origem === "pagamento_parcial") ? "" : `<button class="table-action-btn late-return-btn" data-action="return-pending" data-id="${item.id}" title="Voltar para pendentes" aria-label="Voltar para pendentes">↩</button>`}
             </div>
         </td>
     `;
 
+    tr.querySelector(".atrasada-acordo-check")?.addEventListener("change", (event) => {
+        if (event.target.checked) {
+            state.selectedAtrasadasAcordo.add(selectionKey);
+        } else {
+            state.selectedAtrasadasAcordo.delete(selectionKey);
+        }
+        updateAcordoAtrasadasPanel();
+    });
     tr.querySelectorAll("[data-late-field]").forEach((field) => {
         field.addEventListener("change", () => saveLateContaField(item, field, tr));
     });
     tr.querySelector('[data-action="pay-late"]')?.addEventListener("click", () => pagarContaAtrasada(item, tr));
     tr.querySelector('[data-action="return-pending"]')?.addEventListener("click", () => devolverContaAtrasadaParaPendente(item));
     tableBody.appendChild(tr);
+}
+
+function buildAcordoBadge(item) {
+    if (!item.acordo_id) {
+        return "-";
+    }
+
+    return `<span class="acordo-badge" title="Acordo ${escapeHtmlAttr(item.acordo_id)}">Acordo</span>`;
+}
+
+function getAcordoAtrasadasSelecionadas() {
+    return state.contasAtrasadas.filter((item) => {
+        const status = item.status || "atrasada";
+        return status !== "paga_atrasada"
+            && status !== "quitada"
+            && state.selectedAtrasadasAcordo.has(getAtrasadaSelectionKey(item));
+    });
+}
+
+function syncAcordoAtrasadasSelection(visibleRows = []) {
+    if (!state.selectedAtrasadasAcordo.size) {
+        return;
+    }
+
+    const availableKeys = new Set(visibleRows.map(getAtrasadaSelectionKey));
+    Array.from(state.selectedAtrasadasAcordo).forEach((key) => {
+        if (!availableKeys.has(key)) {
+            state.selectedAtrasadasAcordo.delete(key);
+        }
+    });
+}
+
+function calculateAtrasadaTotal(item) {
+    return roundMoney(Number(item.valor_mensal || 0) + Number(item.juros_valor || 0));
+}
+
+function updateAcordoAtrasadasPanel() {
+    if (!elements.acordoAtrasadasPanel) {
+        return;
+    }
+
+    const rows = getAcordoAtrasadasSelecionadas();
+    const totalOriginal = roundMoney(rows.reduce((total, item) => total + calculateAtrasadaTotal(item), 0));
+    const valorNegociado = Number(elements.acordoAtrasadasValor?.value || 0);
+    const desconto = roundMoney(Math.max(totalOriginal - valorNegociado, 0));
+    const descontoPerc = totalOriginal > 0 ? roundMoney((desconto / totalOriginal) * 100) : 0;
+
+    elements.acordoAtrasadasPanel.style.display = rows.length ? "grid" : "none";
+    if (elements.acordoAtrasadasCount) elements.acordoAtrasadasCount.textContent = String(rows.length);
+    if (elements.acordoAtrasadasOriginal) elements.acordoAtrasadasOriginal.textContent = formatCurrency(totalOriginal);
+    if (elements.acordoAtrasadasDesconto) elements.acordoAtrasadasDesconto.textContent = formatCurrency(desconto);
+    if (elements.acordoAtrasadasDescontoPerc) elements.acordoAtrasadasDescontoPerc.textContent = formatPercent(descontoPerc);
+}
+
+function clearAcordoAtrasadasSelection() {
+    state.selectedAtrasadasAcordo.clear();
+    if (elements.acordoAtrasadasValor) elements.acordoAtrasadasValor.value = "";
+    document.querySelectorAll(".atrasada-acordo-check").forEach((checkbox) => {
+        checkbox.checked = false;
+    });
+    updateAcordoAtrasadasPanel();
+}
+
+function distributeAcordoPayments(rows, valorNegociado) {
+    const totalOriginal = roundMoney(rows.reduce((total, item) => total + calculateAtrasadaTotal(item), 0));
+    let remaining = roundMoney(valorNegociado);
+
+    return rows.map((item, index) => {
+        const totalItem = calculateAtrasadaTotal(item);
+        const isLast = index === rows.length - 1;
+        const valorPago = isLast
+            ? remaining
+            : roundMoney(totalOriginal > 0 ? (valorNegociado * totalItem) / totalOriginal : 0);
+        remaining = roundMoney(remaining - valorPago);
+
+        return {
+            item,
+            totalItem,
+            valorPago,
+            desconto: roundMoney(Math.max(totalItem - valorPago, 0))
+        };
+    });
+}
+
+async function quitarAcordoAtrasadas() {
+    const rows = getAcordoAtrasadasSelecionadas();
+    if (!rows.length) {
+        alert("Selecione as contas atrasadas do acordo.");
+        return;
+    }
+
+    const valorNegociado = Number(elements.acordoAtrasadasValor?.value || 0);
+    const pagoData = normalizeDateInput(elements.acordoAtrasadasData?.value || "");
+    const pagoPor = elements.acordoAtrasadasPagoPor?.value || "";
+    const formaPagamento = (elements.acordoAtrasadasFormaPagamento?.value || "").trim();
+
+    if (valorNegociado <= 0) {
+        alert("Informe o valor negociado do acordo.");
+        elements.acordoAtrasadasValor?.focus();
+        return;
+    }
+
+    if (!pagoData) {
+        alert("Informe a data paga do acordo.");
+        elements.acordoAtrasadasData?.focus();
+        return;
+    }
+
+    if (!pagoPor) {
+        alert("Informe quem pagou o acordo.");
+        elements.acordoAtrasadasPagoPor?.focus();
+        return;
+    }
+
+    if (!formaPagamento) {
+        alert("Informe a forma de pagamento, por exemplo Pix.");
+        elements.acordoAtrasadasFormaPagamento?.focus();
+        return;
+    }
+
+    const totalOriginal = roundMoney(rows.reduce((total, item) => total + calculateAtrasadaTotal(item), 0));
+    if (valorNegociado > totalOriginal && !confirm("O valor negociado esta maior que o total original. Deseja continuar?")) {
+        return;
+    }
+
+    const acordoId = generateId();
+    const distribuicao = distributeAcordoPayments(rows, valorNegociado);
+    const descontoTotal = roundMoney(Math.max(totalOriginal - valorNegociado, 0));
+    const descontoPerc = totalOriginal > 0 ? roundMoney((descontoTotal / totalOriginal) * 100) : 0;
+    const titulo = rows.length === 1 ? rows[0].titulo || "Conta atrasada" : `${rows[0].titulo || "Acordo"} e outras ${rows.length - 1}`;
+    const acordoParcelas = {};
+    const updates = {};
+
+    distribuicao.forEach(({ item, totalItem, valorPago, desconto }, index) => {
+        const parcelaKey = String(index + 1).padStart(3, "0");
+        const jurosValor = Number(item.juros_valor || 0);
+        const valorMensal = Number(item.valor_mensal || 0);
+        const jurosPerc = valorMensal ? roundMoney((jurosValor / valorMensal) * 100) : 0;
+        const descontoPercParcela = totalItem > 0 ? roundMoney((desconto / totalItem) * 100) : 0;
+        const conta = state.contas.find((contaItem) => contaItem.id === item.conta_id && contaItem.path === item.conta_path);
+        const monthStatus = conta?.status_mensal?.[item.mes_referencia] || {};
+
+        acordoParcelas[parcelaKey] = {
+            conta_id: item.conta_id || item.conta_group_id || "",
+            conta_path: item.conta_path || "",
+            atraso_id: item.competencia_id || item.id || "",
+            titulo: item.titulo || "",
+            mes_referencia: item.mes_referencia || "",
+            data_vencida: item.data_vencida || item.prazo || "",
+            valor_original: totalItem,
+            valor_pago: valorPago,
+            desconto_valor: desconto,
+            desconto_perc: descontoPercParcela,
+            forma_pagamento: formaPagamento
+        };
+
+        updates[`${getAtrasadaRefPath(item)}/status`] = "paga_atrasada";
+        updates[`${getAtrasadaRefPath(item)}/juros_valor`] = jurosValor;
+        updates[`${getAtrasadaRefPath(item)}/juros_perc`] = jurosPerc;
+        updates[`${getAtrasadaRefPath(item)}/total`] = totalItem;
+        updates[`${getAtrasadaRefPath(item)}/valor_pago_total`] = valorPago;
+        updates[`${getAtrasadaRefPath(item)}/desconto_valor`] = desconto;
+        updates[`${getAtrasadaRefPath(item)}/desconto_perc`] = descontoPercParcela;
+        updates[`${getAtrasadaRefPath(item)}/acordo_id`] = acordoId;
+        updates[`${getAtrasadaRefPath(item)}/forma_pagamento`] = formaPagamento;
+        updates[`${getAtrasadaRefPath(item)}/pago_data`] = pagoData;
+        updates[`${getAtrasadaRefPath(item)}/pago_mes`] = getMonthKeyFromDateInput(pagoData);
+        updates[`${getAtrasadaRefPath(item)}/pago_por`] = pagoPor;
+        updates[`${getAtrasadaRefPath(item)}/quitada_em`] = new Date().toISOString();
+        updates[`${getAtrasadaRefPath(item)}/atualizado_em`] = new Date().toISOString();
+
+        if (item.origem === "cartao_abandonado" && item.conta_id && item.mes_referencia) {
+            const faturaPath = `${PATHS.cartoes}/${item.conta_id}/faturas/${item.mes_referencia}`;
+            updates[`${faturaPath}/status`] = "paga_atrasada";
+            updates[`${faturaPath}/valor_pago`] = valorPago;
+            updates[`${faturaPath}/juros_valor`] = jurosValor;
+            updates[`${faturaPath}/juros_perc`] = jurosPerc;
+            updates[`${faturaPath}/pago_data`] = pagoData;
+            updates[`${faturaPath}/pago_por`] = pagoPor;
+            updates[`${faturaPath}/acordo_id`] = acordoId;
+            updates[`${faturaPath}/forma_pagamento`] = formaPagamento;
+            updates[`${faturaPath}/desconto_valor`] = desconto;
+            updates[`${faturaPath}/desconto_perc`] = descontoPercParcela;
+            updates[`${faturaPath}/atualizado_em`] = new Date().toISOString();
+        } else if (item.conta_id && item.conta_path && item.mes_referencia) {
+            const contaBasePath = `${item.conta_path}/${item.conta_id}`;
+            updates[`${contaBasePath}/status_mensal/${item.mes_referencia}`] = {
+                ...monthStatus,
+                status: "paga_atrasada",
+                pago_data: pagoData,
+                pago_por: pagoPor,
+                valor_pago: valorPago,
+                acordo_id: acordoId,
+                forma_pagamento: formaPagamento,
+                desconto_valor: desconto,
+                desconto_perc: descontoPercParcela
+            };
+            updates[`${contaBasePath}/pago_data`] = pagoData;
+            updates[`${contaBasePath}/pago_por`] = pagoPor;
+            updates[`${contaBasePath}/atualizado_em`] = new Date().toISOString();
+
+            if (item.parcela_numero) {
+                updates[`${contaBasePath}/parcelas/${item.parcela_numero}/status`] = "paga";
+                updates[`${contaBasePath}/parcelas/${item.parcela_numero}/paga_data`] = pagoData;
+                updates[`${contaBasePath}/parcelas/${item.parcela_numero}/paga_mes`] = getMonthKeyFromDateInput(pagoData);
+                updates[`${contaBasePath}/parcelas/${item.parcela_numero}/acordo_id`] = acordoId;
+            }
+        }
+    });
+
+    updates[`${PATHS.acordosAtrasadas}/${acordoId}`] = {
+        id: acordoId,
+        titulo,
+        quantidade_parcelas: rows.length,
+        total_original: totalOriginal,
+        total_pago: roundMoney(valorNegociado),
+        desconto_valor: descontoTotal,
+        desconto_perc: descontoPerc,
+        pago_data: pagoData,
+        pago_mes: getMonthKeyFromDateInput(pagoData),
+        pago_por: pagoPor,
+        forma_pagamento: formaPagamento,
+        parcelas: acordoParcelas,
+        criado_em: new Date().toISOString(),
+        atualizado_em: new Date().toISOString()
+    };
+
+    await update(ref(database), updates);
+    clearAcordoAtrasadasSelection();
 }
 
 function appendAtrasadaRow(item, tableBody) {

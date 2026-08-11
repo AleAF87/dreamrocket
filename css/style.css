@@ -1940,6 +1940,84 @@ h2::after {
     background: linear-gradient(135deg, #e8f4ff 0%, #d9edff 100%);
 }
 
+.acordo-atrasadas-panel {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.8fr) minmax(420px, 1.2fr);
+    gap: 12px;
+    align-items: stretch;
+    margin: 0 0 16px;
+    padding: 14px;
+    border: 1px solid #b8e6c8;
+    border-radius: 12px;
+    background: #f3fbf6;
+}
+
+.acordo-atrasadas-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.acordo-atrasadas-summary div {
+    display: grid;
+    align-content: center;
+    gap: 4px;
+    min-height: 68px;
+    padding: 10px;
+    border: 1px solid #cdebd6;
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+.acordo-atrasadas-summary strong,
+.acordo-atrasadas-fields label {
+    color: #53657d;
+    font-size: 0.74rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.acordo-atrasadas-summary span {
+    color: #0a192f;
+    font-weight: 800;
+}
+
+.acordo-atrasadas-summary small {
+    color: #166534;
+    font-weight: 800;
+}
+
+.acordo-atrasadas-fields {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(170px, 0.9fr);
+    gap: 10px;
+    align-items: end;
+}
+
+.acordo-atrasadas-fields .filter-group {
+    margin-bottom: 0;
+}
+
+.acordo-atrasadas-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.acordo-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 4px 8px;
+    background: #e9f9ef;
+    color: #166534;
+    font-size: 0.72rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
 .filter-checkboxes {
     display: flex;
     flex-wrap: wrap;
@@ -2468,7 +2546,7 @@ h2::after {
 
 .contas-atrasadas-table {
     table-layout: fixed;
-    min-width: 1280px;
+    min-width: 1360px;
 }
 
 .contas-atrasadas-table th,
@@ -2478,19 +2556,23 @@ h2::after {
 
 .contas-atrasadas-table th:nth-child(1),
 .contas-atrasadas-table td:nth-child(1) {
-    width: 16%;
+    width: 5%;
+    text-align: center;
 }
 
 .contas-atrasadas-table th:nth-child(2),
-.contas-atrasadas-table td:nth-child(2),
-.contas-atrasadas-table th:nth-child(8),
-.contas-atrasadas-table td:nth-child(8) {
-    width: 9%;
-    white-space: nowrap;
+.contas-atrasadas-table td:nth-child(2) {
+    width: 16%;
 }
 
 .contas-atrasadas-table th:nth-child(3),
 .contas-atrasadas-table td:nth-child(3),
+.contas-atrasadas-table th:nth-child(9),
+.contas-atrasadas-table td:nth-child(9) {
+    width: 9%;
+    white-space: nowrap;
+}
+
 .contas-atrasadas-table th:nth-child(4),
 .contas-atrasadas-table td:nth-child(4),
 .contas-atrasadas-table th:nth-child(5),
@@ -2498,39 +2580,41 @@ h2::after {
 .contas-atrasadas-table th:nth-child(6),
 .contas-atrasadas-table td:nth-child(6),
 .contas-atrasadas-table th:nth-child(7),
-.contas-atrasadas-table td:nth-child(7) {
+.contas-atrasadas-table td:nth-child(7),
+.contas-atrasadas-table th:nth-child(8),
+.contas-atrasadas-table td:nth-child(8) {
     width: 8%;
     text-align: right;
     white-space: nowrap;
 }
 
-.contas-atrasadas-table th:nth-child(9),
-.contas-atrasadas-table td:nth-child(9) {
-    width: 9%;
-}
-
 .contas-atrasadas-table th:nth-child(10),
 .contas-atrasadas-table td:nth-child(10) {
-    width: 4%;
+    width: 9%;
 }
 
 .contas-atrasadas-table th:nth-child(11),
 .contas-atrasadas-table td:nth-child(11) {
-    width: 17%;
-}
-
-.contas-atrasadas-table td:nth-child(11) textarea.filter-select {
-    width: 100%;
+    width: 4%;
 }
 
 .contas-atrasadas-table th:nth-child(12),
 .contas-atrasadas-table td:nth-child(12) {
-    width: 6%;
-    text-align: center;
+    width: 17%;
+}
+
+.contas-atrasadas-table td:nth-child(12) textarea.filter-select {
+    width: 100%;
 }
 
 .contas-atrasadas-table th:nth-child(13),
 .contas-atrasadas-table td:nth-child(13) {
+    width: 6%;
+    text-align: center;
+}
+
+.contas-atrasadas-table th:nth-child(14),
+.contas-atrasadas-table td:nth-child(14) {
     width: 4%;
     text-align: center;
 }
@@ -3422,6 +3506,15 @@ h2::after {
     }
 
     .contas-filters-summary-row {
+        grid-template-columns: 1fr;
+    }
+
+    .acordo-atrasadas-panel,
+    .acordo-atrasadas-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .acordo-atrasadas-summary {
         grid-template-columns: 1fr;
     }
 
