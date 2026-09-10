@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { publicBasePath } from '@/lib/public-path'
 import Index from '@/pages/Index'
 import NotFound from '@/pages/NotFound'
 import { AdminLogin } from '@/pages/admin/AdminLogin'
@@ -11,10 +12,11 @@ import { Toaster } from '@/components/ui/toaster'
 
 export default function App() {
   return (
-    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+    <BrowserRouter basename={publicBasePath.replace(/\/$/, '') || '/'}>
       <Routes>
         {/* Landing Page Principal Pública */}
         <Route path="/" element={<Index />} />
+        <Route path="/index.html" element={<Index />} />
 
         {/* Rotas Administrativas */}
         <Route path="/admin/login" element={<AdminLogin />} />

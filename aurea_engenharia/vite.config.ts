@@ -7,7 +7,7 @@ import uidPlugin from './vite-plugin-react-uid'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: '/pagina_dev/aurea_engenharia/',
+  base: './',
   server: {
     host: '::',
     port: 8080,

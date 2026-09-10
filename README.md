@@ -25,6 +25,16 @@ Para publicar manualmente, autenticar com `netlify login`, vincular ao site
 existente `dreamrocketadm` e usar `netlify deploy --prod --dir=dist --no-build`.
 Para publicação pelo Git, manter o `netlify.toml` versionado junto com as fontes.
 
+### Visualização com Live Server
+
+Depois de compilar, também é possível abrir diretamente:
+`http://127.0.0.1:5500/Github-Ale/dreamrocket/dist/pagina_dev/aurea_engenharia/index.html`.
+O HTML calcula o diretório da página antes de carregar os arquivos; o roteador
+reconhece tanto a pasta quanto `index.html`. Os mesmos arquivos funcionam no
+caminho público do Netlify, inclusive ao acessar diretamente subrotas.
+No Live Server, as subrotas administrativas dependem do suporte do servidor a
+fallback de SPA; a página pública e seus links de seção funcionam diretamente.
+
 ## Acesso restrito
 
 O login com Google exige registros já existentes em `login/{uid}` e

@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { publicBasePath } from '@/lib/public-path'
 import {
   ArrowRight,
   Building2,
@@ -307,7 +308,7 @@ function Index() {
         <section id="inicio" className="hero">
           <img
             className="hero-image"
-            src={`${import.meta.env.BASE_URL}images/residencia-anoitecer.jpg`}
+            src={`${publicBasePath}images/residencia-anoitecer.jpg`}
             alt="Residência moderna iluminada ao anoitecer"
           />
           <div className="hero-grid" aria-hidden="true" />
@@ -364,7 +365,7 @@ function Index() {
         <section id="avcb" className="fire-section section-border">
           <div className="fire-image-panel">
             <img
-              src={`${import.meta.env.BASE_URL}images/escada-emergencia.jpg`}
+              src={`${publicBasePath}images/escada-emergencia.jpg`}
               alt="Escada de emergência e equipamentos de combate a incêndio em edifício"
               loading="lazy"
             />

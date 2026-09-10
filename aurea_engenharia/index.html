@@ -4,19 +4,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="alternate icon" href="/favicon.ico" />
+    <script>
+      // Resolve assets before loading the bundle, including nested Netlify routes
+      // and Live Server URLs whose root is above the project directory.
+      const pageMount = location.pathname.match(/^(.*\/pagina_dev\/aurea_engenharia)(?:\/|$)/)
+      const pageDirectory = pageMount
+        ? pageMount[1] + '/'
+        : new URL('.', location.href).pathname
+      const pageBase = document.createElement('base')
+      pageBase.href = location.origin + pageDirectory
+      if (location.pathname === pageDirectory + 'index.html') {
+        pageBase.href += 'index.html'
+      }
+      document.head.appendChild(pageBase)
+    </script>
     <title>AUREA Engenharia Consultiva | Regularização de Edificações e AVCB</title>
     <meta name="description" content="AUREA Engenharia Consultiva — Engenharia que sustenta decisões. Regularização de edificações, projetos de combate a incêndio e AVCB em São Paulo." />
-    <meta name="author" content="Skip (https://goskip.dev)" />
     <meta property="og:image" content="%BASE_URL%og-image.png" />
   </head>
 
   <body>
     <div id="root"></div>
-    <!-- @skip-protected: Do not remove. Required for app features. -->
-    <script src="https://goskip.dev/skip.js"></script>
-    <!-- @skip-protected: Do not remove. App entrypoint. -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
