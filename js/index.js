@@ -1,78 +1,9 @@
-import { auth, database, provider } from "./firebase-config.js";
+import { auth, provider } from "./firebase-config.js";
 import { onAuthStateChanged, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { get, ref, serverTimestamp, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { syncUserAccess, endUserSession } from "./auth-check.js";
 
 function setPageReady() {
     document.body.classList.remove("auth-pending");
-}
-
-function getUserKey(user) {
-    return user?.uid || "";
-}
-
-function saveUserSession(userKey, userData) {
-    const level = Number(userData?.nivel || 1);
-
-    sessionStorage.setItem("userKey", userKey);
-    sessionStorage.setItem("userName", userData?.nome || "Usuário");
-    sessionStorage.setItem("userEmail", userData?.email || "");
-    sessionStorage.setItem("currentUserLevel", String(level));
-
-    localStorage.setItem("userKey", userKey);
-    localStorage.setItem("userName", userData?.nome || "Usuário");
-    localStorage.setItem("userEmail", userData?.email || "");
-}
-
-async function syncUserStructure(user) {
-    const userKey = getUserKey(user);
-    if (!userKey) {
-        throw new Error("Usuário inválido para autenticação.");
-    }
-
-    const loginRef = ref(database, `login/${userKey}`);
-    const usuarioRef = ref(database, `usuarios/${userKey}`);
-
-    const [loginSnapshot, usuarioSnapshot] = await Promise.all([
-        get(loginRef),
-        get(usuarioRef)
-    ]);
-
-    const loginData = loginSnapshot.exists() ? (loginSnapshot.val() || {}) : {};
-    const usuarioData = usuarioSnapshot.exists() ? (usuarioSnapshot.val() || {}) : {};
-
-    const mergedData = {
-        chave: userKey,
-        nome: usuarioData.nome || loginData.nome || user.displayName || "Usuário",
-        email: usuarioData.email || loginData.email || user.email || "",
-        foto: usuarioData.foto || loginData.foto || user.photoURL || "",
-        status: String(loginData.status || usuarioData.status || "ativo").trim().toLowerCase(),
-        nivel: Number(usuarioData.nivel || 1)
-    };
-
-    const updates = {};
-    updates[`login/${userKey}`] = {
-        chave: userKey,
-        nome: mergedData.nome,
-        email: mergedData.email,
-        foto: mergedData.foto,
-        status: mergedData.status,
-        ultimoAcesso: serverTimestamp()
-    };
-    updates[`usuarios/${userKey}`] = {
-        chave: userKey,
-        uid: user.uid,
-        nome: mergedData.nome,
-        email: mergedData.email,
-        foto: mergedData.foto,
-        nivel: mergedData.nivel,
-        status: mergedData.status,
-        ultimoAcesso: serverTimestamp()
-    };
-
-    await update(ref(database), updates);
-    saveUserSession(userKey, mergedData);
-
-    return { userKey, userData: mergedData };
 }
 
 async function loginWithGoogle() {
@@ -85,15 +16,12 @@ async function loginWithGoogle() {
         }
 
         const result = await signInWithPopup(auth, provider);
-        const { userData } = await syncUserStructure(result.user);
-
-        if (userData.status !== "ativo") {
-            throw new Error("Seu cadastro não está ativo.");
-        }
+        await syncUserAccess(result.user);
 
         window.location.href = "app.html";
     } catch (error) {
         console.error("Erro no login:", error);
+        await endUserSession();
         alert(error.message || "Falha ao fazer login.");
         setPageReady();
     } finally {
@@ -124,11 +52,15 @@ export function redirectIfAuthenticated(targetPage = "app.html") {
             }
 
             try {
-                await syncUserStructure(user);
+                await syncUserAccess(user);
                 window.location.replace(targetPage);
             } catch (error) {
                 console.error("Erro ao sincronizar sessao:", error);
+                await endUserSession();
+                alert(error.message || "Acesso não autorizado.");
                 setPageReady();
+                resolve(null);
+                return;
             }
 
             resolve(user);

@@ -16,13 +16,6 @@ function clearUserData() {
     localStorage.removeItem("userEmail");
 }
 
-function getStoredUserKey(user) {
-    return sessionStorage.getItem("userKey")
-        || localStorage.getItem("userKey")
-        || user?.uid
-        || "";
-}
-
 function saveUserSession(userKey, userData) {
     sessionStorage.setItem("userKey", userKey);
     sessionStorage.setItem("userName", userData.nome || "Usuário");
@@ -34,8 +27,8 @@ function saveUserSession(userKey, userData) {
     localStorage.setItem("userEmail", userData.email || "");
 }
 
-async function syncUserAccess(user) {
-    const userKey = getStoredUserKey(user);
+export async function syncUserAccess(user, requiredLevel = 1) {
+    const userKey = user?.uid || "";
     if (!userKey) {
         throw new Error("Chave do usuário não encontrada.");
     }
@@ -48,8 +41,12 @@ async function syncUserAccess(user) {
         get(usuarioRef)
     ]);
 
-    const loginData = loginSnapshot.exists() ? (loginSnapshot.val() || {}) : {};
-    const usuarioData = usuarioSnapshot.exists() ? (usuarioSnapshot.val() || {}) : {};
+    if (!loginSnapshot.exists() || !usuarioSnapshot.exists()) {
+        throw new Error("Acesso não autorizado. Novos cadastros estão bloqueados.");
+    }
+
+    const loginData = loginSnapshot.val() || {};
+    const usuarioData = usuarioSnapshot.val() || {};
 
     const userData = {
         chave: userKey,
@@ -57,12 +54,16 @@ async function syncUserAccess(user) {
         nome: usuarioData.nome || loginData.nome || user.displayName || "Usuário",
         email: usuarioData.email || loginData.email || user.email || "",
         foto: usuarioData.foto || loginData.foto || user.photoURL || "",
-        status: String(loginData.status || usuarioData.status || "ativo").trim().toLowerCase(),
+        status: String(loginData.status || usuarioData.status || "").trim().toLowerCase(),
         nivel: Number(usuarioData.nivel || 1)
     };
 
     if (userData.status !== "ativo") {
-        throw new Error(`Cadastro com status ${userData.status}`);
+        throw new Error("Seu cadastro não está ativo.");
+    }
+
+    if (!Number.isFinite(userData.nivel) || userData.nivel < 1 || userData.nivel > Number(requiredLevel)) {
+        throw new Error("Seu cadastro não tem permissão para acessar o sistema.");
     }
 
     await update(ref(database), {
@@ -88,16 +89,12 @@ export function checkAuth(requiredLevel = 1) {
             }
 
             try {
-                const access = await syncUserAccess(user);
-
-                if (Number(access.userData.nivel || 1) > Number(requiredLevel)) {
-                    throw new Error(`Nivel insuficiente: ${access.userData.nivel} > ${requiredLevel}`);
-                }
+                const access = await syncUserAccess(user, requiredLevel);
 
                 resolve(access);
             } catch (error) {
                 console.error("Erro ao verificar acesso:", error);
-                clearUserData();
+                await endUserSession();
                 redirectToLogin();
                 reject(error);
             }
@@ -135,7 +132,7 @@ export async function loadNavbar() {
     }
 }
 
-export async function logoutCurrentUser() {
+export async function endUserSession() {
     try {
         await signOut(auth);
     } catch (error) {
@@ -143,5 +140,9 @@ export async function logoutCurrentUser() {
     }
 
     clearUserData();
+}
+
+export async function logoutCurrentUser() {
+    await endUserSession();
     redirectToLogin();
 }

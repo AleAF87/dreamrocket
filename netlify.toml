@@ -1,0 +1,8 @@
+[build]
+  base = "."
+  command = "node scripts/build-netlify.mjs --install"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  VITE_POCKETBASE_URL = "https://regularizacao-de-edificacoes-avcb-524f4.shrd00.internal.goskip.dev"
